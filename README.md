@@ -5,9 +5,16 @@
 
 > This package is in an early Alpha stage and not yet ready for consumption
 
+## Installation
+```
+yarn add @jaronp/discord.ts
+```
+
 ## Quick Start
 A small example implementation.
 ```ts
+import { Client } from '@jaronp/discord.ts';
+
 // Initialize and configure
 const bot = new Client({
     token: '<token>',
@@ -28,7 +35,7 @@ bot.handlers.register('READY', (client, context, data) => {
 // Register a command
 bot.commands.register('ping', (client, context, args) => {
     context.reply('Pong!', true);
-})
+});
 
 // Connect
 bot.connect();
