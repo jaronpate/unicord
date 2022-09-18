@@ -5,6 +5,7 @@
   "types": "dist/index.d.ts",
   "author": "Jaron Pate",
   "license": "Unlicense",
+  "repository": "https://github.com/jaronpate/discord.ts",
   "files": [
     "/dist"
   ],
