@@ -1,0 +1,203 @@
+export type Payload = {
+    op: number;             // opcode
+    d: Record<string, any>; // data
+    s: number | null;       // sequence number
+    t: string | null;       // event name
+};
+
+export type Session = {
+    s: number; // sequence number
+    session_id: string;
+    session_type: string;
+    resume_gateway_url: string;
+};
+
+export type Guild = Record<string, any>;
+
+export type User = Record<string, any>;
+
+export enum Status {
+    Online = "online",
+    DND = "dnd",
+    Idle = "idle",
+    Invisible = "invisible",
+    Offline = "offline"
+}
+
+export type Presence = {
+    since: number | null;
+    activities: Activity[];
+    status: Status;
+    afk: boolean;
+}
+
+export type Activity = {
+    name: string;
+    type: number;
+    created_at: number;
+    url?: string;
+    timestamps?: {
+        start?: number;
+        end?: number;
+    };
+    application_id?: string;
+    details?: string;
+    state?: string;
+    emoji?: {
+        name: string;
+        id?: string;
+        animated?: boolean;
+    };
+    party?: {
+        id?: string;
+        size?: [number, number];
+    };
+    assets?: {
+        large_image?: string;
+        large_text?: string;
+        small_image?: string;
+        small_text?: string;
+    };
+    secrets?: {
+        join?: string;
+        spectate?: string;
+        match?: string;
+    };
+    instance?: boolean;
+    flags?: number;
+}
+
+export enum ActivityType {
+    Game,
+    Streaming,
+    Listening,
+    Watching,
+    Custom ,
+    Competing
+}
+
+export enum Intent {
+    GUILDS = 1 << 0,
+    GUILD_MEMBERS = 1 << 1,
+    GUILD_BANS = 1 << 2,
+    GUILD_EMOJIS_AND_STICKERS = 1 << 3,
+    GUILD_INTEGRATIONS = 1 << 4,
+    GUILD_WEBHOOKS = 1 << 5,
+    GUILD_INVITES = 1 << 6,
+    GUILD_VOICE_STATES = 1 << 7,
+    GUILD_PRESENCES = 1 << 8,
+    GUILD_MESSAGES = 1 << 9,
+    GUILD_MESSAGE_REACTIONS = 1 << 10,
+    GUILD_MESSAGE_TYPING = 1 << 11,
+    DIRECT_MESSAGES = 1 << 12,
+    DIRECT_MESSAGE_REACTIONS = 1 << 13,
+    DIRECT_MESSAGE_TYPING = 1 << 14,
+    MESSAGE_CONTENT = 1 << 15,
+    DEFAULT = 513,
+    ALL = 32767
+}
+
+export const IntentGroup : {[key in Intent]: [string[], number]} = {
+    [Intent.GUILDS]: [[
+      "GUILD_CREATE",
+      "GUILD_UPDATE",
+      "GUILD_DELETE",
+      "GUILD_ROLE_CREATE",
+      "GUILD_ROLE_UPDATE",
+      "GUILD_ROLE_DELETE",
+      "CHANNEL_CREATE",
+      "CHANNEL_UPDATE",
+      "CHANNEL_DELETE",
+      "CHANNEL_PINS_UPDATE",
+      "THREAD_CREATE",
+      "THREAD_UPDATE",
+      "THREAD_DELETE",
+      "THREAD_LIST_SYNC",
+      "THREAD_MEMBER_UPDATE",
+      "THREAD_MEMBERS_UPDATE *",
+      "STAGE_INSTANCE_CREATE",
+      "STAGE_INSTANCE_UPDATE",
+      "STAGE_INSTANCE_DELETE"
+    ], 0],
+  
+    [Intent.GUILD_MEMBERS]: [[
+      "GUILD_MEMBER_ADD",
+      "GUILD_MEMBER_UPDATE",
+      "GUILD_MEMBER_REMOVE",
+      "THREAD_MEMBERS_UPDATE *",
+    ], 1], 
+  
+    [Intent.GUILD_BANS]: [[
+      "GUILD_BAN_ADD",
+      "GUILD_BAN_REMOVE",
+    ], 2],
+  
+    [Intent.GUILD_EMOJIS_AND_STICKERS]: [[
+      "GUILD_EMOJIS_UPDATE",
+      "GUILD_STICKERS_UPDATE",
+    ], 3],
+  
+    [Intent.GUILD_INTEGRATIONS]: [[
+      "GUILD_INTEGRATIONS_UPDATE",
+      "INTEGRATION_CREATE",
+      "INTEGRATION_UPDATE",
+      "INTEGRATION_DELETE",
+    ], 4],
+  
+    [Intent.GUILD_WEBHOOKS]: [[
+      "WEBHOOKS_UPDATE"
+    ], 5],
+  
+    [Intent.GUILD_INVITES]: [[
+      "INVITE_CREATE",
+      "INVITE_DELETE",
+    ], 6],
+  
+    [Intent.GUILD_VOICE_STATES]: [[
+      "VOICE_STATE_UPDATE"
+    ], 7],
+  
+    [Intent.GUILD_PRESENCES]: [[
+      "PRESENCE_UPDATE"
+    ], 8],
+  
+    [Intent.GUILD_MESSAGES]: [[
+      "MESSAGE_CREATE",
+      "MESSAGE_UPDATE",
+      "MESSAGE_DELETE",
+      "MESSAGE_DELETE_BULK",
+    ], 9],
+  
+    [Intent.GUILD_MESSAGE_REACTIONS]: [[
+      "MESSAGE_REACTION_ADD",
+      "MESSAGE_REACTION_REMOVE",
+      "MESSAGE_REACTION_REMOVE_ALL",
+      "MESSAGE_REACTION_REMOVE_EMOJI",
+    ], 10],
+  
+    [Intent.GUILD_MESSAGE_TYPING]: [[
+      "TYPING_START"
+    ], 11],
+  
+    [Intent.DIRECT_MESSAGES]: [[
+      "MESSAGE_CREATE",
+      "MESSAGE_UPDATE",
+      "MESSAGE_DELETE",
+      "CHANNEL_PINS_UPDATE",
+    ], 12],
+  
+    [Intent.DIRECT_MESSAGE_REACTIONS]: [[
+      "MESSAGE_REACTION_ADD",
+      "MESSAGE_REACTION_REMOVE",
+      "MESSAGE_REACTION_REMOVE_ALL",
+      "MESSAGE_REACTION_REMOVE_EMOJI",
+    ], 13],
+  
+    [Intent.DIRECT_MESSAGE_TYPING]: [[
+      "TYPING_START"
+    ], 14],
+  
+    [Intent.MESSAGE_CONTENT]: [[
+      "MESSAGE_CONTENT"
+    ], 15]
+  }
