@@ -5,6 +5,8 @@
 
 > This package is in an early Alpha stage and not yet ready for consumption
 
+A solid and simple Discord API wrapper.
+
 ## Installation
 ```
 yarn add @jaronp/discord.ts
