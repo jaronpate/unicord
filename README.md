@@ -3,6 +3,7 @@
     <p>Build good bots fast</p>
 </div>
 
+> This package is in an early Alpha stage and not yet ready for consumption
 
 ## Quick Start
 A small example implementation.
