@@ -14,10 +14,10 @@ import {
     ActivityType,
     CommandFuntion,
     Interaction,
-    InteractionFunction,
-    InteractionContext
+    InteractionFunction
 } from '../types';
 import { Context } from './context';
+import { InteractionContext } from './interaction';
 
 export class Gateway {
     socket: WebSocket;
