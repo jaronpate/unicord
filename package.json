@@ -10,8 +10,8 @@
     "/dist"
   ],
   "scripts": {
-    "start": "npx ts-node-dev src/index.ts",
-    "start:watch": "npx ts-node-dev --respawn src/index.ts",
+    "start": "npx ts-node test/main.test.ts",
+    "start:watch": "npx ts-node-dev --respawn test/main.test.ts",
     "build": "npx tsc"
   },
   "devDependencies": {

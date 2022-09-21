@@ -237,6 +237,16 @@ export class Gateway {
     };
 
     private handleInteractionCreate = (payload: Payload) => {
+        if (payload.d.type === 2) {
+            this.handleShashInteraction(payload);
+        } else {
+            this.handleChatInteraction(payload);
+        }
+    };
+
+    private handleShashInteraction = (payload: Payload) => {};
+
+    private handleChatInteraction = (payload: Payload) => {
         const context = new InteractionContext({ client: this.client, interaction: payload.d });
         const handlers = this.client.interactions.get(payload.d.data.custom_id);
         if (handlers) {
@@ -322,7 +332,7 @@ export class Gateway {
         }
         if (data) {
             console.log('received: %s', data);
-            console.log('received: %s', data.d);
+            console.log('received data: %s', data.d);
             if (this.session && data.s && data.s > this.session.s) {
                 this.session.s = data.s;
             } else {

@@ -13,6 +13,10 @@ bot.commands.register('ping', (client, context, args) => {
     context.reply('Pong!', true);
 });
 
+bot.commands.register('help', (client, context, args) => {
+    context.reply('Help yourself.');
+});
+
 bot.commands.register('demo', (_client, context, _args) => {
     const msg = new Message()
         .setContent('Hello World!')
@@ -125,14 +129,14 @@ bot.handlers.register('READY', (client, context, data) => {
 bot.interactions.register('never_me', async (client, context, interaction) => {
     const reply = await context.loading();
     setTimeout(() => {
-        reply.editOriginal(`You clicked me! Thank you ${interaction.member.user.username} <3`);
+        reply.edit(`You clicked me! Thank you ${interaction.member.user.username} <3`);
     }, 1000);
 });
 
 bot.interactions.register('click_me', async (client, context, interaction) => {
     const reply = await context.loading();
     setTimeout(() => {
-        reply.editOriginal(
+        reply.edit(
             new Message().addComponent(
                 Message.button({
                     label: 'Click me!',

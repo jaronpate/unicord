@@ -5,9 +5,11 @@ import { Message } from "./message";
 export class InteractionContext {
     public client: Client;
     public interaction: Record<string, any>;
-    constructor({ client, interaction }: { client: Client; interaction: Record<string, any> }) {
+    private is_loading: boolean;
+    constructor({ client, interaction, is_loading = false }: { client: Client; interaction: Record<string, any>, is_loading?: boolean }) {
         this.client = client;
         this.interaction = interaction;
+        this.is_loading = is_loading;
     }
 
     ack = (type: InteractionResponseType = InteractionResponseType.Pong, data?: Record<string, any>) => {
@@ -30,22 +32,20 @@ export class InteractionContext {
         if (typeof message === 'string') {
             message = new Message().setContent(message);
         }
-        return this.ack(InteractionResponseType.UpdateMessage, {
-            ...message
-        });
-    };
-
-    editOriginal = (message: Message | string) => {
-        if (typeof message === 'string') {
-            message = new Message().setContent(message);
-        }
-        return this.client.api.patch(
-            `/webhooks/${this.client.application_id}/${this.interaction.token}/messages/@original`,
-            {
-                type: InteractionResponseType.DeferredUpdateMessage,
+        if (!this.is_loading) {
+            return this.ack(InteractionResponseType.UpdateMessage, {
                 ...message
-            }
-        );
+            });
+        } else {
+            return this.client.api.patch(
+                `/webhooks/${this.client.application_id}/${this.interaction.token}/messages/@original`,
+                {
+                    type: InteractionResponseType.DeferredUpdateMessage,
+                    ...message
+                }
+            );
+        }
+
     };
 
     deleteOriginal = () => {
@@ -56,6 +56,6 @@ export class InteractionContext {
 
     loading = async () => {
         await this.ack(InteractionResponseType.DeferredReply);
-        return new InteractionContext({ client: this.client, interaction: this.interaction });
+        return new InteractionContext({ client: this.client, interaction: this.interaction, is_loading: true });
     };
 }
