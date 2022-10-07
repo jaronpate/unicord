@@ -68,8 +68,8 @@ export class Embed {
         return this;
     };
 
-    setColor = (color: number) => {
-        this.color = color;
+    setColor = (color: number | string) => {
+        this.color = typeof color === 'string' ? parseInt(`0x${color.replace('#', '')}`) : color;
         return this;
     };
 

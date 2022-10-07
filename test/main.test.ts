@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import { Client, ComponentStyle, Intent, Message } from '../src';
+import { Client, ChatCommand, ComponentStyle, Intent, Message } from '../src';
 
 const bot = new Client({
     token: process.env.BOT_TOKEN!,
@@ -9,15 +9,26 @@ const bot = new Client({
     intents: [Intent.GUILDS, Intent.GUILD_MESSAGES, Intent.GUILD_MESSAGE_REACTIONS, Intent.MESSAGE_CONTENT]
 });
 
-bot.commands.register('ping', (client, context, args) => {
-    context.reply('Pong!', true);
+bot.commands.chat.register(new ChatCommand({
+    name: 'ping',
+    description: 'Check if he is alive',
+    execute: (client, context, args) => {
+        context.reply('Pong!', true);
+    }
+}))
+
+bot.commands.application.register({
+    name: 'ping',
+    description: 'Check if he is alive'
+}, (client, context, args) => {
+    context.reply('Pong!');
 });
 
-bot.commands.register('help', (client, context, args) => {
-    context.reply('Help yourself.');
-});
+// bot.commands.register('help', (client, context, args) => {
+//     context.reply('Help yourself.');
+// });
 
-bot.commands.register('demo', (_client, context, _args) => {
+bot.commands.chat.register('demo', (_client, context, _args) => {
     const msg = new Message()
         .setContent('Hello World!')
         .addComponent(
@@ -94,7 +105,7 @@ bot.commands.register('demo', (_client, context, _args) => {
     context.reply(msg);
 });
 
-bot.commands.register('test', (_client, context, _args) => {
+bot.commands.chat.register('test', (_client, context, _args) => {
     const msg = new Message().setContent('This is a test interaction!').addComponent(
         'This is an action row',
         Message.button({

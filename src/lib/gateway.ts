@@ -12,9 +12,10 @@ import {
     Status,
     Presence,
     ActivityType,
-    CommandFuntion,
+    CommandFunction,
     Interaction,
-    InteractionFunction
+    InteractionFunction,
+    SlashCommand
 } from '../types';
 import { Context } from './context';
 import { InteractionContext } from './interaction';
@@ -26,9 +27,11 @@ export class Gateway {
     readonly token: string;
     readonly client: Client;
     private intents: number = 513;
-    private commandNotFound: CommandFuntion = null;
+    private commandNotFound: CommandFunction = null;
     // Discord gateway data
     private readonly url: string = 'wss://gateway.discord.gg/?v=10&encoding=json';
+    private heartbeat_timeout: NodeJS.Timeout;
+    private heartbeat_function: NodeJS.Timer;
     private heartbeat_interval: number | null = null;
     private session: Session = null;
     public user: User = null;
@@ -45,7 +48,7 @@ export class Gateway {
         token: string;
         intents?: Intent[];
         client: Client;
-        commandNotFound?: CommandFuntion;
+        commandNotFound?: CommandFunction;
     }) {
         // Copy config
         this.token = token;
@@ -80,6 +83,7 @@ export class Gateway {
     };
 
     public reconnect = () => {
+        this.socket.terminate();
         return this.connect();
     };
 
@@ -167,12 +171,21 @@ export class Gateway {
         if (!this.heartbeat_interval) {
             throw new Error('No heartbeat interval set');
         }
-        setInterval(() => {
+        if (this.heartbeat_function) {
+            clearInterval(this.heartbeat_function);
+        }
+        if (this.heartbeat_timeout) {
+            clearTimeout(this.heartbeat_timeout);
+        }
+        this.heartbeat_function = setInterval(() => {
             this.send({
                 op: 1,
                 d: {}
             });
         }, this.heartbeat_interval);
+        this.heartbeat_timeout = setTimeout(() => {
+            this.reconnect();
+        }, this.heartbeat_interval * 2);
     };
 
     private initialize = (payload: Payload) => {
@@ -244,7 +257,18 @@ export class Gateway {
         }
     };
 
-    private handleShashInteraction = (payload: Payload) => {};
+    private handleShashInteraction = (payload: Payload) => {
+        console.log(payload.d);
+        const context = new InteractionContext({ client: this.client, interaction: payload.d });
+        const handler = this.client.commands.application.get(payload.d.data.name);
+        if (handler) {
+            if (handler instanceof SlashCommand) {
+                handler.execute(this.client, context, payload.d);
+            } else {
+                handler(this.client, context, payload.d);
+            }
+        }
+    };
 
     private handleChatInteraction = (payload: Payload) => {
         const context = new InteractionContext({ client: this.client, interaction: payload.d });
@@ -266,15 +290,16 @@ export class Gateway {
             return;
         }
         console.log(payload.d);
+        const content = payload.d.content.trim();
         // Is this a command?
-        if (payload.d.content.startsWith(this.client.prefix)) {
+        if (content.startsWith(this.client.prefix) | content.startsWith(`<@${this.client.user.id}>`)) {
             // Parse command
-            const args = payload.d.content
+            const args = content
                 .slice(this.client.prefix.length)
                 .trim()
                 .split(/\s+(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)/g);
             // Check if command exists
-            const handler = this.client.commands.get(args[0]);
+            const handler = this.client.commands.chat.get(args[0]);
             // Generate context
             const context = new Context({ client: this.client, message: payload.d });
             if (handler) {
@@ -317,6 +342,7 @@ export class Gateway {
                 break;
             case 11:
                 console.log('heartbeat acknowledged');
+                this.heartbeat_timeout.refresh();
                 break;
             default:
                 break;
@@ -324,6 +350,7 @@ export class Gateway {
     };
 
     private onMessage = (packet: Data): void => {
+        console.log('============================');
         let data: Payload | null = null;
         try {
             data = JSON.parse(packet.toString());
