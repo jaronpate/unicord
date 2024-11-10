@@ -1,4 +1,6 @@
-import { Embed } from '.';
+import { isNil } from '../utils';
+import { Embed } from './embed';
+import { User } from './user';
 
 export type Component = Partial<Button | SelectMenu> & {
     type: ComponentType;
@@ -70,24 +72,50 @@ export enum ComponentType {
     ActionRow = 1,
     Button,
     SelectMenu,
-    TextInput
+    TextInput,
+    UserSelect,
+    RoleSelect,
+    MentionableSelect,
+    ChannelSelect
 }
 
 export class Message {
     id?: string;
+    author?: User;
     channel_id?: string;
     guild_id?: string;
     public content?: string;
     public embeds: Embed[] = [];
     public components: Component[] = [];
     public message_reference?: {
-        message_id?: string;
-        channel_id?: string;
+        type?: number;
+        message_id: string;
+        channel_id: string;
         guild_id?: string;
         fail_if_not_exists?: boolean;
     };
 
-    constructor() {}
+    constructor(data?: Partial<Message>) {
+        if (data) {
+            this.id = data.id;
+            this.author = User.fromAPIResponse(data.author);
+            this.channel_id = data.channel_id;
+            this.guild_id = data.guild_id;
+            this.content = data.content;
+            this.message_reference = data.message_reference;
+        }
+    }
+
+    public static fromAPIResponse = (data: any) => {
+        return new Message({
+            id: data.id,
+            author: data.author,
+            channel_id: data.channel_id,
+            guild_id: data.guild_id,
+            content: data.content,
+            message_reference: data.message_reference
+        });
+    }
 
     public static button(config: Button): Component {
         return {
@@ -115,7 +143,6 @@ export class Message {
 
     public addComponent = (content: Component | string, ...components: Component[]) => {
         if (typeof content === 'string') {
-            console.log('string');
             this.components.push({
                 type: ComponentType.ActionRow,
                 content,
@@ -131,6 +158,10 @@ export class Message {
     };
 
     public setReference = (message: Partial<Message>) => {
+        if (isNil(message.id) || isNil(message.channel_id)) {
+            throw new Error('Message ID and Channel ID are required');
+        }
+
         this.message_reference = {
             message_id: message.id,
             channel_id: message.channel_id,

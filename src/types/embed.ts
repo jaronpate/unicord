@@ -1,4 +1,4 @@
-import { Message } from '.';
+import type { Message } from './message';
 
 type EmbedFooter = {
     text: string;

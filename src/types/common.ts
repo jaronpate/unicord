@@ -1,80 +1,39 @@
+import type { Client } from "../services/client";
+import type { Context } from "./context";
+import type { BaseHandler } from "./hander";
+
+export type ClientConfig = {
+    token: string;
+    application_id: string;
+    prefix?: string;
+    intents?: Intent[];
+}
+export enum HandlerType {
+    Events = 'events',
+    Commands = 'commands',
+    Interactions = 'interactions'
+}
+
+
+export type EventPayload = any;
+
+export type Primitive = string | number | boolean | null;
+
+/**
+ * Represents a payload structure used in the Discord API.
+ * 
+ * @typedef {Object} Payload
+ * @property {number} op - The opcode of the payload.
+ * @property {Record<string, any>} d - The data associated with the payload.
+ * @property {number | null} s - The sequence number, or null if not applicable.
+ * @property {string | null} t - The event name, or null if not applicable.
+ */
 export type Payload = {
-    op: number;             // opcode
-    d: Record<string, any>; // data
-    s: number | null;       // sequence number
-    t: string | null;       // event name
+    op: number;
+    d: Record<string, any> | Primitive | null;
+    s: number | null;
+    t: string | null;
 };
-
-export type Session = {
-    s: number; // sequence number
-    session_id: string;
-    session_type: string;
-    resume_gateway_url: string;
-};
-
-export type Guild = Record<string, any>;
-
-export type User = Record<string, any>;
-
-export enum Status {
-    Online = "online",
-    DND = "dnd",
-    Idle = "idle",
-    Invisible = "invisible",
-    Offline = "offline"
-}
-
-export type Presence = {
-    since: number | null;
-    activities: Activity[];
-    status: Status;
-    afk: boolean;
-}
-
-export type Activity = {
-    name: string;
-    type: number;
-    created_at: number;
-    url?: string;
-    timestamps?: {
-        start?: number;
-        end?: number;
-    };
-    application_id?: string;
-    details?: string;
-    state?: string;
-    emoji?: {
-        name: string;
-        id?: string;
-        animated?: boolean;
-    };
-    party?: {
-        id?: string;
-        size?: [number, number];
-    };
-    assets?: {
-        large_image?: string;
-        large_text?: string;
-        small_image?: string;
-        small_text?: string;
-    };
-    secrets?: {
-        join?: string;
-        spectate?: string;
-        match?: string;
-    };
-    instance?: boolean;
-    flags?: number;
-}
-
-export enum ActivityType {
-    Game,
-    Streaming,
-    Listening,
-    Watching,
-    Custom ,
-    Competing
-}
 
 export enum Intent {
     GUILDS = 1 << 0,
@@ -97,7 +56,7 @@ export enum Intent {
     ALL = 32767
 }
 
-export const IntentGroup : {[key in Intent]: [string[], number]} = {
+export const IntentGroup : {[key in Intent]?: [string[], number]} = {
     [Intent.GUILDS]: [[
       "GUILD_CREATE",
       "GUILD_UPDATE",
