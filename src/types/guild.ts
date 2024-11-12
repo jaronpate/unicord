@@ -4,6 +4,47 @@ import { Member } from "./member";
 import { Role } from "./role";
 
 export class Guild {
+    id: string;
+    name: string;
+    description: string | null;
+    icon: string | null;
+    banner: string | null;
+    owner_id: string;
+    // emojis: Emoji[];
+    // roles: Role[];
+
+    constructor(data: Guild) {
+        this.id = data.id;
+        this.name = data.name;
+        this.description = data.description;
+        this.icon = data.icon;
+        this.banner = data.banner;
+        this.owner_id = data.owner_id;
+        // this.emojis = data.emojis;
+        // this.roles = data.roles;
+    }
+
+
+    public static async factory(data: any) {
+        return await Guild.hydrate(DiscordGuild.fromAPIResponse(data));
+    }
+
+
+    public static async hydrate(data: DiscordGuild) {
+        return new Guild({
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            icon: data.icon,
+            banner: data.banner,
+            owner_id: data.owner_id,
+            // emojis: data.emojis,
+            // roles: data.roles,
+        });
+    }
+}
+
+export class DiscordGuild {
     system_channel_id: string | null;
     premium_progress_bar_enabled: boolean;
     region: string;
@@ -124,7 +165,7 @@ export class Guild {
         this.explicit_content_filter = data.explicit_content_filter;
     }
 
-    static fromAPIResponse(data: any): Guild {
-        return new Guild(data);
+    static fromAPIResponse(data: any): DiscordGuild {
+        return new DiscordGuild(data);
     }
 }

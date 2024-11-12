@@ -1,7 +1,7 @@
 import type { API } from "../services/api";
 import type { Client } from "../services/client";
 import { isNil } from "../utils";
-import { Message } from "./message";
+import { DiscordMessage, Message } from "./message";
 /**
  * Represents the context of a message in a Discord channel.
  * Provides methods to interact with the message and the channel it was sent in.
@@ -26,39 +26,27 @@ export class Context {
     channel_id: string;
     guild_id?: string;
 
-    constructor(private client: Client, private api: API, private _message: Message) {
-        if (isNil(_message.id)) {
+    constructor(private client: Client, private api: API, public message: Message) {
+        console.log('Context created: ', );
+        if (isNil(message.id)) {
             throw new Error('Message ID is required to create a context');
         }
 
-        if (isNil(_message.channel_id)) {
+        if (isNil(message.channel_id)) {
             throw new Error('Channel ID is required to create a context');
         }
 
         this.client = client;
-        this.message_id = _message.id;
-        this.channel_id = _message.channel_id;
-        this.guild_id = _message.guild_id;
+        this.message_id = message.id;
+        this.channel_id = message.channel_id;
+        this.guild_id = message.guild_id;
     }
 
     // get author() {
     //     return this.client.users.get(this.author_id);
     // };
 
-    get message(): Message & { getReference: () => Promise<Message | null> } {
-        return Object.assign(this._message, {
-            getReference: async () => {
-                const reference = this._message.message_reference;
-                if (isNil(reference)) {
-                    return null;
-                }
-
-                return Message.fromAPIResponse(await this.api.get(`/channels/${reference.channel_id}/messages/${reference.message_id}`));
-            }
-        });
-    }
-
-    fetchGuild() {
+    async fetchGuild() {
         if (isNil(this.guild_id)) {
             return Promise.resolve(null);
         }
@@ -78,11 +66,7 @@ export class Context {
         }
 
         if (reference) {
-            message.message_reference = {
-                message_id: this.message_id,
-                channel_id: this.channel_id,
-                guild_id: this.guild_id
-            };
+            message.setReference(this.message)
         }
         
         return this.client.sendMessage(this.channel_id, message);
@@ -108,7 +92,7 @@ export class Context {
      * @param {string} [message_id] - The ID of the message to delete. If not provided, the message ID of this context will be used.
      * @returns {Promise<void>} A promise that resolves when the message is deleted.
      */
-    public delete = (message_id?: string) => {
+    public deleteMessage = (message_id: string) => {
         return this.api.delete(`/channels/${this.channel_id}/messages/${message_id ?? this.message_id}`);
     };
 
@@ -119,10 +103,11 @@ export class Context {
      * @param {Message | string} message - The updated message content.
      * @returns {Promise<Message>} The updated message.
      */
-    public edit = async (message: Message | string) => {
-        if (typeof message === 'string') {
-            message = new Message().setContent(message);
+    public async editMessage (message: Message, content?: string) {
+        const clone = new Message(message);
+        if (content) {
+            clone.setContent(content);
         }
-        return Message.fromAPIResponse(await this.api.patch(`/channels/${this.channel_id}/messages/${this.message_id}`, message));
+        return Message.hydrate(DiscordMessage.fromAPIResponse(await this.api.patch(`/channels/${clone.channel_id}/messages/${clone.id}`, clone)), this.client, this.api);
     };
 }

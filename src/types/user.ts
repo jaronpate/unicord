@@ -1,3 +1,58 @@
+export class User {
+    id: string;
+    username: string;
+    discriminator: string;
+    display_name: string;
+    avatar: string;
+    bot?: boolean;
+    system?: boolean;
+    mfa_enabled?: boolean;
+    banner?: string;
+    accent_color?: number;
+    locale?: string;
+    verified?: boolean;
+    email?: string;
+    // TODO: Add the rest of the properties
+
+    constructor(data: Partial<User> & { id: string; username: string; discriminator: string; display_name: string; avatar: string }) {
+        this.id = data.id;
+        this.username = data.username;
+        this.discriminator = data.discriminator;
+        this.display_name = data.display_name;
+        this.avatar = data.avatar;
+        this.bot = data.bot;
+        this.system = data.system;
+        this.mfa_enabled = data.mfa_enabled;
+        this.banner = data.banner;
+        this.accent_color = data.accent_color;
+        this.locale = data.locale;
+        this.verified = data.verified;
+        this.email = data.email;
+    }
+
+    public static async factory(data: DiscordUser) {
+        return User.hydrate(DiscordUser.fromAPIResponse(data));
+    }
+
+    public static hydrate(data: DiscordUser) {
+        return new User({
+            id: data.id,
+            username: data.username,
+            discriminator: data.discriminator,
+            display_name: data.global_name,
+            avatar: data.avatar,
+            bot: data.bot,
+            system: data.system,
+            mfa_enabled: data.mfa_enabled,
+            banner: data.banner,
+            accent_color: data.accent_color,
+            locale: data.locale,
+            verified: data.verified,
+            email: data.email
+        });
+    }
+}
+
 // id	snowflake	the user's id	identify
 // username	string	the user's username, not unique across the platform	identify
 // discriminator	string	the user's Discord-tag	identify
@@ -16,7 +71,7 @@
 // public_flags?	integer	the public flags on a user's account	identify
 // avatar_decoration_data?
 
-export class User {
+export class DiscordUser {
     id: string;
     username: string;
     discriminator: string;
@@ -35,7 +90,7 @@ export class User {
     public_flags?: number;
     avatar_decoration_data?: Record<string, any>;
 
-    constructor(data: User) {
+    constructor(data: DiscordUser) {
         this.id = data.id;
         this.username = data.username;
         this.discriminator = data.discriminator;
@@ -55,8 +110,8 @@ export class User {
         this.avatar_decoration_data = data.avatar_decoration_data;
     }
 
-    static fromAPIResponse(data: any): User {
-        return new User({
+    static fromAPIResponse(data: any): DiscordUser {
+        return new DiscordUser({
             id: data.id,
             username: data.username,
             discriminator: data.discriminator,

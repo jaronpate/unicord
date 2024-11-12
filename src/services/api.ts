@@ -6,7 +6,7 @@ export class API {
     constructor(private client: Client) {}
 
     async request<T = any>(method: string, path: string, data?: any): Promise<T> {
-        const url = `${this.base_url}${path}`;
+        const url = new URL(path, this.base_url).toString();
         const headers = {
             Authorization: `Bot ${this.client.token}`,
             'Accept': 'application/json',
@@ -29,7 +29,7 @@ export class API {
 
         const body = await response.json();
 
-        console.log('API Response:', JSON.stringify(body, null, 4));
+        // console.log('API Response:', JSON.stringify(body, null, 4));
 
         return body;
     }

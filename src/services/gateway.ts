@@ -5,8 +5,8 @@ import { exists, isNil, isObject, log } from "../utils";
 import type { API } from "./api";
 import type { Processor } from './processor';
 import { Context } from '../types/context';
-import { Message } from '../types/message';
-import { User } from '../types/user';
+import { DiscordMessage, Message } from '../types/message';
+import { DiscordUser, User } from '../types/user';
 
 export class Gateway {
     private socket: WebSocket | null = null;
@@ -22,7 +22,7 @@ export class Gateway {
         log('Connected to gateway');
     }
 
-    private onMessage = (packet: Data) => {
+    private onMessage = async (packet: Data) => {
         // console.log(packet);
         // Allocate a variable to store the parsed payload
         let data: Payload | null = null;
@@ -44,7 +44,7 @@ export class Gateway {
             const code = data.op;
             if (code === 0) {
                 // Event received
-                this.parseEvent(data);
+                await this.parseEvent(data);
             } else if (code === 1) {
                 // Heartbeat requested
                 this.send({ op: 1, d: this.sequence });
@@ -111,7 +111,7 @@ export class Gateway {
         });
     };
 
-    private parseEvent(payload: Payload) {
+    private async parseEvent(payload: Payload) {
         if (isNil(payload.t)) {
             throw new Error('Event name is required');
         }
@@ -131,7 +131,7 @@ export class Gateway {
         } else if (event_name === 'INTERACTION_CREATE') {
             // this.handleInteractionCreate(payload);
         } else if (event_name === 'MESSAGE_CREATE') {
-            this.handleMessageCreate(payload as Payload);
+            await this.handleMessageCreate(payload as Payload);
         } else if (event_name === 'MESSAGE_UPDATE') {
             // this.handleMessageCreate(payload);
         }
@@ -141,7 +141,8 @@ export class Gateway {
 
         if (['MESSAGE_CREATE', 'MESSAGE_UPDATE'].includes(event_name)) {
             // If the event is a message event, create a message object
-            const message = Message.fromAPIResponse(event_data);
+            const discord_message = DiscordMessage.fromAPIResponse(event_data);
+            const message = await Message.hydrate(discord_message, this.client, this.api);
             // And then generate the context
             context = new Context(this.client, this.api, message);
         }
@@ -164,7 +165,7 @@ export class Gateway {
             return;
         }
         // Extract the author
-        const author = User.fromAPIResponse(payload.d.author);
+        const author = User.hydrate(DiscordUser.fromAPIResponse(payload.d.author));
         // Store the author in the cache
         this.client.users.set(author.id, author);
         // Extract the content
@@ -185,14 +186,15 @@ export class Gateway {
             // Extract the command name
             // TODO: Case insensitive config?
             const command = args.shift()!;
+            console.log('payload.d', payload.d)
             // Create a new message object from the payload
-            const message = Message.fromAPIResponse(payload.d);
+            const message = await Message.hydrate(DiscordMessage.fromAPIResponse(payload.d), this.client, this.api);
             // Generate context
             const context = new Context(this.client, this.api, message);
             // Check if command exists
-            if (this.processor.commands.has(command)) {
+            if (this.processor.chat_commands.has(command)) {
                 // Execute the handler
-                this.processor.commands.execute(command, context, args);
+                this.processor.chat_commands.execute(command, context, args);
             } else {
                 // TODO: Custom unknown command handler
                 context.reply(`Unknown command: ${command}`);

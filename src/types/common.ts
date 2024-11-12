@@ -10,7 +10,8 @@ export type ClientConfig = {
 }
 export enum HandlerType {
     Events = 'events',
-    Commands = 'commands',
+    ChatCommands = 'chat_commands',
+    SlashCommands = 'slash_commands',
     Interactions = 'interactions'
 }
 

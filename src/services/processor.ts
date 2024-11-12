@@ -2,15 +2,17 @@ import type { Client } from "./client";
 import type { Context } from "../types/context";
 import { HandlerType, type EventPayload, type Payload } from "../types/common";
 import { BaseHandler, type Handler } from "../types/hander";
+import type { API } from "./api";
 
 export class Processor {
     private handlers = {
         [HandlerType.Events]: new Map<string, Handler[]>(),
-        [HandlerType.Commands]: new Map<string, Handler[]>(),
+        [HandlerType.ChatCommands]: new Map<string, Handler[]>(),
+        [HandlerType.SlashCommands]: new Map<string, Handler[]>(),
         [HandlerType.Interactions]: new Map<string, Handler[]>()
     };
 
-    constructor(private client: Client) {};
+    constructor(private client: Client, private api: API) {};
 
     public register(type: HandlerType, event: string | string[], handler: Handler) {
         // Normalize events into an array
@@ -46,18 +48,18 @@ export class Processor {
         }
     };
 
-    public execute(type: HandlerType.Events, event: string, context: Context | null, payload: EventPayload): void
-    public execute(type: Omit<HandlerType, HandlerType.Events>, event: string, context: Context, args: any[]): void
-    public execute(type: HandlerType, event: string, context: Context | null, argsOrPayload: any[] | EventPayload) {
+    public async execute(type: HandlerType.Events, event: string, context: Context | null, payload: EventPayload): Promise<void>
+    public async execute(type: Omit<HandlerType, HandlerType.Events>, event: string, context: Context, args: any[]): Promise<void>
+    public async execute(type: HandlerType, event: string, context: Context | null, argsOrPayload: any[] | EventPayload) {
         const handlers = this.handlers[type].get(event);
 
         if (handlers) {
             for (const handler of handlers) {
                 if (handler instanceof BaseHandler) {
-                    handler.execute(context, argsOrPayload);
+                    await Promise.resolve(handler.execute(context, argsOrPayload));
                 } else {
                     // TODO: Fix ts error
-                    handler(context, argsOrPayload);
+                    await Promise.resolve(handler(context, argsOrPayload))
                 }
             }
         }
@@ -66,21 +68,28 @@ export class Processor {
     [HandlerType.Events] = {
         register: (event: string | string[], handler: Handler) => this.register(HandlerType.Events, event, handler),
         unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.Events, event, handler),
-        execute: (event: string, context: Context | null, payload: EventPayload) => this.execute(HandlerType.Events, event, context, payload),
+        execute: async (event: string, context: Context | null, payload: EventPayload) => this.execute(HandlerType.Events, event, context, payload),
         has: (event: string) => this.handlers[HandlerType.Events].has(event) && this.handlers[HandlerType.Events].get(event)?.length! > 0
     };
 
-    [HandlerType.Commands] = {
-        register: (event: string | string[], handler: Handler) => this.register(HandlerType.Commands, event, handler),
-        unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.Commands, event, handler),
-        execute: (event: string, context: Context, args: any[]) => this.execute(HandlerType.Commands, event, context, args),
-        has: (event: string) => this.handlers[HandlerType.Commands].has(event) ?? this.handlers[HandlerType.Commands].get(event)?.length! > 0
+    [HandlerType.ChatCommands] = {
+        register: (event: string | string[], handler: Handler) => this.register(HandlerType.ChatCommands, event, handler),
+        unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.ChatCommands, event, handler),
+        execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.ChatCommands, event, context, args),
+        has: (event: string) => this.handlers[HandlerType.ChatCommands].has(event) ?? this.handlers[HandlerType.ChatCommands].get(event)?.length! > 0
+    };
+
+    [HandlerType.SlashCommands] = {
+        register: (event: string | string[], handler: Handler) => this.register(HandlerType.SlashCommands, event, handler),
+        unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.SlashCommands, event, handler),
+        execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.SlashCommands, event, context, args),
+        has: (event: string) => this.handlers[HandlerType.SlashCommands].has(event) ?? this.handlers[HandlerType.SlashCommands].get(event)?.length! > 0
     };
 
     [HandlerType.Interactions] = {
         register: (event: string | string[], handler: Handler) => this.register(HandlerType.Interactions, event, handler),
         unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.Interactions, event, handler),
-        execute: (event: string, context: Context, args: any[]) => this.execute(HandlerType.Interactions, event, context, args),
+        execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.Interactions, event, context, args),
         has: (event: string) => this.handlers[HandlerType.Interactions].has(event) ?? this.handlers[HandlerType.Interactions].get(event)?.length! > 0
     };
 }

@@ -13,25 +13,40 @@ const client = new Client({
 });
 
 client.chatCommands.register('ping', async (context: Context, args: any[]) => {
-    await context.reply(`Pong!: got ${args.join(', ')}`, true)
+    const message = await context.reply(`Pong!: got ${args.join(', ')}`, true);
+    // Calculate the time it took to send the message
+    const time = message.timestamp.getTime() - context.message.timestamp.getTime();
+    // Edit the message to include the time
+    await context.editMessage(message, `Pong! Latency: ${time}ms`);
 });
 
 client.chatCommands.register('here', async (context: Context, _args: any[]) => {
     const guild = await context.fetchGuild();
     if (guild !== null) {
-        await context.reply(`You are in ${guild?.name}`, true); 
+        await context.reply(`You are in ${guild.name}`, true); 
     } else {
-        await context.reply('You are not in a guild', true);
+        await context.reply('This is not a server!', true);
     }
 });
 
-client.chatCommands.register('quote', async (context: Context, args: any[]) => {
-    const referenced = await context.message.getReference();
-    if (referenced === null) {
-        await context.reply('No message to quote', true);
+client.chatCommands.register('quote', async (context: Context, _args: any[]) => {
+    const referenced = context.message.reference;
+
+    let reply = null;
+    if (referenced === null || referenced === undefined) {
+        reply = await context.reply('No message to quote', true);
         return;
     } else {
-        await context.reply(`> "${referenced.content}"\n> — ${referenced.author?.global_name}`, true);
+        reply = await context.reply(`> "${referenced.content}"\n> — ${referenced.author?.display_name ?? referenced.author?.username}`, true);
+        // Save to quote database
+        // TODO
+    }
+
+    if (reply?.id) {
+        const message_id = reply.id;
+        setTimeout(() => {
+            context.deleteMessage(message_id);
+        }, 3000);
     }
 });
 

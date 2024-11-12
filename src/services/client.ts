@@ -4,9 +4,10 @@ import { Processor } from './processor';
 import { Intent, type ClientConfig } from '../types/common';
 import { exists, isNil } from '../utils/index';
 import type { Handler } from '../types/hander';
-import { Message } from '../types/message';
+import { DiscordMessage, Message } from '../types/message';
 import { Guilds } from './guilds';
 import { Users } from './users';
+import { Messages } from './messages';
 
 export class Client {
     readonly token: string;
@@ -14,11 +15,12 @@ export class Client {
     readonly intents: Intent[] = [Intent.DEFAULT];
     prefix: string;
     // Internal services
-    protected _api: API;
-    protected _processor: Processor;
-    protected _gateway: Gateway;
+    protected api: API;
+    protected processor: Processor;
+    protected gateway: Gateway;
     guilds: Guilds;
     users: Users;
+    messages: Messages
 
     constructor(config: ClientConfig) {
         // Validate the configuration
@@ -29,23 +31,12 @@ export class Client {
         this.intents = config.intents ?? this.intents;
         this.prefix = config.prefix ?? '!';
         // Initialize internal services
-        this._api = new API(this);
-        this._processor = new Processor(this);
-        this._gateway = new Gateway(this, this.processor, this.api);
+        this.api = new API(this);
+        this.processor = new Processor(this, this.api);
+        this.gateway = new Gateway(this, this.processor, this.api);
         this.guilds = new Guilds(this.api, this.processor);
         this.users = new Users(this.api, this.processor);
-    }
-
-    private get api() {
-        return this._api;
-    }
-
-    private get gateway() {
-        return this._gateway;
-    }
-    
-    private get processor() {
-        return this._processor;
+        this.messages = new Messages(this, this.api, this.processor);
     }
 
     private static validateConfig(config: ClientConfig) {
@@ -79,13 +70,19 @@ export class Client {
             message = new Message().setContent(message);
         }
 
-        return Message.fromAPIResponse(await this.api.post(`/channels/${channel_id}/messages`, message.toJSON()));
+        return Message.hydrate(DiscordMessage.fromAPIResponse(await this.api.post(`/channels/${channel_id}/messages`, message.toJSON())), this, this.api);
     }
 
     chatCommands = {
-        register: (name: string | string[], handler: Handler) => this.processor.commands.register(name, handler),
-        unregister: (name: string | string[]) => this.processor.commands.unregister(name),
-        has: (name: string) => this.processor.commands.has(name)
+        register: (name: string | string[], handler: Handler) => this.processor.chat_commands.register(name, handler),
+        unregister: (name: string | string[]) => this.processor.chat_commands.unregister(name),
+        has: (name: string) => this.processor.chat_commands.has(name)
+    }
+
+    slashCommands = {
+        register: (name: string, handler: Handler) => this.processor.slash_commands.register(name, handler),
+        unregister: (name: string) => this.processor.slash_commands.unregister(name),
+        has: (name: string) => this.processor.slash_commands.has(name)
     }
 
     connect = () => this.gateway.connect();
