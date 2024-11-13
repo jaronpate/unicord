@@ -6,7 +6,7 @@ export class API {
     constructor(private client: Client) {}
 
     async request<T = any>(method: string, path: string, data?: any): Promise<T> {
-        const url = new URL(path, this.base_url).toString();
+        const url = `${this.base_url}${path.startsWith('/') ? '' : '/'}${path}`;
         const headers = {
             Authorization: `Bot ${this.client.token}`,
             'Accept': 'application/json',
@@ -14,6 +14,7 @@ export class API {
         };
 
         console.log(`API Request: ${method} ${url}`);
+        console.log(`API Body: ${JSON.stringify(data, null, 4)}`);
 
         const response = await fetch(url, {
             method,
@@ -22,8 +23,8 @@ export class API {
         });
 
         if (!response.ok) {
-            console.error(`Failed to fetch: ${response.statusText} ${response.url} ${response.status}`);
-            console.error(response.json());
+            // console.error(`Failed to fetch: ${response.statusText} ${response.url} ${response.status}`);
+            console.log('Failed Request Response: ', await response.text());
             throw new Error(`Failed to fetch: ${response.statusText}`);
         }
 

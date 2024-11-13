@@ -1,7 +1,10 @@
 import type { API } from "../services/api";
 import type { Client } from "../services/client";
+import { hydrator, type Hydrateable } from "../services/hydrator";
 import { isNil } from "../utils";
-import { DiscordMessage, Message } from "./message";
+import type { Expectation } from "./common";
+import type { Guild } from "./guild";
+import { DiscordMessage, Message, type MessagePayload } from "./message";
 /**
  * Represents the context of a message in a Discord channel.
  * Provides methods to interact with the message and the channel it was sent in.
@@ -20,13 +23,18 @@ import { DiscordMessage, Message } from "./message";
  * @throws {Error} If the message ID is not provided.
  * @throws {Error} If the channel ID is not provided.
  */
+
+export type HydratedContext<T extends Array<Expectation>> = Context & {
+    guild: Extract<Expectation.Guild, T[number]> extends never ? undefined : Guild;
+};
+
 export class Context {
     // Public properties
     message_id: string;
     channel_id: string;
     guild_id?: string;
 
-    constructor(private client: Client, private api: API, public message: Message) {
+    constructor(private client: Client, private api: API, public message: MessagePayload) {
         console.log('Context created: ', );
         if (isNil(message.id)) {
             throw new Error('Message ID is required to create a context');
@@ -42,17 +50,13 @@ export class Context {
         this.guild_id = message.guild_id;
     }
 
+    hydrator = <T extends Hydrateable, K extends Array<Expectation>>(data: T, expectations: K) => {
+        return hydrator<T, K>(data, expectations, this.client, this.api);
+    }
+
     // get author() {
     //     return this.client.users.get(this.author_id);
     // };
-
-    async fetchGuild() {
-        if (isNil(this.guild_id)) {
-            return Promise.resolve(null);
-        }
-
-        return this.client.guilds.get(this.guild_id);
-    }
 
     /**
      * Reply to the message that this command
@@ -60,7 +64,7 @@ export class Context {
      * @param reference If true the message will be a reference the the message that triggered the command
      * @returns The message that was sent
      */
-    public reply = (message: Message | string, reference: boolean = true) => {
+    public reply = async (message: Message | string, reference: boolean = true): Promise<MessagePayload> => {
         if (typeof message === 'string') {
             message = new Message().setContent(message);
         }
@@ -92,8 +96,8 @@ export class Context {
      * @param {string} [message_id] - The ID of the message to delete. If not provided, the message ID of this context will be used.
      * @returns {Promise<void>} A promise that resolves when the message is deleted.
      */
-    public deleteMessage = (message_id: string) => {
-        return this.api.delete(`/channels/${this.channel_id}/messages/${message_id ?? this.message_id}`);
+    public deleteMessage = (message_id: string): Promise<void> => {
+        return this.api.delete(`/channels/${this.channel_id}/messages/${message_id ?? this.message_id}`).then(() => {});
     };
 
     /**
@@ -108,6 +112,6 @@ export class Context {
         if (content) {
             clone.setContent(content);
         }
-        return Message.hydrate(DiscordMessage.fromAPIResponse(await this.api.patch(`/channels/${clone.channel_id}/messages/${clone.id}`, clone)), this.client, this.api);
+        return Message.fromDiscord(DiscordMessage.fromAPIResponse(await this.api.patch(`/channels/${clone.channel_id}/messages/${clone.id}`, clone)));
     };
 }

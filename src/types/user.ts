@@ -30,11 +30,7 @@ export class User {
         this.email = data.email;
     }
 
-    public static async factory(data: DiscordUser) {
-        return User.hydrate(DiscordUser.fromAPIResponse(data));
-    }
-
-    public static hydrate(data: DiscordUser) {
+    public static fromDiscord(data: DiscordUser): User {
         return new User({
             id: data.id,
             username: data.username,

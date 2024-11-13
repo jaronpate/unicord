@@ -1,13 +1,14 @@
 import { API } from './api';
 import { Gateway } from './gateway';
 import { Processor } from './processor';
-import { Intent, type ClientConfig } from '../types/common';
+import { Expectation, Intent, type ClientConfig } from '../types/common';
 import { exists, isNil } from '../utils/index';
 import type { Handler } from '../types/hander';
 import { DiscordMessage, Message } from '../types/message';
 import { Guilds } from './guilds';
 import { Users } from './users';
 import { Messages } from './messages';
+import { hydrator, type Hydrateable } from './hydrator';
 
 export class Client {
     readonly token: string;
@@ -65,12 +66,16 @@ export class Client {
         }
     }
 
+    hydrator = async<T extends Hydrateable, K extends Expectation[]>(data: T, expectations: K) => {
+        return hydrator<T, K>(data, expectations, this, this.api);   
+    }
+
     sendMessage = async (channel_id: string, message: Message | string) => {
         if (typeof message === 'string') {
             message = new Message().setContent(message);
         }
 
-        return Message.hydrate(DiscordMessage.fromAPIResponse(await this.api.post(`/channels/${channel_id}/messages`, message.toJSON())), this, this.api);
+        return Message.fromDiscord(DiscordMessage.fromAPIResponse(await this.api.post(`/channels/${channel_id}/messages`, message.toJSON())));
     }
 
     chatCommands = {

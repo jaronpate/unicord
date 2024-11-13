@@ -24,13 +24,7 @@ export class Guild {
         // this.roles = data.roles;
     }
 
-
-    public static async factory(data: any) {
-        return await Guild.hydrate(DiscordGuild.fromAPIResponse(data));
-    }
-
-
-    public static async hydrate(data: DiscordGuild) {
+    public static fromDiscord(data: DiscordGuild) {
         return new Guild({
             id: data.id,
             name: data.name,

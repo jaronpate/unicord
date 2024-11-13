@@ -1,20 +1,23 @@
-import type { Client } from "../services/client";
-import type { Context } from "./context";
-import type { BaseHandler } from "./hander";
-
 export type ClientConfig = {
     token: string;
     application_id: string;
     prefix?: string;
     intents?: Intent[];
 }
+
+export enum Expectation {
+  Guild = 'guild',
+  Channel = 'channel',
+  User = 'user',
+  Message = 'message',
+}
+
 export enum HandlerType {
     Events = 'events',
     ChatCommands = 'chat_commands',
     SlashCommands = 'slash_commands',
     Interactions = 'interactions'
 }
-
 
 export type EventPayload = any;
 

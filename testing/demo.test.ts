@@ -1,4 +1,4 @@
-import { Client, type Context, Intent } from '../src/index';
+import { Client, type Context, Expectation, Intent, type MessagePayload } from '../src/index';
 
 const client = new Client({
     token: process.env.BOT_TOKEN!,
@@ -21,33 +21,33 @@ client.chatCommands.register('ping', async (context: Context, args: any[]) => {
 });
 
 client.chatCommands.register('here', async (context: Context, _args: any[]) => {
-    const guild = await context.fetchGuild();
-    if (guild !== null) {
-        await context.reply(`You are in ${guild.name}`, true); 
+    const guild = (await context.hydrator(context, [Expectation.Guild]))(context);
+
+    if (guild) {
+        await context.reply(`You are in ${context.guild.name}`, true); 
     } else {
         await context.reply('This is not a server!', true);
     }
 });
 
 client.chatCommands.register('quote', async (context: Context, _args: any[]) => {
-    const referenced = context.message.reference;
+    const { message, hydrator } = context;
+    const reference = (await hydrator(message, [Expectation.Message]))(message);
 
-    let reply = null;
-    if (referenced === null || referenced === undefined) {
-        reply = await context.reply('No message to quote', true);
-        return;
-    } else {
-        reply = await context.reply(`> "${referenced.content}"\n> — ${referenced.author?.display_name ?? referenced.author?.username}`, true);
+    let reply: MessagePayload;
+
+    if (reference) {
+        reply = await context.reply(`> "${message.reference.content}"\n> — ${message.reference.author.display_name ?? message.reference.author.username}`, true);
         // Save to quote database
         // TODO
+    } else {
+        reply = await context.reply('No message to quote', true);
     }
 
-    if (reply?.id) {
-        const message_id = reply.id;
-        setTimeout(() => {
-            context.deleteMessage(message_id);
-        }, 3000);
-    }
+    // Wait 3 seconds then delete the quote
+    setTimeout(() => {
+        context.deleteMessage(reply.id);
+    }, 3000);
 });
 
 client.connect();

@@ -1,7 +1,9 @@
 import type { API } from '../services/api';
 import type { Client } from '../services/client';
 import { isNil } from '../utils';
+import type { Expectation } from './common';
 import { Embed } from './embed';
+import type { Guild } from './guild';
 import { DiscordUser, User } from './user';
 
 export type Component = Partial<Button | SelectMenu> & {
@@ -81,6 +83,27 @@ export enum ComponentType {
     ChannelSelect
 }
 
+export type HydratedMessage<T extends Array<Expectation>> = MessagePayload & {
+    // channel: Extract<Expectation.Channel, T[number]> extends never ? undefined : Channel;
+    reference: Extract<Expectation.Message, T[number]> extends never ? undefined : MessagePayload;
+    guild: Extract<Expectation.Guild, T[number]> extends never ? undefined : Guild;
+}
+
+export type MessagePayload = Message & {
+    id: string;
+    author: User;
+    channel_id: string;
+    content: string;
+    embeds: Embed[];
+    components: Component[];
+    message_reference?: {
+        id: string;
+        channel_id: string;
+        guild_id?: string;
+    };
+    timestamp: Date;
+};
+
 export class Message {
     id?: string;
     author?: User;
@@ -89,8 +112,12 @@ export class Message {
     public content: string;
     public embeds: Embed[] = [];
     public components: Component[] = [];
-    public reference?: Message;
-    timestamp: Date;
+    public message_reference?: {
+        id: string;
+        channel_id: string;
+        guild_id?: string;
+    };
+    timestamp?: Date;
 
     constructor(data?: Partial<Message>) {
         this.id = data?.id;
@@ -98,31 +125,18 @@ export class Message {
         this.channel_id = data?.channel_id;
         this.guild_id = data?.guild_id;
         this.content = data?.content ?? '';
-        this.reference = data?.reference;
-        this.timestamp = data?.timestamp ?? new Date();
+        this.timestamp = data?.timestamp;
     }
 
-    public static factory = async (data: any, client: Client, api: API, resolveReference: boolean = true): Promise<Message> => {
-        return Message.hydrate(DiscordMessage.fromAPIResponse(data), client, api, resolveReference);
-    }
-
-    public static hydrate = async (discord_message: DiscordMessage, client: Client, api: API, resolveReference: boolean = true): Promise<Message> => {
-        let reference: Message | undefined;
-        
-        if (discord_message.message_reference && resolveReference) {
-            const { channel_id, message_id } = discord_message.message_reference;
-            reference = await client.messages.get(channel_id, message_id, false);
-        }
-
+    public static fromDiscord(data: DiscordMessage): MessagePayload {
         return new Message({
-            id: discord_message.id,
-            author: User.hydrate(discord_message.author),
-            channel_id: discord_message.channel_id,
-            guild_id: discord_message?.guild_id,
-            content: discord_message.content,
-            reference,
-            timestamp: new Date(discord_message.timestamp)
-        });
+            id: data.id,
+            author: User.fromDiscord(data.author),
+            channel_id: data.channel_id,
+            guild_id: data.guild_id,
+            content: data.content,
+            timestamp: new Date(data.timestamp)
+        }) as MessagePayload;
     }
 
     public static button(config: Button): Component {
@@ -178,7 +192,11 @@ export class Message {
             ref = message;
         }
 
-        this.reference = ref;
+        this.message_reference = {
+            id: ref.id!,
+            channel_id: ref.channel_id!,
+            guild_id: ref.guild_id
+        };
         return this;
     };
 
@@ -187,12 +205,11 @@ export class Message {
             content: this.content,
             embeds: this.embeds,
             components: this.components,
-            message_reference: {
-                message_id: this.reference?.id,
-                channel_id: this.reference?.channel_id,
-                guild_id: this.reference?.guild_id,
-                fail_if_not_exists: false
-            }
+            message_reference: this.message_reference ? {
+                message_id: this.message_reference.id,
+                channel_id: this.message_reference.channel_id,
+                guild_id: this.message_reference.guild_id
+            } : undefined
         };
     };
 }

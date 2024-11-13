@@ -141,8 +141,7 @@ export class Gateway {
 
         if (['MESSAGE_CREATE', 'MESSAGE_UPDATE'].includes(event_name)) {
             // If the event is a message event, create a message object
-            const discord_message = DiscordMessage.fromAPIResponse(event_data);
-            const message = await Message.hydrate(discord_message, this.client, this.api);
+            const message = Message.fromDiscord(DiscordMessage.fromAPIResponse(event_data));
             // And then generate the context
             context = new Context(this.client, this.api, message);
         }
@@ -165,7 +164,7 @@ export class Gateway {
             return;
         }
         // Extract the author
-        const author = User.hydrate(DiscordUser.fromAPIResponse(payload.d.author));
+        const author = User.fromDiscord(DiscordUser.fromAPIResponse(payload.d.author));
         // Store the author in the cache
         this.client.users.set(author.id, author);
         // Extract the content
@@ -186,9 +185,8 @@ export class Gateway {
             // Extract the command name
             // TODO: Case insensitive config?
             const command = args.shift()!;
-            console.log('payload.d', payload.d)
             // Create a new message object from the payload
-            const message = await Message.hydrate(DiscordMessage.fromAPIResponse(payload.d), this.client, this.api);
+            const message = Message.fromDiscord(DiscordMessage.fromAPIResponse(payload.d));
             // Generate context
             const context = new Context(this.client, this.api, message);
             // Check if command exists
