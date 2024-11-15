@@ -1,3 +1,5 @@
+import { Trait } from "./common";
+
 export class User {
     id: string;
     username: string;
@@ -30,7 +32,7 @@ export class User {
         this.email = data.email;
     }
 
-    public static fromDiscord(data: DiscordUser): User {
+    public static [Trait.fromDiscord](data: DiscordUser): User {
         return new User({
             id: data.id,
             username: data.username,

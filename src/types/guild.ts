@@ -1,4 +1,5 @@
 import { Channel } from "./channel";
+import { Trait } from "./common";
 import { Emoji } from "./emoji";
 import { Member } from "./member";
 import { Role } from "./role";
@@ -24,7 +25,7 @@ export class Guild {
         // this.roles = data.roles;
     }
 
-    public static fromDiscord(data: DiscordGuild) {
+    public static [Trait.fromDiscord](data: DiscordGuild) {
         return new Guild({
             id: data.id,
             name: data.name,

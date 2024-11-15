@@ -1,12 +1,12 @@
 import { WebSocket, type Data } from 'ws';
-import type { Client } from "./client";
-import type { Payload } from "../types/common";
-import { exists, isNil, isObject, log } from "../utils";
-import type { API } from "./api";
-import type { Processor } from './processor';
-import { Context } from '../types/context';
-import { DiscordMessage, Message } from '../types/message';
-import { DiscordUser, User } from '../types/user';
+import type { Client } from "../client";
+import { fromDiscord, type Payload } from "../../types/common";
+import { exists, isNil, isObject, log } from "../../utils";
+import type { API } from "../api";
+import type { Processor } from '../processor';
+import { Context } from '../../types/context';
+import { type DiscordMessage, Message } from '../../types/message';
+import { DiscordUser, User } from '../../types/user';
 
 export class Gateway {
     private socket: WebSocket | null = null;
@@ -141,7 +141,7 @@ export class Gateway {
 
         if (['MESSAGE_CREATE', 'MESSAGE_UPDATE'].includes(event_name)) {
             // If the event is a message event, create a message object
-            const message = Message.fromDiscord(DiscordMessage.fromAPIResponse(event_data));
+            const message = Message[fromDiscord](event_data as DiscordMessage);
             // And then generate the context
             context = new Context(this.client, this.api, message);
         }
@@ -164,7 +164,7 @@ export class Gateway {
             return;
         }
         // Extract the author
-        const author = User.fromDiscord(DiscordUser.fromAPIResponse(payload.d.author));
+        const author = User[fromDiscord](DiscordUser.fromAPIResponse(payload.d.author));
         // Store the author in the cache
         this.client.users.set(author.id, author);
         // Extract the content
@@ -186,7 +186,7 @@ export class Gateway {
             // TODO: Case insensitive config?
             const command = args.shift()!;
             // Create a new message object from the payload
-            const message = Message.fromDiscord(DiscordMessage.fromAPIResponse(payload.d));
+            const message = Message[fromDiscord](payload.d as DiscordMessage);
             // Generate context
             const context = new Context(this.client, this.api, message);
             // Check if command exists

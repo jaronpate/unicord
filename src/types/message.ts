@@ -1,7 +1,5 @@
-import type { API } from '../services/api';
-import type { Client } from '../services/client';
 import { isNil } from '../utils';
-import type { Expectation } from './common';
+import { fromDiscord, Trait, type Expectation, type Expects } from './common';
 import { Embed } from './embed';
 import type { Guild } from './guild';
 import { DiscordUser, User } from './user';
@@ -128,10 +126,10 @@ export class Message {
         this.timestamp = data?.timestamp;
     }
 
-    public static fromDiscord(data: DiscordMessage): MessagePayload {
+    public static [Trait.fromDiscord](data: DiscordMessage): MessagePayload {
         return new Message({
             id: data.id,
-            author: User.fromDiscord(data.author),
+            author: User[fromDiscord](data.author),
             channel_id: data.channel_id,
             guild_id: data.guild_id,
             content: data.content,
@@ -214,8 +212,8 @@ export class Message {
     };
 }
 
-// Raw API Class
-export class DiscordMessage {
+// Raw API Object
+export type DiscordMessage = {
     id: string;
     channel_id: string;
     guild_id?: string;
@@ -257,74 +255,4 @@ export class DiscordMessage {
         preview_asset?: string;
         format_type: number;
     }[];
-
-    constructor(data: DiscordMessage) {
-        this.id = data.id;
-        this.channel_id = data.channel_id;
-        this.guild_id = data.guild_id;
-        this.author = data.author;
-        // this.member = data.member;
-        this.content = data.content;
-        this.timestamp = data.timestamp;
-        this.edited_timestamp = data.edited_timestamp;
-        this.tts = data.tts;
-        this.mention_everyone = data.mention_everyone;
-        this.mentions = data.mentions;
-        this.mention_roles = data.mention_roles;
-        this.mention_channels = data.mention_channels;
-        this.attachments = data.attachments;
-        // this.embeds = data.embeds;
-        this.reactions = data.reactions;
-        this.nonce = data.nonce;
-        this.pinned = data.pinned;
-        this.webhook_id = data.webhook_id;
-        this.type = data.type;
-        this.activity = data.activity;
-        this.application = data.application;
-        this.application_id = data.application_id;
-        this.message_reference = data.message_reference;
-        this.flags = data.flags;
-        this.referenced_message = data.referenced_message;
-        this.interaction = data.interaction;
-        this.thread = data.thread;
-        this.components = data.components;
-        this.sticker_items = data.sticker_items;
-        this.stickers = data.stickers;
-    }
-
-    static fromAPIResponse(data: any): DiscordMessage {
-        return new DiscordMessage({
-            id: data.id,
-            channel_id: data.channel_id,
-            guild_id: data.guild_id,
-            author: data.author,
-            // member: data.member,
-            content: data.content,
-            timestamp: data.timestamp,
-            edited_timestamp: data.edited_timestamp,
-            tts: data.tts,
-            mention_everyone: data.mention_everyone,
-            mentions: data.mentions,
-            mention_roles: data.mention_roles,
-            mention_channels: data.mention_channels,
-            attachments: data.attachments,
-            // embeds: data.embeds,
-            reactions: data.reactions,
-            nonce: data.nonce,
-            pinned: data.pinned,
-            webhook_id: data.webhook_id,
-            type: data.type,
-            activity: data.activity,
-            application: data.application,
-            application_id: data.application_id,
-            message_reference: data.message_reference,
-            flags: data.flags,
-            referenced_message: data.referenced_message,
-            interaction: data.interaction,
-            thread: data.thread,
-            components: data.components,
-            sticker_items: data.sticker_items,
-            stickers: data.stickers
-        });
-    }
 }

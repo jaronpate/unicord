@@ -1,6 +1,6 @@
 import type { Client } from "./client";
 import type { Context } from "../types/context";
-import { HandlerType, type EventPayload, type Payload } from "../types/common";
+import { HandlerType, type EventPayload } from "../types/common";
 import { BaseHandler, type Handler } from "../types/hander";
 import type { API } from "./api";
 

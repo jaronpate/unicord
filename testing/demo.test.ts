@@ -20,6 +20,25 @@ client.chatCommands.register('ping', async (context: Context, args: any[]) => {
     await context.editMessage(message, `Pong! Latency: ${time}ms`);
 });
 
+client.chatCommands.register('me', async (context: Context, _args: any[]) => {
+    // Note: Testing repeated hydration
+    const message = await context.hydrate(context.message, [Expectation.Channel])
+    const rehydrated = await context.hydrate(message, [Expectation.Guild]);
+
+    rehydrated.guild.name
+
+    const hydrate = await context.hydrator(message, [Expectation.Guild]);
+    const hasGuild = hydrate(message);
+
+    if (hasGuild) {
+        message.guild.name
+    } else {
+        message
+    }
+
+    // await context.reply(`You are ${message.author.username} ${hasGuild ? message.guild.name : ''}`, true);
+});
+
 client.chatCommands.register('here', async (context: Context, _args: any[]) => {
     const guild = (await context.hydrator(context, [Expectation.Guild]))(context);
 

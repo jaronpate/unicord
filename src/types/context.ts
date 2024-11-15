@@ -1,10 +1,10 @@
 import type { API } from "../services/api";
 import type { Client } from "../services/client";
-import { hydrator, type Hydrateable } from "../services/hydrator";
+import { hydrate, hydrator, type Hydrateable, type Hydrated } from "../services/hydrator";
 import { isNil } from "../utils";
-import type { Expectation } from "./common";
+import { fromDiscord, type Expectation } from "./common";
 import type { Guild } from "./guild";
-import { DiscordMessage, Message, type MessagePayload } from "./message";
+import { type DiscordMessage, Message, type MessagePayload } from "./message";
 /**
  * Represents the context of a message in a Discord channel.
  * Provides methods to interact with the message and the channel it was sent in.
@@ -50,7 +50,38 @@ export class Context {
         this.guild_id = message.guild_id;
     }
 
-    hydrator = <T extends Hydrateable, K extends Array<Expectation>>(data: T, expectations: K) => {
+    /**
+     * Hydrates a given data object based on the provided expectations.
+     * 
+     * @template T - The type of the data object to be hydrated. Must extend `Hydrateable`.
+     * @template K - An array of `Expectation` types that specify what properties should be hydrated.
+     * 
+     * @param data - The data object to be hydrated. Can be of type `Context` or `Message`.
+     * @param expectations - An array of expectations that specify what properties should be hydrated.
+     * 
+     * @returns A promise that resolves to the hydrated data object.
+     * 
+     * @throws Will throw an error if an expectation cannot be resolved.
+     */
+    hydrate = async <
+        T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>,
+        K extends Array<Expectation>
+    >(data: T, expectations: K) => {
+        return hydrate<T, K>(data, expectations, this.client, this.api);
+    }
+
+    /**
+     * A wrapper function that attempts to hydrate a given data object and returns a type guard function.
+     * 
+     * @template T - The type of the data object to be hydrated. Must extend `Hydrateable`.
+     * @template K - An array of `Expectation` types that specify what properties should be hydrated.
+     * 
+     * @param data - The data object to be hydrated. Can be of type `Context` or `Message`.
+     * @param expectations - An array of expectations that specify what properties should be hydrated.
+     * 
+     * @returns A promise that resolves to a type guard function. The type guard function returns `true` if the data object was successfully hydrated, otherwise `false`.
+     */
+    hydrator = async <T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>, K extends Array<Expectation>>(data: T, expectations: K) => {
         return hydrator<T, K>(data, expectations, this.client, this.api);
     }
 
@@ -112,6 +143,6 @@ export class Context {
         if (content) {
             clone.setContent(content);
         }
-        return Message.fromDiscord(DiscordMessage.fromAPIResponse(await this.api.patch(`/channels/${clone.channel_id}/messages/${clone.id}`, clone)));
+        return Message[fromDiscord](await this.api.patch<DiscordMessage>(`/channels/${clone.channel_id}/messages/${clone.id}`, clone));
     };
 }

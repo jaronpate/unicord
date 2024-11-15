@@ -11,4 +11,4 @@ export type CommandHandlerFunction = (context: Context, args: any[]) => Promise<
 export type EventHandlerFunction = (context: Context | null, payload: EventPayload) => Promise<void> | void;
 
 export type HandlerFunction = CommandHandlerFunction | EventHandlerFunction;
-export type Handler = CommandHandlerFunction | EventHandlerFunction | BaseHandler;
+export type Handler = HandlerFunction | BaseHandler;
