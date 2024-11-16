@@ -15,7 +15,7 @@ export enum Expectation {
 export enum HandlerType {
     Events = 'events',
     ChatCommands = 'chat_commands',
-    SlashCommands = 'slash_commands',
+    ApplicationCommands = 'application_commands',
     Interactions = 'interactions'
 }
 
@@ -51,6 +51,14 @@ export type Payload = {
     s: number | null;
     t: string | null;
 };
+
+export type InteractionPayload = Record<string, any>;
+
+export enum InteractionResponseType {
+    Pong = 1,
+    Message = 4,
+    DeferredMessage = 5
+}
 
 export enum Intent {
     GUILDS = 1 << 0,

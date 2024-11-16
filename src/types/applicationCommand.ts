@@ -2,7 +2,7 @@ import { Trait } from "./common";
 
 // Enum for Application Command Types
 export enum ApplicationCommandType {
-    ChatInput = 1,
+    Chat = 1,
     User = 2,
     Message = 3,
     PrimaryEntryPoint = 4,
@@ -63,6 +63,12 @@ export type ApplicationCommandOption = {
     min_length?: number;
     max_length?: number;
     autocomplete?: boolean;
+};
+
+export type ApplicationCommandOptionResult = {
+    value: any,
+    type: number,
+    name: string
 };
 
 // Define the DiscordApplicationCommand type

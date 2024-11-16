@@ -1,12 +1,14 @@
 import { WebSocket, type Data } from 'ws';
 import type { Client } from "../client";
-import { fromDiscord, type Payload } from "../../types/common";
+import { fromDiscord, type InteractionPayload, type Payload } from "../../types/common";
 import { exists, isNil, isObject, log } from "../../utils";
 import type { API } from "../api";
 import type { Processor } from '../processor';
 import { Context } from '../../types/context';
 import { type DiscordMessage, Message } from '../../types/message';
 import { DiscordUser, User } from '../../types/user';
+import { Guild } from '../../types/guild';
+import { Channel } from '../../types/channel';
 
 export class Gateway {
     private socket: WebSocket | null = null;
@@ -14,7 +16,7 @@ export class Gateway {
     private heartbeat_timeout: Timer | null = null;
     private sequence: number | null = null;
     // Internal state
-    private user: any;
+    user: User | null = null;
 
     constructor(private client: Client, private processor: Processor, private api: API) {}
 
@@ -126,10 +128,9 @@ export class Gateway {
         }
 
         if (event_name === 'READY') {
-            this.user = event_data.user;
-            log('User:', this.user);
+            this.user = User[fromDiscord](DiscordUser.fromAPIResponse(event_data.user));
         } else if (event_name === 'INTERACTION_CREATE') {
-            // this.handleInteractionCreate(payload);
+            this.handleInteractionCreate(payload);
         } else if (event_name === 'MESSAGE_CREATE') {
             await this.handleMessageCreate(payload as Payload);
         } else if (event_name === 'MESSAGE_UPDATE') {
@@ -143,7 +144,7 @@ export class Gateway {
             // If the event is a message event, create a message object
             const message = Message[fromDiscord](event_data as DiscordMessage);
             // And then generate the context
-            context = new Context(this.client, this.api, message);
+            context = new Context(this.client, this.api, { message });
         }
 
         // Call event handlers
@@ -151,6 +152,10 @@ export class Gateway {
     }
 
     private handleMessageCreate = async (payload: Payload) => {
+        if (isNil(this.user)) {
+            throw new Error('Cannot handle MESSAGE_CREATE event without a user');
+        }
+
         if (!isObject(payload.d)) {
             throw new Error('Invalid MESSAGE_CREATE payload received');
         }
@@ -188,7 +193,7 @@ export class Gateway {
             // Create a new message object from the payload
             const message = Message[fromDiscord](payload.d as DiscordMessage);
             // Generate context
-            const context = new Context(this.client, this.api, message);
+            const context = new Context(this.client, this.api, { message });
             // Check if command exists
             if (this.processor.chat_commands.has(command)) {
                 // Execute the handler
@@ -197,6 +202,57 @@ export class Gateway {
                 // TODO: Custom unknown command handler
                 context.reply(`Unknown command: ${command}`);
             }
+        }
+    };
+
+    private handleInteractionCreate = (payload: Payload) => {
+        if (isNil(payload.d)) {
+            throw new Error('Invalid INTERACTION_CREATE payload received');
+        }
+
+        if (!isObject(payload.d)) {
+            throw new Error('Invalid INTERACTION_CREATE data received');
+        }
+
+        if (typeof payload.d.type !== 'number') {
+            throw new Error('Invalid INTERACTION_CREATE type received');
+        }
+
+        if (payload.d.type === 2) {
+            this.handleShashInteraction(payload as Payload & { d: InteractionPayload });
+        } else {
+            // this.handleChatInteraction(payload);
+        }
+    };
+
+    private handleShashInteraction = (payload: Payload & { d: InteractionPayload }) => {
+        console.log('handleShashInteraction')
+        const command = payload.d.data.name;
+        const args = payload.d.data.options;
+
+        const context = new Context(this.client, this.api, { interaction: payload.d });
+
+        if (payload.d.data.guild) {
+            const guild = Guild[fromDiscord](payload.d.data.guild);
+            this.client.guilds.set(guild.id, guild);
+        }
+
+        if (payload.d.data.member) {
+            const member = User[fromDiscord](payload.d.data.member.user);
+            this.client.users.set(member.id, member);
+        }
+
+        // TODO: Fix when channel class is implemented
+        // if (payload.d.data.channel) {
+        //     const channel = Channel[fromDiscord](payload.d.data.channel);
+        //     this.client.channels.set(channel.id, channel);
+        // }
+
+        if (this.processor.application_commands.has(command)) {
+            this.processor.application_commands.execute(command, context, args);
+        } else {
+            // TODO: Custom unknown command handler
+            context.reply(`Unknown command: ${command}`);
         }
     };
 

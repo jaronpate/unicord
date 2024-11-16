@@ -1,8 +1,8 @@
 import type { API } from "../services/api";
 import type { Client } from "../services/client";
 import { hydrate, hydrator, type Hydrateable, type Hydrated } from "../services/hydrator";
-import { isNil } from "../utils";
-import { fromDiscord, type Expectation } from "./common";
+import { isNil, exists } from "../utils";
+import { fromDiscord, InteractionResponseType, type Expectation, type InteractionPayload } from "./common";
 import type { Guild } from "./guild";
 import { type DiscordMessage, Message, type MessagePayload } from "./message";
 /**
@@ -26,28 +26,39 @@ import { type DiscordMessage, Message, type MessagePayload } from "./message";
 
 export type HydratedContext<T extends Array<Expectation>> = Context & {
     guild: Extract<Expectation.Guild, T[number]> extends never ? undefined : Guild;
+    message: Extract<Expectation.Message, T[number]> extends never ? undefined : Message;
 };
+
+type ContextData =
+    | { channel_id?: string; message_id?: string; guild_id?: string; message?: MessagePayload, interaction: InteractionPayload }
+    | { channel_id?: string; message_id?: string; guild_id?: string; message: MessagePayload, interaction?: InteractionPayload }
 
 export class Context {
     // Public properties
-    message_id: string;
+    message_id?: string;
     channel_id: string;
     guild_id?: string;
+    message?: MessagePayload;
+    // TODO: Type this
+    interaction?: InteractionPayload;
 
-    constructor(private client: Client, private api: API, public message: MessagePayload) {
-        console.log('Context created: ', );
-        if (isNil(message.id)) {
-            throw new Error('Message ID is required to create a context');
-        }
+    constructor(private client: Client, private api: API, data: ContextData) {
+        const channel_id = data.channel_id ?? data.message?.channel_id ?? data.interaction?.channel_id;
 
-        if (isNil(message.channel_id)) {
+        if (isNil(channel_id)) {
             throw new Error('Channel ID is required to create a context');
         }
 
         this.client = client;
-        this.message_id = message.id;
-        this.channel_id = message.channel_id;
-        this.guild_id = message.guild_id;
+        this.message_id = data.message_id ?? data.message?.id;
+        this.channel_id = channel_id;
+        this.guild_id = data.guild_id ?? data.message?.guild_id ?? data.interaction?.guild_id;
+        this.message = data.message;
+        this.interaction = data.interaction;
+    }
+
+    get self() {
+        return this.client.self!;
     }
 
     /**
@@ -63,7 +74,7 @@ export class Context {
      * 
      * @throws Will throw an error if an expectation cannot be resolved.
      */
-    hydrate = async <
+    public hydrate = async <
         T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>,
         K extends Array<Expectation>
     >(data: T, expectations: K) => {
@@ -81,13 +92,9 @@ export class Context {
      * 
      * @returns A promise that resolves to a type guard function. The type guard function returns `true` if the data object was successfully hydrated, otherwise `false`.
      */
-    hydrator = async <T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>, K extends Array<Expectation>>(data: T, expectations: K) => {
+    public hydrator = async <T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>, K extends Array<Expectation>>(data: T, expectations: K) => {
         return hydrator<T, K>(data, expectations, this.client, this.api);
     }
-
-    // get author() {
-    //     return this.client.users.get(this.author_id);
-    // };
 
     /**
      * Reply to the message that this command
@@ -96,15 +103,22 @@ export class Context {
      * @returns The message that was sent
      */
     public reply = async (message: Message | string, reference: boolean = true): Promise<MessagePayload> => {
+        console.log('this.interaction', this.interaction)
         if (typeof message === 'string') {
             message = new Message().setContent(message);
         }
 
-        if (reference) {
-            message.setReference(this.message)
+        if (exists(this.message)) {
+            if (reference) {
+                message.setReference(this.message)
+            }
+            
+            return this.client.sendMessage(this.channel_id, message);
+        } else if (exists(this.interaction)) {
+            return this.ack(InteractionResponseType.Message, message.toJSON());
+        } else {
+            throw new Error('Cannot reply without a message or interaction payload');
         }
-        
-        return this.client.sendMessage(this.channel_id, message);
     };
 
     /**
@@ -138,11 +152,27 @@ export class Context {
      * @param {Message | string} message - The updated message content.
      * @returns {Promise<Message>} The updated message.
      */
-    public async editMessage (message: Message, content?: string) {
+    public editMessage = async (message: Message, content?: string) => {
         const clone = new Message(message);
         if (content) {
             clone.setContent(content);
         }
         return Message[fromDiscord](await this.api.patch<DiscordMessage>(`/channels/${clone.channel_id}/messages/${clone.id}`, clone));
+    };
+
+    // Interaction methods
+    public ack = async (type: InteractionResponseType = InteractionResponseType.Pong, data?: Record<string, any>) => {
+        if (isNil(this.interaction)) {
+            throw new Error('Cannot acknowledge an interaction without an interaction payload');
+        }
+
+        return this.api.post(`/interactions/${this.interaction.id}/${this.interaction.token}/callback`, {
+            type,
+            data
+        });
+    };
+
+    public defer = async () => {
+        return this.ack(InteractionResponseType.DeferredMessage);
     };
 }

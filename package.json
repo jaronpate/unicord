@@ -3,8 +3,8 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "test": "dotenvx run -f .env -- bun run testing/demo.test.ts",
-    "test:inspect": "dotenvx run -f .env -- bun --inspect testing/demo.test.ts"
+    "test": "bun run testing/demo.test.ts",
+    "test:inspect": "bun --inspect testing/demo.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

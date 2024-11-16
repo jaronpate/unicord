@@ -1,5 +1,5 @@
 import { Client, type Context, createCommandHandler, Expectation, Intent, type MessagePayload, Trait } from '../src/index';
-import { ApplicationCommandOptionType } from '../src/types/applicationCommand';
+import { ApplicationCommandOptionType, ApplicationCommandType } from '../src/types/applicationCommand';
 
 const client = new Client({
     token: process.env.BOT_TOKEN!,
@@ -21,25 +21,26 @@ client.chatCommands.register('ping', async (context: Context, args: any[]) => {
     await context.editMessage(message, `Pong! Latency: ${time}ms`);
 });
 
-client.slashCommands.register('ping', createCommandHandler({
+client.applicationCommands.register('hello', ApplicationCommandType.Chat, createCommandHandler({
+    description: "Introduce yourself",
     args: [
         {
             type: ApplicationCommandOptionType.String,
-            name: "Name",
+            name: "name",
             id: "name",
             description: "Your name",
             required: true
         },
         {
             type: ApplicationCommandOptionType.Integer,
-            name: "Age",
+            name: "age",
             id: "age",
             description: "Your age",
             required: true
         },
         {
             type: ApplicationCommandOptionType.String,
-            name: "Favorite Animal",
+            name: "favorite_animal",
             id: "favorite_animal",
             description: "Your favorite animal",
             required: false,
@@ -56,24 +57,28 @@ client.slashCommands.register('ping', createCommandHandler({
         }
     ] as const,
     [Trait.execute]: async (context, args) => {
-        context.reply(`You are ${args.name} and you are ${args.age} years old and your favorite animal is ${args.favorite_animal}`, true);
+        context.reply(
+            `\
+Hello ${args.name}! I see you are ${args.age} years old${!!args.favorite_animal ? ` and your favorite animal is ${args.favorite_animal}.`: '.'}      
+Nice to meet you, I'm ${context.self.username}!`
+        , true);
     }
 }));
 
 client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // Note: Testing repeated hydration
-    const message = await context.hydrate(context.message, [Expectation.Channel])
-    const rehydrated = await context.hydrate(message, [Expectation.Guild]);
+    const hydrated = await context.hydrate(context.message, [Expectation.Channel])
+    const rehydrated = await context.hydrate(hydrated, [Expectation.Guild]);
 
     rehydrated.guild.name
 
-    const hydrate = await context.hydrator(message, [Expectation.Guild]);
-    const hasGuild = hydrate(message);
+    const hydrate = await context.hydrator(hydrated, [Expectation.Guild]);
+    const hasGuild = hydrate(hydrated);
 
     // if (hasGuild) {
-    //     message.guild.name
+    //     hydrated.guild.name
     // } else {
-    //     message
+    //     hydrated
     // }
 
     // await context.reply(`You are ${message.author.username} ${hasGuild ? message.guild.name : ''}`, true);
@@ -90,8 +95,8 @@ client.chatCommands.register('here', async (context: Context, _args: any[]) => {
 });
 
 client.chatCommands.register('quote', async (context: Context, _args: any[]) => {
-    const { message, hydrator } = context;
-    const reference = (await hydrator(message, [Expectation.Message]))(message);
+    const message = context.message;
+    const reference = (await context.hydrator(message, [Expectation.Message]))(message);
 
     let reply: MessagePayload;
 

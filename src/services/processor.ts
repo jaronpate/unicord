@@ -1,15 +1,15 @@
 import type { Client } from "./client";
 import type { Context } from "../types/context";
 import { HandlerType, Trait, type EventPayload } from "../types/common";
-import { type CommandHandler, type Handler } from "../types/handler";
+import { CommandHandler, type Handler, type ArgsFromOptions, OptionTypeMap } from "../types/handler";
 import type { API } from "./api";
-import type { ApplicationCommandOption } from "../types/applicationCommand";
+import { ApplicationCommandType, type ApplicationCommandOption, type ApplicationCommandOptionResult } from "../types/applicationCommand";
 
 export class Processor {
     private handlers = {
         [HandlerType.Events]: new Map<string, Handler[]>(),
         [HandlerType.ChatCommands]: new Map<string, Handler[]>(),
-        [HandlerType.SlashCommands]: new Map<string, Handler[]>(),
+        [HandlerType.ApplicationCommands]: new Map<string, Handler[]>(),
         [HandlerType.Interactions]: new Map<string, Handler[]>()
     };
 
@@ -19,7 +19,7 @@ export class Processor {
         // Normalize events into an array
         const events = Array.isArray(event) ? event : [event];
         // Register the handler for each event
-        for (const e of events) {
+        for (const e of events) {            
             const handlers = this.handlers[type].get(e) || [];
             handlers.push(handler);
             this.handlers[type].set(e, handlers);
@@ -56,12 +56,13 @@ export class Processor {
 
         if (handlers) {
             for (const handler of handlers) {
-                if (isCommandHandler(handler)) {
-                    if (type === HandlerType.Events) {
-                        throw new Error('Event handlers cannot be a CommandHandler');
-                    }
-
-                    await Promise.resolve(handler[Trait.execute](context!, argsOrPayload));
+                if (Processor.isCommandHandler(handler)) {
+                    // TODO: Enforce this?
+                    // if (type === HandlerType.Events) {
+                    //     throw new Error('Event handlers cannot be a CommandHandler');
+                    // }
+                    const resolvedArgs = await this.validateAndResolveArgs(argsOrPayload, handler.args);
+                    await Promise.resolve(handler[Trait.execute](context!, resolvedArgs));
                 } else {
                     // TODO: Fix ts error
                     await Promise.resolve(handler(context, argsOrPayload));
@@ -69,6 +70,33 @@ export class Processor {
             }
         }
     }
+    
+    private validateAndResolveArgs = <T extends readonly ApplicationCommandOption[]>(args: ApplicationCommandOptionResult[], definition: T): Promise<ArgsFromOptions<T>> => {
+        // Zip the args and definition together
+        const zipped: [ApplicationCommandOption, ApplicationCommandOptionResult][] = args.map((arg, i) => [definition[i], arg]);
+        // Validate the args
+        const validated: Record<string, any> = {};
+        for (const [def, arg] of zipped) {
+            if (def.choices) {
+                // If the definition has choices, validate the arg against them
+                const choice = def.choices.find((choice: any) => choice.value === arg.value);
+                if (!choice) {
+                    throw new Error(`Invalid choice for ${def.name}: expected one of ${def.choices.map((c: any) => c.value).join(', ')}, got ${arg.value}`);
+                }
+                validated[def.name] = choice.value;
+            } else {
+                // Otherwise just check the type
+                if (arg.value instanceof OptionTypeMap[def.type]) {
+                    // TODO: Coerce the type if possible
+                    throw new Error(`Invalid type for ${def.name}: expected ${def.type}, got ${typeof arg}`);
+                } else {
+                    validated[def.name] = arg.value;
+                }
+            }
+        }
+        // TODO: Fix types so we don't need to cast here
+        return Promise.resolve(validated as ArgsFromOptions<T>);
+    };
 
     [HandlerType.Events] = {
         register: (event: string | string[], handler: Handler) => this.register(HandlerType.Events, event, handler),
@@ -84,11 +112,37 @@ export class Processor {
         has: (event: string) => this.handlers[HandlerType.ChatCommands].has(event) ?? this.handlers[HandlerType.ChatCommands].get(event)?.length! > 0
     };
 
-    [HandlerType.SlashCommands] = {
-        register: (event: string | string[], handler: Handler) => this.register(HandlerType.SlashCommands, event, handler),
-        unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.SlashCommands, event, handler),
-        execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.SlashCommands, event, context, args),
-        has: (event: string) => this.handlers[HandlerType.SlashCommands].has(event) ?? this.handlers[HandlerType.SlashCommands].get(event)?.length! > 0
+    [HandlerType.ApplicationCommands] = {
+        register: (name: string | string[], type: ApplicationCommandType, handler: Handler) => {
+            const names = Array.isArray(name) ? name : [name];
+
+            // This is an application command so we need to register it with the API
+            // Ensure the handler is a CommandHandler
+            // TODO: Don't enforce this?
+            if (!Processor.isCommandHandler(handler)) {
+                throw new Error('Handler must be a CommandHandler');
+            }
+
+            // Ensure the command name is valid
+            // @see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+            if (!names.every(/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u.test.bind(/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u))) {
+                throw new Error('Invalid application command name');
+            };
+
+            for (const n of names) {
+                // Register the command with the API
+                const command: Record<string, any> = handler.toJSON();
+                command.name = n;
+                command.description = handler.description;
+                command.type = type;
+                this.api.post(`/applications/${this.client.application_id}/commands`, command);
+            }
+
+            this.register(HandlerType.ApplicationCommands, names, handler)
+        },
+        unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.ApplicationCommands, event, handler),
+        execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.ApplicationCommands, event, context, args),
+        has: (event: string) => this.handlers[HandlerType.ApplicationCommands].has(event) ?? this.handlers[HandlerType.ApplicationCommands].get(event)?.length! > 0,
     };
 
     [HandlerType.Interactions] = {
@@ -97,12 +151,12 @@ export class Processor {
         execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.Interactions, event, context, args),
         has: (event: string) => this.handlers[HandlerType.Interactions].has(event) ?? this.handlers[HandlerType.Interactions].get(event)?.length! > 0
     };
-}
 
-const isCommandHandler = (handler: Handler): handler is CommandHandler<readonly ApplicationCommandOption[]> => {
-    if (typeof handler === 'object') {
-        return 'args' in handler && Trait.execute in handler;
-    } else {
-        return false;
+    static isCommandHandler = (handler: Handler): handler is CommandHandler<readonly ApplicationCommandOption[]> => {
+        if (typeof handler === 'object') {
+            return 'args' in handler && Trait.execute in handler && handler instanceof CommandHandler;
+        } else {
+            return false;
+        }
     }
 }

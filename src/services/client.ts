@@ -3,12 +3,12 @@ import { Gateway } from './connectors/gateway';
 import { Processor } from './processor';
 import { Expectation, fromDiscord, Intent, type ClientConfig } from '../types/common';
 import { exists, isNil } from '../utils/index';
-import type { Handler } from '../types/handler';
 import { type DiscordMessage, Message } from '../types/message';
 import { Guilds } from './caches/guilds';
 import { Messages } from './caches/messages';
 import { Users } from './caches/users';
 import { hydrate, hydrator, type Hydrateable, type Hydrated } from './hydrator';
+import type { User } from '../types/user';
 
 export class Client {
     readonly token: string;
@@ -21,7 +21,9 @@ export class Client {
     protected gateway: Gateway;
     guilds: Guilds;
     users: Users;
-    messages: Messages
+    messages: Messages;
+    chatCommands: Processor['chat_commands'];
+    applicationCommands: Processor['application_commands'];
 
     constructor(config: ClientConfig) {
         // Validate the configuration
@@ -38,6 +40,9 @@ export class Client {
         this.guilds = new Guilds(this.api, this.processor);
         this.users = new Users(this.api, this.processor);
         this.messages = new Messages(this, this.api, this.processor);
+        // Save references to the chat and application command handlers
+        this.chatCommands = this.processor.chat_commands;
+        this.applicationCommands = this.processor.application_commands;
     }
 
     private static validateConfig(config: ClientConfig) {
@@ -64,6 +69,10 @@ export class Client {
                 }
             }
         }
+    }
+
+    get self() {
+        return this.gateway.user;
     }
 
     /**
@@ -106,17 +115,17 @@ export class Client {
         return Message[fromDiscord](await this.api.post<DiscordMessage>(`/channels/${channel_id}/messages`, message.toJSON()));
     }
 
-    chatCommands = {
-        register: (name: string | string[], handler: Handler) => this.processor.chat_commands.register(name, handler),
-        unregister: (name: string | string[]) => this.processor.chat_commands.unregister(name),
-        has: (name: string) => this.processor.chat_commands.has(name)
-    }
+    // chatCommands = {
+    //     register: (name: string | string[], handler: Handler) => this.processor.chat_commands.register(name, handler),
+    //     unregister: (name: string | string[]) => this.processor.chat_commands.unregister(name),
+    //     has: (name: string) => this.processor.chat_commands.has(name)
+    // }
 
-    slashCommands = {
-        register: (name: string, handler: Handler) => this.processor.slash_commands.register(name, handler),
-        unregister: (name: string) => this.processor.slash_commands.unregister(name),
-        has: (name: string) => this.processor.slash_commands.has(name)
-    }
+    // applicationCommands = {
+    //     register: (name: string, type: ApplicationCommandType, handler: Handler) => this.processor.application_commands.register(name, type, handler),
+    //     unregister: (name: string) => this.processor.application_commands.unregister(name),
+    //     has: (name: string) => this.processor.application_commands.has(name)
+    // }
 
     connect = () => this.gateway.connect();
 }
