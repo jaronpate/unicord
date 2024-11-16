@@ -2,54 +2,55 @@ import { Trait } from "./common";
 
 // Enum for Application Command Types
 export enum ApplicationCommandType {
-    CHAT_INPUT = 1,
-    USER = 2,
-    MESSAGE = 3,
-    PRIMARY_ENTRY_POINT = 4,
+    ChatInput = 1,
+    User = 2,
+    Message = 3,
+    PrimaryEntryPoint = 4,
 }
 
 // Enum for Application Command Option Types
 export enum ApplicationCommandOptionType {
-    SUB_COMMAND = 1,
-    SUB_COMMAND_GROUP = 2,
-    STRING = 3,
-    INTEGER = 4,
-    BOOLEAN = 5,
-    USER = 6,
-    CHANNEL = 7,
-    ROLE = 8,
-    MENTIONABLE = 9,
-    NUMBER = 10,
-    ATTACHMENT = 11,
+    SubCommand = 1,
+    SubCommandGroup = 2,
+    String = 3,
+    Integer = 4,
+    Boolean = 5,
+    User = 6,
+    Channel = 7,
+    Role = 8,
+    Mentionable = 9,
+    Number = 10,
+    Attachment = 11,
 }
 
 // Enum for Channel Types (if applicable for options)
 export enum ChannelType {
-    GUILD_TEXT = 0,
+    GuildText = 0,
     DM = 1,
-    GUILD_VOICE = 2,
-    GROUP_DM = 3,
-    GUILD_CATEGORY = 4,
-    GUILD_NEWS = 5,
-    GUILD_STORE = 6,
-    GUILD_NEWS_THREAD = 10,
-    GUILD_PUBLIC_THREAD = 11,
-    GUILD_PRIVATE_THREAD = 12,
-    GUILD_STAGE_VOICE = 13,
-    GUILD_DIRECTORY = 14,
-    GUILD_FORUM = 15,
+    GuildVoice = 2,
+    GroupDm = 3,
+    GuildCategory = 4,
+    GuildNews = 5,
+    GuildStore = 6,
+    GuildNewsThread = 10,
+    GuildPublicThread = 11,
+    GuildPrivateThread = 12,
+    GuildStageVoice = 13,
+    GuildDirectory = 14,
+    GuildForum = 15,
 }
 
 // Enum for Application Command Handler Types
 export enum ApplicationCommandHandlerType {
-    APP_HANDLER = 1,
-    DISCORD_LAUNCH_ACTIVITY = 2,
+    AppHandler = 1,
+    LaunchActivity = 2,
 }
 
 // Define the ApplicationCommandOption type
 export type ApplicationCommandOption = {
     type: ApplicationCommandOptionType;
     name: string;
+    id: string;
     name_localizations?: Record<string, string> | null;
     description: string;
     description_localizations?: Record<string, string> | null;

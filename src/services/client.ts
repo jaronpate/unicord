@@ -3,7 +3,7 @@ import { Gateway } from './connectors/gateway';
 import { Processor } from './processor';
 import { Expectation, fromDiscord, Intent, type ClientConfig } from '../types/common';
 import { exists, isNil } from '../utils/index';
-import type { Handler } from '../types/hander';
+import type { Handler } from '../types/handler';
 import { type DiscordMessage, Message } from '../types/message';
 import { Guilds } from './caches/guilds';
 import { Messages } from './caches/messages';

@@ -1,4 +1,5 @@
 import { Client, type Context, createCommandHandler, Expectation, Intent, type MessagePayload, Trait } from '../src/index';
+import { ApplicationCommandOptionType } from '../src/types/applicationCommand';
 
 const client = new Client({
     token: process.env.BOT_TOKEN!,
@@ -20,32 +21,44 @@ client.chatCommands.register('ping', async (context: Context, args: any[]) => {
     await context.editMessage(message, `Pong! Latency: ${time}ms`);
 });
 
-const handler = createCommandHandler({
+client.slashCommands.register('ping', createCommandHandler({
     args: [
         {
-            type: 3,
-            name: "name",
-            description: "The name of the user",
+            type: ApplicationCommandOptionType.String,
+            name: "Name",
+            id: "name",
+            description: "Your name",
             required: true
         },
         {
-            type: 3,
-            name: "age",
-            description: "The age of the user",
-            required: true,
+            type: ApplicationCommandOptionType.Integer,
+            name: "Age",
+            id: "age",
+            description: "Your age",
+            required: true
+        },
+        {
+            type: ApplicationCommandOptionType.String,
+            name: "Favorite Animal",
+            id: "favorite_animal",
+            description: "Your favorite animal",
+            required: false,
             choices: [
-                { name: "18", value: "18" },
-                { name: "19", value: "19" },
-                { name: "20", value: "20" }
+                { name: "Dog", value: "dog" },
+                { name: "Cat", value: "cat" },
+                { name: "Bird", value: "bird" },
+                { name: "Shark", value: "shark" },
+                { name: "Elephant", value: "elephant" },
+                { name: "Tiger", value: "Tiger" },
+                { name: "Lion", value: "lion" },
+                { name: "Bear", value: "Bear" }
             ]
         }
     ] as const,
     [Trait.execute]: async (context, args) => {
-        context.reply(`You are ${args.name} and you are ${args.age} years old`, true);
+        context.reply(`You are ${args.name} and you are ${args.age} years old and your favorite animal is ${args.favorite_animal}`, true);
     }
-});
-
-client.slashCommands.register('ping', handler);
+}));
 
 client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // Note: Testing repeated hydration

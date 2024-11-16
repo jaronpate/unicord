@@ -14,4 +14,4 @@ export { Message, type MessagePayload } from './types/message';
 export { Embed } from './types/embed';
 export { Emoji } from './types/emoji';
 // Other
-export { createCommandHandler } from './types/hander';
+export { createCommandHandler } from './types/handler';

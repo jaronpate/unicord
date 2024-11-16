@@ -1,8 +1,9 @@
 import type { Client } from "./client";
 import type { Context } from "../types/context";
-import { HandlerType, type EventPayload } from "../types/common";
-import { BaseHandler, type Handler } from "../types/hander";
+import { HandlerType, Trait, type EventPayload } from "../types/common";
+import { type CommandHandler, type Handler } from "../types/handler";
 import type { API } from "./api";
+import type { ApplicationCommandOption } from "../types/applicationCommand";
 
 export class Processor {
     private handlers = {
@@ -55,11 +56,15 @@ export class Processor {
 
         if (handlers) {
             for (const handler of handlers) {
-                if (handler instanceof BaseHandler) {
-                    await Promise.resolve(handler.execute(context, argsOrPayload));
+                if (isCommandHandler(handler)) {
+                    if (type === HandlerType.Events) {
+                        throw new Error('Event handlers cannot be a CommandHandler');
+                    }
+
+                    await Promise.resolve(handler[Trait.execute](context!, argsOrPayload));
                 } else {
                     // TODO: Fix ts error
-                    await Promise.resolve(handler(context, argsOrPayload))
+                    await Promise.resolve(handler(context, argsOrPayload));
                 }
             }
         }
@@ -92,4 +97,12 @@ export class Processor {
         execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.Interactions, event, context, args),
         has: (event: string) => this.handlers[HandlerType.Interactions].has(event) ?? this.handlers[HandlerType.Interactions].get(event)?.length! > 0
     };
+}
+
+const isCommandHandler = (handler: Handler): handler is CommandHandler<readonly ApplicationCommandOption[]> => {
+    if (typeof handler === 'object') {
+        return 'args' in handler && Trait.execute in handler;
+    } else {
+        return false;
+    }
 }
