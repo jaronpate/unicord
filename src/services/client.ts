@@ -4,7 +4,7 @@ import { Processor } from './processor';
 import { Expectation, fromDiscord, Intent, type ClientConfig } from '../types/common';
 import { exists, isNil } from '../utils/index';
 import type { Handler } from '../types/hander';
-import { DiscordMessage, Message } from '../types/message';
+import { type DiscordMessage, Message } from '../types/message';
 import { Guilds } from './caches/guilds';
 import { Messages } from './caches/messages';
 import { Users } from './caches/users';
@@ -103,7 +103,7 @@ export class Client {
             message = new Message().setContent(message);
         }
 
-        return Message[fromDiscord](DiscordMessage.fromAPIResponse(await this.api.post(`/channels/${channel_id}/messages`, message.toJSON())));
+        return Message[fromDiscord](await this.api.post<DiscordMessage>(`/channels/${channel_id}/messages`, message.toJSON()));
     }
 
     chatCommands = {

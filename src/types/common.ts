@@ -22,11 +22,14 @@ export enum HandlerType {
 export type Expects<T extends Array<Expectation>, K extends Expectation> = Extract<K, T[number]> extends never ? false : true;
 
 export const fromDiscord: unique symbol = Symbol('fromDiscord')
+export const execute: unique symbol = Symbol('execute')
 
 export const Trait: {
     fromDiscord: typeof fromDiscord
+    execute: typeof execute
 } = {
-    fromDiscord
+    fromDiscord,
+    execute
 }
 
 export type EventPayload = any;

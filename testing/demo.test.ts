@@ -1,4 +1,4 @@
-import { Client, type Context, Expectation, Intent, type MessagePayload } from '../src/index';
+import { Client, type Context, createCommandHandler, Expectation, Intent, type MessagePayload, Trait } from '../src/index';
 
 const client = new Client({
     token: process.env.BOT_TOKEN!,
@@ -20,6 +20,33 @@ client.chatCommands.register('ping', async (context: Context, args: any[]) => {
     await context.editMessage(message, `Pong! Latency: ${time}ms`);
 });
 
+const handler = createCommandHandler({
+    args: [
+        {
+            type: 3,
+            name: "name",
+            description: "The name of the user",
+            required: true
+        },
+        {
+            type: 3,
+            name: "age",
+            description: "The age of the user",
+            required: true,
+            choices: [
+                { name: "18", value: "18" },
+                { name: "19", value: "19" },
+                { name: "20", value: "20" }
+            ]
+        }
+    ] as const,
+    [Trait.execute]: async (context, args) => {
+        context.reply(`You are ${args.name} and you are ${args.age} years old`, true);
+    }
+});
+
+client.slashCommands.register('ping', handler);
+
 client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // Note: Testing repeated hydration
     const message = await context.hydrate(context.message, [Expectation.Channel])
@@ -30,11 +57,11 @@ client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     const hydrate = await context.hydrator(message, [Expectation.Guild]);
     const hasGuild = hydrate(message);
 
-    if (hasGuild) {
-        message.guild.name
-    } else {
-        message
-    }
+    // if (hasGuild) {
+    //     message.guild.name
+    // } else {
+    //     message
+    // }
 
     // await context.reply(`You are ${message.author.username} ${hasGuild ? message.guild.name : ''}`, true);
 });
