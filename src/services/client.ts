@@ -8,7 +8,7 @@ import { Guilds } from './caches/guilds';
 import { Messages } from './caches/messages';
 import { Users } from './caches/users';
 import { hydrate, hydrator, type Hydrateable, type Hydrated } from './hydrator';
-import type { User } from '../types/user';
+import { EventBus, type Emitter } from './bus';
 
 export class Client {
     readonly token: string;
@@ -16,6 +16,7 @@ export class Client {
     readonly intents: Intent[] = [Intent.DEFAULT];
     prefix: string;
     // Internal services
+    protected bus: Emitter;
     protected api: API;
     protected processor: Processor;
     protected gateway: Gateway;
@@ -34,9 +35,10 @@ export class Client {
         this.intents = config.intents ?? this.intents;
         this.prefix = config.prefix ?? '!';
         // Initialize internal services
+        this.bus = EventBus;
         this.api = new API(this);
-        this.processor = new Processor(this, this.api);
-        this.gateway = new Gateway(this, this.processor, this.api);
+        this.processor = new Processor(this, this.api, this.bus);
+        this.gateway = new Gateway(this, this.processor, this.api, this.bus);
         this.guilds = new Guilds(this.api, this.processor);
         this.users = new Users(this.api, this.processor);
         this.messages = new Messages(this, this.api, this.processor);
@@ -112,7 +114,7 @@ export class Client {
             message = new Message().setContent(message);
         }
 
-        return Message[fromDiscord](await this.api.post<DiscordMessage>(`/channels/${channel_id}/messages`, message.toJSON()));
+        return Message.fromDiscord(await this.api.post<DiscordMessage>(`/channels/${channel_id}/messages`, message.toJSON()));
     }
 
     // chatCommands = {
@@ -126,6 +128,12 @@ export class Client {
     //     unregister: (name: string) => this.processor.application_commands.unregister(name),
     //     has: (name: string) => this.processor.application_commands.has(name)
     // }
+
+    on = (event: string, handler: (...args: any[]) => void) => this.bus.on(event, handler);
+
+    once = (event: string, handler: (...args: any[]) => void) => this.bus.once(event, handler);
+
+    off = (event: string, handler: (...args: any[]) => void) => this.bus.off(event, handler);
 
     connect = () => this.gateway.connect();
 }

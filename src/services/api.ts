@@ -13,9 +13,6 @@ export class API {
             'Content-Type': 'application/json'
         };
 
-        console.log(`API Request: ${method} ${url}`);
-        console.log(`API Body: ${JSON.stringify(data, null, 4)}`);
-
         const response = await fetch(url, {
             method,
             headers,
@@ -30,6 +27,9 @@ export class API {
 
         const body = await response.json();
 
+
+        // console.log(`API Request: ${method} ${url}`);
+        // console.log(`API Body: ${JSON.stringify(data, null, 4)}`);
         // console.log('API Response:', JSON.stringify(body, null, 4));
 
         return body;

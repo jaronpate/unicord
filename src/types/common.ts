@@ -21,13 +21,16 @@ export enum HandlerType {
 
 export type Expects<T extends Array<Expectation>, K extends Expectation> = Extract<K, T[number]> extends never ? false : true;
 
+export const clone: unique symbol = Symbol('clone')
 export const fromDiscord: unique symbol = Symbol('fromDiscord')
 export const execute: unique symbol = Symbol('execute')
 
 export const Trait: {
+    clone: typeof clone
     fromDiscord: typeof fromDiscord
     execute: typeof execute
 } = {
+    clone,
     fromDiscord,
     execute
 }

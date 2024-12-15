@@ -29,20 +29,19 @@ export type HydratedContext<T extends Array<Expectation>> = Context & {
     message: Extract<Expectation.Message, T[number]> extends never ? undefined : Message;
 };
 
-type ContextData =
+export type ContextData =
     | { channel_id?: string; message_id?: string; guild_id?: string; message?: MessagePayload, interaction: InteractionPayload }
-    | { channel_id?: string; message_id?: string; guild_id?: string; message: MessagePayload, interaction?: InteractionPayload }
+    | { channel_id?: string; message_id?: string; guild_id?: string; message: MessagePayload, interaction?: InteractionPayload };
 
-export class Context {
+export class Context<D extends ContextData = ContextData> {
     // Public properties
     message_id?: string;
     channel_id: string;
     guild_id?: string;
-    message?: MessagePayload;
-    // TODO: Type this
-    interaction?: InteractionPayload;
+    message?: D extends { message: MessagePayload } ? MessagePayload : undefined;
+    interaction?: D extends { interaction: InteractionPayload } ? InteractionPayload : undefined;
 
-    constructor(private client: Client, private api: API, data: ContextData) {
+    constructor(private client: Client, private api: API, data: D) {
         const channel_id = data.channel_id ?? data.message?.channel_id ?? data.interaction?.channel_id;
 
         if (isNil(channel_id)) {
@@ -53,8 +52,8 @@ export class Context {
         this.message_id = data.message_id ?? data.message?.id;
         this.channel_id = channel_id;
         this.guild_id = data.guild_id ?? data.message?.guild_id ?? data.interaction?.guild_id;
-        this.message = data.message;
-        this.interaction = data.interaction;
+        this.message = data.message as D extends { message: MessagePayload } ? MessagePayload : undefined;
+        this.interaction = data.interaction as D extends { interaction: InteractionPayload } ? InteractionPayload : undefined;
     }
 
     get self() {
@@ -104,6 +103,11 @@ export class Context {
      */
     public reply = async (message: Message | string, reference: boolean = true): Promise<MessagePayload> => {
         console.log('this.interaction', this.interaction)
+
+        if (isNil(this.message)) {
+            throw new Error('Cannot reply without a message');
+        }
+        
         if (typeof message === 'string') {
             message = new Message().setContent(message);
         }

@@ -1,4 +1,5 @@
 import { isNil } from '../utils';
+import { GatewayObject } from './base';
 import { fromDiscord, Trait, type Expectation, type Expects } from './common';
 import { Embed } from './embed';
 import type { Guild } from './guild';
@@ -102,7 +103,7 @@ export type MessagePayload = Message & {
     timestamp: Date;
 };
 
-export class Message {
+export class Message extends GatewayObject {
     id?: string;
     author?: User;
     channel_id?: string;
@@ -118,15 +119,16 @@ export class Message {
     timestamp?: Date;
 
     constructor(data?: Partial<Message>) {
+        super();
         this.id = data?.id;
         this.author = data?.author;
         this.channel_id = data?.channel_id;
         this.guild_id = data?.guild_id;
         this.content = data?.content ?? '';
         this.timestamp = data?.timestamp;
-    }
+    };
 
-    public static [Trait.fromDiscord](data: DiscordMessage): MessagePayload {
+    public static [Trait.fromDiscord]<T = MessagePayload>(data: DiscordMessage): T {
         return new Message({
             id: data.id,
             author: User[fromDiscord](data.author),
@@ -134,22 +136,22 @@ export class Message {
             guild_id: data.guild_id,
             content: data.content,
             timestamp: new Date(data.timestamp)
-        }) as MessagePayload;
-    }
+        }) as T;
+    };
 
     public static button(config: Button): Component {
         return {
             type: ComponentType.Button,
             ...config
         };
-    }
+    };
 
     public static selectMenu(config: SelectMenu): Component {
         return {
             type: ComponentType.SelectMenu,
             ...config
         };
-    }
+    };
 
     public setContent = (content: string) => {
         this.content = content;

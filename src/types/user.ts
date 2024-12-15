@@ -1,6 +1,7 @@
+import { GatewayObject } from "./base";
 import { Trait } from "./common";
 
-export class User {
+export class User extends GatewayObject {
     id: string;
     username: string;
     discriminator: string;
@@ -17,6 +18,7 @@ export class User {
     // TODO: Add the rest of the properties
 
     constructor(data: Partial<User> & { id: string; username: string; discriminator: string; display_name: string; avatar: string }) {
+        super();
         this.id = data.id;
         this.username = data.username;
         this.discriminator = data.discriminator;
@@ -32,7 +34,10 @@ export class User {
         this.email = data.email;
     }
 
-    public static [Trait.fromDiscord](data: DiscordUser): User {
+    // TODO: Add a clone method to subclasses
+    // public [Trait.clone]<T = User>(data: DiscordUser): T { ... };
+
+    public static [Trait.fromDiscord]<T = User>(data: DiscordUser): T {
         return new User({
             id: data.id,
             username: data.username,
@@ -47,8 +52,8 @@ export class User {
             locale: data.locale,
             verified: data.verified,
             email: data.email
-        });
-    }
+        }) as T;
+    };
 }
 
 // id	snowflake	the user's id	identify

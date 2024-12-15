@@ -1,4 +1,4 @@
-import { Client, type Context, createCommandHandler, Expectation, Intent, type MessagePayload, Trait } from '../src/index';
+import { Client, type Context, createCommandHandler, Expectation, Intent, type MessagePayload } from '../src/index';
 import { ApplicationCommandOptionType, ApplicationCommandType } from '../src/types/applicationCommand';
 
 const client = new Client({
@@ -13,14 +13,22 @@ const client = new Client({
     prefix: '??'
 });
 
-client.chatCommands.register('ping', async (context: Context, args: any[]) => {
-    const message = await context.reply(`Pong!: got ${args.join(', ')}`, true);
-    // Calculate the time it took to send the message
-    const time = message.timestamp.getTime() - context.message.timestamp.getTime();
-    // Edit the message to include the time
-    await context.editMessage(message, `Pong! Latency: ${time}ms`);
+// Register arbitrary event handler to the client bus
+client.on('READY', async (_, payload) => {
+    console.log(`Logged in as ${payload.user.username}${payload.user.discriminator?.length > 0 ? `#${payload.user.discriminator}` : ''}`);
 });
 
+// Register a chat command
+client.chatCommands.register('ping', async (context: Context, args: any[]) => {
+    const { message } = await context.hydrate(context, [Expectation.Message]);
+    const response = await context.reply(`Pong!: got ${args.join(', ')}`, true);
+    // Calculate the time it took to send the message
+    const time = message.timestamp.getTime() - message.timestamp.getTime();
+    // Edit the message to include the time
+    await context.editMessage(response, `Pong! Latency: ${time}ms`);
+});
+
+// Register an application command
 client.applicationCommands.register('hello', ApplicationCommandType.Chat, createCommandHandler({
     description: "Introduce yourself",
     args: [
@@ -56,7 +64,7 @@ client.applicationCommands.register('hello', ApplicationCommandType.Chat, create
             ]
         }
     ] as const,
-    [Trait.execute]: async (context, args) => {
+    execute: async (context, args) => {
         context.reply(
             `\
 Hello ${args.name}! I see you are ${args.age} years old${!!args.favorite_animal ? ` and your favorite animal is ${args.favorite_animal}.`: '.'}      
@@ -65,9 +73,11 @@ Nice to meet you, I'm ${context.self.username}!`
     }
 }));
 
+// Repeated hydration
 client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // Note: Testing repeated hydration
-    const hydrated = await context.hydrate(context.message, [Expectation.Channel])
+    const { message } = await context.hydrate(context, [Expectation.Message])
+    const hydrated = await context.hydrate(message, [Expectation.Channel])
     const rehydrated = await context.hydrate(hydrated, [Expectation.Guild]);
 
     rehydrated.guild.name
@@ -84,6 +94,7 @@ client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // await context.reply(`You are ${message.author.username} ${hasGuild ? message.guild.name : ''}`, true);
 });
 
+// Hydrator - hydration function generator
 client.chatCommands.register('here', async (context: Context, _args: any[]) => {
     const guild = (await context.hydrator(context, [Expectation.Guild]))(context);
 
@@ -94,8 +105,9 @@ client.chatCommands.register('here', async (context: Context, _args: any[]) => {
     }
 });
 
+// Quote command
 client.chatCommands.register('quote', async (context: Context, _args: any[]) => {
-    const message = context.message;
+    const { message } = await context.hydrate(context, [Expectation.Message]);
     const reference = (await context.hydrator(message, [Expectation.Message]))(message);
 
     let reply: MessagePayload;

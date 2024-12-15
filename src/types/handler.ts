@@ -17,7 +17,7 @@ export const OptionTypeMap = {
 };
 
 // Recursive type to map ApplicationCommandOption to arguments
-type ArgsFromOptions<T extends readonly ApplicationCommandOption[]> = {
+export type ArgsFromOptions<T extends readonly ApplicationCommandOption[]> = {
     [Option in T[number] as Option['name']]: Option extends { options: readonly ApplicationCommandOption[] }
         ? ArgsFromOptions<Option['options']> // Recursive inference for subcommands
         : Option['choices'] extends readonly { value: infer U }[]
@@ -33,16 +33,26 @@ type ArgsFromOptions<T extends readonly ApplicationCommandOption[]> = {
         : unknown | undefined;
 };
 
+export type CommandHandlerExecuteFunction<T extends readonly ApplicationCommandOption[]> = (context: Context, args: ArgsFromOptions<T>) => Promise<void> | void;
+
 export type CommandHandlerInput<T extends readonly ApplicationCommandOption[]> = {
     args: T;
     description: string;
-    [Trait.execute]: (context: Context, args: ArgsFromOptions<T>) => Promise<void> | void;
+    execute: CommandHandlerExecuteFunction<T>;
 };
 
 export class CommandHandler<T extends readonly ApplicationCommandOption[]> {
     args: T;
     description: string;
-    [Trait.execute]!: (context: Context, args: ArgsFromOptions<T>) => Promise<void> | void;
+    [Trait.execute]!: CommandHandlerExecuteFunction<T>;
+
+    get execute() {
+        return this[Trait.execute];
+    }
+
+    set execute(fn: CommandHandlerExecuteFunction<T>) {
+        this[Trait.execute] = fn;
+    }
 
     constructor(input: CommandHandlerInput<T>) {
         // Validate option names
@@ -54,7 +64,7 @@ export class CommandHandler<T extends readonly ApplicationCommandOption[]> {
         }
         this.args = input.args;
         this.description = input.description
-        this[Trait.execute] = input[Trait.execute];
+        this[Trait.execute] = input.execute;
     }
 
     toJSON() {
@@ -74,5 +84,7 @@ export function createCommandHandler<T extends readonly ApplicationCommandOption
 export type CommandHandlerFunction = (context: Context, args: any[]) => Promise<void> | void;
 export type EventHandlerFunction = (context: Context | null, payload: EventPayload) => Promise<void> | void;
 
-export type HandlerFunction = CommandHandlerFunction | EventHandlerFunction;
-export type Handler = HandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;
+export type HandlerWithoutContext = EventHandlerFunction;
+export type HanderWithContext = CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;
+
+export type Handler = EventHandlerFunction | CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;

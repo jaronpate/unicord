@@ -4,6 +4,7 @@ import { HandlerType, Trait, type EventPayload } from "../types/common";
 import { CommandHandler, type Handler, type ArgsFromOptions, OptionTypeMap } from "../types/handler";
 import type { API } from "./api";
 import { ApplicationCommandType, type ApplicationCommandOption, type ApplicationCommandOptionResult } from "../types/applicationCommand";
+import type { Emitter } from "./bus";
 
 export class Processor {
     private handlers = {
@@ -13,7 +14,7 @@ export class Processor {
         [HandlerType.Interactions]: new Map<string, Handler[]>()
     };
 
-    constructor(private client: Client, private api: API) {};
+    constructor(private client: Client, private api: API, private bus: Emitter) {};
 
     public register(type: HandlerType, event: string | string[], handler: Handler) {
         // Normalize events into an array
@@ -76,6 +77,7 @@ export class Processor {
         const zipped: [ApplicationCommandOption, ApplicationCommandOptionResult][] = args.map((arg, i) => [definition[i], arg]);
         // Validate the args
         const validated: Record<string, any> = {};
+        // TODO: Attempt some type coresion/resolution here (mostly for text commands)
         for (const [def, arg] of zipped) {
             if (def.choices) {
                 // If the definition has choices, validate the arg against them
@@ -125,7 +127,10 @@ export class Processor {
 
             // Ensure the command name is valid
             // @see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
-            if (!names.every(/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u.test.bind(/^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u))) {
+            // TODO: can this sus bind be removed? Is the only way to kill the arrow function?
+            const commandNameRegex = /^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u;
+            const commandNameTest = commandNameRegex.test.bind(commandNameRegex)
+            if (!names.every(commandNameTest)) {
                 throw new Error('Invalid application command name');
             };
 

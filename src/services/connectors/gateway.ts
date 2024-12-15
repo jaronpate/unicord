@@ -1,6 +1,6 @@
 import { WebSocket, type Data } from 'ws';
 import type { Client } from "../client";
-import { fromDiscord, type InteractionPayload, type Payload } from "../../types/common";
+import { fromDiscord, HandlerType, type InteractionPayload, type Payload } from "../../types/common";
 import { exists, isNil, isObject, log } from "../../utils";
 import type { API } from "../api";
 import type { Processor } from '../processor';
@@ -9,6 +9,7 @@ import { type DiscordMessage, Message } from '../../types/message';
 import { DiscordUser, User } from '../../types/user';
 import { Guild } from '../../types/guild';
 import { Channel } from '../../types/channel';
+import type { Emitter } from '../bus';
 
 export class Gateway {
     private socket: WebSocket | null = null;
@@ -18,14 +19,13 @@ export class Gateway {
     // Internal state
     user: User | null = null;
 
-    constructor(private client: Client, private processor: Processor, private api: API) {}
+    constructor(private client: Client, private processor: Processor, private api: API, private bus: Emitter) {}
 
     private onOpen = () => {
         log('Connected to gateway');
     }
 
     private onMessage = async (packet: Data) => {
-        // console.log(packet);
         // Allocate a variable to store the parsed payload
         let data: Payload | null = null;
 
@@ -36,12 +36,13 @@ export class Gateway {
             console.error(e);
         }
 
-        if (data) {
-            log('='.repeat(25));
-            log('received: ', data.op);
-            log('received event: ', data.t ?? 'no event');
-            log('received data: ', exists(data.d) ? Object.keys(data.d) : 'no data');
-            log('='.repeat(25));
+        if (exists(data)) {
+            // NOTE: Uncomment for debugging recieved event data
+            // log('='.repeat(25));
+            // log('received: ', data.op);
+            // log('received event: ', data.t ?? 'no event');
+            // log('received data: ', exists(data.d) ? Object.keys(data.d) : 'no data');
+            // log('='.repeat(25));
             // If the data is successfully parsed check the opcode
             const code = data.op;
             if (code === 0) {
@@ -61,6 +62,9 @@ export class Gateway {
                 this.heartbeat_interval = data.d?.heartbeat_interval;
                 // Kick off the heartbeat loop
                 this.heartbeat();
+                // Identify with the gateway
+                // TODO: Is there a way identify without the timeout? Or waiting for the heartbeat?
+                // We need to wait a bit before sending the identify payload so that the heartbeat can be established
                 setTimeout(this.indentify, 2500);
             } else if (code === 11) {
                 // Heartbeat ACK
@@ -70,7 +74,6 @@ export class Gateway {
     }
 
     private heartbeat() {
-        log('Sending heartbeat');
         if (exists(this.heartbeat_interval)) {
             // If a previous heartbeat timeout exists, clear it
             if (exists(this.heartbeat_timeout)) {
@@ -91,9 +94,9 @@ export class Gateway {
             throw new Error('Socket is not connected');
         }
 
-        log('='.repeat(25));
-        log('sending: ', JSON.stringify(payload, null, 4));
-        log('='.repeat(25));
+        // log('='.repeat(25));
+        // log('sending: ', JSON.stringify(payload, null, 4));
+        // log('='.repeat(25));
 
         this.socket.send(JSON.stringify(payload));
     };
@@ -118,15 +121,18 @@ export class Gateway {
             throw new Error('Event name is required');
         }
 
-        log('Event:', payload.t);
+        // log('Event:', payload.t);
 
+        // Extract the event name and data
         const event_name = payload.t;
         const event_data = payload.d;
 
+        // Simple validation on the event data
         if (!isObject(event_data)) {
             throw new Error('Invalid event data received');
         }
 
+        // Check if this is a known event
         if (event_name === 'READY') {
             this.user = User[fromDiscord](DiscordUser.fromAPIResponse(event_data.user));
         } else if (event_name === 'INTERACTION_CREATE') {
@@ -140,6 +146,7 @@ export class Gateway {
         // Allocate a var to store the context
         let context = null;
 
+        // If the event is a message event, create a context from the message
         if (['MESSAGE_CREATE', 'MESSAGE_UPDATE'].includes(event_name)) {
             // If the event is a message event, create a message object
             const message = Message[fromDiscord](event_data as DiscordMessage);
@@ -148,7 +155,8 @@ export class Gateway {
         }
 
         // Call event handlers
-        this.processor.events.execute(event_name, context, event_data);
+        this.bus.emit(event_name, context, event_data);
+        // this.processor.events.execute(event_name, context, event_data);
     }
 
     private handleMessageCreate = async (payload: Payload) => {
@@ -169,7 +177,7 @@ export class Gateway {
             return;
         }
         // Extract the author
-        const author = User[fromDiscord](DiscordUser.fromAPIResponse(payload.d.author));
+        const author = User.fromDiscord(DiscordUser.fromAPIResponse(payload.d.author));
         // Store the author in the cache
         this.client.users.set(author.id, author);
         // Extract the content
@@ -191,13 +199,15 @@ export class Gateway {
             // TODO: Case insensitive config?
             const command = args.shift()!;
             // Create a new message object from the payload
-            const message = Message[fromDiscord](payload.d as DiscordMessage);
+            const message = Message.fromDiscord(payload.d as DiscordMessage);
+            // Store the message in the cache
+            this.client.messages.set(message.id, message);
             // Generate context
             const context = new Context(this.client, this.api, { message });
-            // Check if command exists
-            if (this.processor.chat_commands.has(command)) {
+            // // Check if command exists
+            if (this.processor[HandlerType.ChatCommands].has(command)) {
                 // Execute the handler
-                this.processor.chat_commands.execute(command, context, args);
+                this.processor[HandlerType.ChatCommands].execute(command, context, args);
             } else {
                 // TODO: Custom unknown command handler
                 context.reply(`Unknown command: ${command}`);
