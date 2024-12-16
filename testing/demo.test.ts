@@ -10,7 +10,7 @@ const client = new Client({
         Intent.GUILD_MESSAGE_REACTIONS,
         Intent.MESSAGE_CONTENT
     ],
-    prefix: '??'
+    prefix: '!'
 });
 
 // Register arbitrary event handler to the client bus
@@ -103,27 +103,6 @@ client.chatCommands.register('here', async (context: Context, _args: any[]) => {
     } else {
         await context.reply('This is not a server!', true);
     }
-});
-
-// Quote command
-client.chatCommands.register('quote', async (context: Context, _args: any[]) => {
-    const { message } = await context.hydrate(context, [Expectation.Message]);
-    const reference = (await context.hydrator(message, [Expectation.Message]))(message);
-
-    let reply: MessagePayload;
-
-    if (reference) {
-        reply = await context.reply(`> "${message.reference.content}"\n> — ${message.reference.author.display_name ?? message.reference.author.username}`, true);
-        // Save to quote database
-        // TODO
-    } else {
-        reply = await context.reply('No message to quote', true);
-    }
-
-    // Wait 3 seconds then delete the quote
-    setTimeout(() => {
-        context.deleteMessage(reply.id);
-    }, 3000);
 });
 
 client.connect();

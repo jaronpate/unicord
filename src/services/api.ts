@@ -1,3 +1,4 @@
+import { exists, log } from "../utils";
 import type { Client } from "./client";
 
 export class API {
@@ -31,6 +32,30 @@ export class API {
         // console.log(`API Request: ${method} ${url}`);
         // console.log(`API Body: ${JSON.stringify(data, null, 4)}`);
         // console.log('API Response:', JSON.stringify(body, null, 4));
+
+        // Extract rate limit headers
+        const remaining = response.headers.get('X-RateLimit-Remaining');
+        const limit = response.headers.get('X-RateLimit-Limit');
+        const reset = response.headers.get('X-RateLimit-Reset');
+        const resetSeconds = response.headers.get('X-RateLimit-Reset-After');
+        const limitBucket = response.headers.get('X-RateLimit-Bucket');
+
+        // Log rate limit info for debugging
+        log(`Rate Limit: ${remaining}/${limit} - Reset: ${reset} (${resetSeconds}s) - Bucket: ${limitBucket}`);
+
+        // If status is 429, we are being rate limited
+        if (response.status === 429) {
+            // Look for the retry-after header
+            const retryAfter = response.headers.get('Retry-After');
+            if (exists(retryAfter)) {
+                // Wait for the retry-after time
+                await new Promise(resolve => setTimeout(resolve, parseInt(retryAfter) * 1000));
+            } else {
+                // TODO: Handle this case better
+                // Maybe wait some arbitrary time??
+                throw new Error('Rate limited without Retry-After header');
+            }
+        }
 
         return body;
     }

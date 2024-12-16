@@ -38,11 +38,14 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
 
     if (data instanceof Context) {
         for (const expectation of expectations) {
-            if (expectation === Expectation.Guild && exists(data.guild_id)) {
+            if (expectation === Expectation.Message && exists(data.message_id)) {
+                let context = data as unknown as HydratedContext<[Expectation.Message, ...Expectation[]]>;
+                context.message = await client.messages.get(data.channel_id, data.message_id);
+            } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
                 let context = data as unknown as HydratedContext<[Expectation.Guild, ...Expectation[]]>;
                 context.guild = await client.guilds.get(data.guild_id);
             } else {
-                throw new Error(`Could not resolve expectation: ${expectation}`);
+                throw new Error(`Invalid expectation requested for Context: ${expectation}`);
             }
         }
     } else if (data instanceof Message) {
@@ -54,7 +57,7 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
                 let message = data as unknown as HydratedMessage<[Expectation.Guild, ...Expectation[]]>;
                 message.guild = await client.guilds.get(data.guild_id);
             } else {
-                throw new Error(`Could not resolve expectation: ${expectation}`);
+                throw new Error(`Invalid expectation requested for Message: ${expectation}`);
             }
         }
     }

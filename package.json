@@ -1,15 +1,23 @@
 {
-  "name": "discord.ts-rewrite",
+  "name": "discord.ts",
   "module": "src/index.ts",
   "type": "module",
+  "main": "out/index.js",
   "scripts": {
     "test": "bun run testing/demo.test.ts",
-    "test:inspect": "bun --inspect testing/demo.test.ts"
+    "test:inspect": "bun --inspect testing/demo.test.ts",
+    "build": "bun run build:types && bun build src/index.ts --outdir out",
+    "build:types": "tsc --emitDeclarationOnly --project tsconfig.json --noCheck",
+    "build:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --noCheck --watch\" \"bun build src/index.ts --outdir out --watch\""
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "concurrently": "^9.1.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
   }
 }

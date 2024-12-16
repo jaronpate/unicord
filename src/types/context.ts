@@ -102,8 +102,6 @@ export class Context<D extends ContextData = ContextData> {
      * @returns The message that was sent
      */
     public reply = async (message: Message | string, reference: boolean = true): Promise<MessagePayload> => {
-        console.log('this.interaction', this.interaction)
-
         if (isNil(this.message)) {
             throw new Error('Cannot reply without a message');
         }

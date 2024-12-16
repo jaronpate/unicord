@@ -1,4 +1,4 @@
-import { isNil } from '../utils';
+import { exists, isNil } from '../utils';
 import { GatewayObject } from './base';
 import { fromDiscord, Trait, type Expectation, type Expects } from './common';
 import { Embed } from './embed';
@@ -125,8 +125,16 @@ export class Message extends GatewayObject {
         this.channel_id = data?.channel_id;
         this.guild_id = data?.guild_id;
         this.content = data?.content ?? '';
+        this.message_reference = data?.message_reference;
         this.timestamp = data?.timestamp;
     };
+
+    // NOTE: Overriden here because the `fromDiscord` method returns a `MessagePayload` object
+    // and the GatewayObject getter overrides the return type to `Message`
+    // TODO: Fix type in GatewayObject so this override is not needed
+    public static get fromDiscord() {
+        return this[Trait.fromDiscord];
+    }
 
     public static [Trait.fromDiscord]<T = MessagePayload>(data: DiscordMessage): T {
         return new Message({
@@ -135,6 +143,15 @@ export class Message extends GatewayObject {
             channel_id: data.channel_id,
             guild_id: data.guild_id,
             content: data.content,
+            // TODO: Add embeds
+            // embeds: data.embeds.map(embed => Embed.fromDiscord(embed)),
+            // TODO: Add components
+            // components: data.components,
+            message_reference: exists(data.message_reference) ? {
+                id: data.message_reference.message_id,
+                channel_id: data.message_reference.channel_id,
+                guild_id: data.message_reference.guild_id
+            } : undefined,
             timestamp: new Date(data.timestamp)
         }) as T;
     };
