@@ -1,4 +1,4 @@
-import type { Message } from './message';
+import { Message } from './message';
 
 type EmbedFooter = {
     text: string;
@@ -42,7 +42,7 @@ export class Embed {
     author?: EmbedImage & {
         name?: string;
     };
-    fields?: EmbedField[];
+    fields: EmbedField[];
 
     constructor() {
         this.fields = [];

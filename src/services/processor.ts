@@ -66,6 +66,7 @@ export class Processor {
                     await Promise.resolve(handler[Trait.execute](context!, resolvedArgs));
                 } else {
                     // TODO: Fix ts error
+                    // @ts-ignore - Haven't figured out how to type narrow this yet
                     await Promise.resolve(handler(context, argsOrPayload));
                 }
             }

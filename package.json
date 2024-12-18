@@ -1,5 +1,6 @@
 {
   "name": "discord.ts",
+  "version": "0.0.1",
   "module": "src/index.ts",
   "type": "module",
   "main": "out/index.js",
@@ -7,8 +8,11 @@
     "test": "bun run testing/demo.test.ts",
     "test:inspect": "bun --inspect testing/demo.test.ts",
     "build": "bun run build:types && bun build src/index.ts --outdir out",
-    "build:types": "tsc --emitDeclarationOnly --project tsconfig.json --noCheck",
-    "build:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --noCheck --watch\" \"bun build src/index.ts --outdir out --watch\""
+    "build:packages": "bun run build:types && bun build src/index.ts --packages external --outdir out",
+    "build:nocheck": "bun run build:types:nocheck && bun build src/index.ts --outdir out --noCheck",
+    "build:types": "tsc --emitDeclarationOnly --project tsconfig.json",
+    "build:types:nocheck": "tsc --emitDeclarationOnly --project tsconfig.json --noCheck",
+    "build:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --watch\" \"bun build src/index.ts --outdir out --watch\""
   },
   "devDependencies": {
     "@types/bun": "latest",

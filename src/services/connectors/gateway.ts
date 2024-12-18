@@ -8,7 +8,6 @@ import { Context } from '../../types/context';
 import { type DiscordMessage, Message } from '../../types/message';
 import { DiscordUser, User } from '../../types/user';
 import { Guild } from '../../types/guild';
-import { Channel } from '../../types/channel';
 import type { Emitter } from '../bus';
 
 export class Gateway {
