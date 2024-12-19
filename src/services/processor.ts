@@ -1,7 +1,7 @@
 import type { Client } from "./client";
 import type { Context } from "../types/context";
 import { HandlerType, Trait, type EventPayload } from "../types/common";
-import { CommandHandler, type Handler, type ArgsFromOptions, OptionTypeMap } from "../types/handler";
+import { CommandHandler, type Handler, type ArgsFromOptions, OptionConstructorMap } from "../types/handler";
 import type { API } from "./api";
 import { ApplicationCommandType, type ApplicationCommandOption, type ApplicationCommandOptionResult } from "../types/applicationCommand";
 import type { Emitter } from "./bus";
@@ -89,7 +89,7 @@ export class Processor {
                 validated[def.name] = choice.value;
             } else {
                 // Otherwise just check the type
-                if (arg.value instanceof OptionTypeMap[def.type]) {
+                if (arg.value instanceof OptionConstructorMap[def.type]) {
                     // TODO: Coerce the type if possible
                     throw new Error(`Invalid type for ${def.name}: expected ${def.type}, got ${typeof arg}`);
                 } else {
