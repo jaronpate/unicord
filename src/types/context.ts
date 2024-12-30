@@ -102,10 +102,6 @@ export class Context<D extends ContextData = ContextData> {
      * @returns The message that was sent
      */
     public reply = async (message: Message | string, reference: boolean = true): Promise<MessagePayload> => {
-        if (isNil(this.message)) {
-            throw new Error('Cannot reply without a message');
-        }
-        
         if (typeof message === 'string') {
             message = new Message().setContent(message);
         }
@@ -159,7 +155,7 @@ export class Context<D extends ContextData = ContextData> {
         if (content) {
             clone.setContent(content);
         }
-        return Message[fromDiscord](await this.api.patch<DiscordMessage>(`/channels/${clone.channel_id}/messages/${clone.id}`, clone));
+        return Message.fromDiscord(await this.api.patch<DiscordMessage>(`/channels/${clone.channel_id}/messages/${clone.id}`, clone));
     };
 
     // Interaction methods

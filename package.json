@@ -12,7 +12,8 @@
     "build:nocheck": "bun run build:types:nocheck && bun build src/index.ts --outdir out --noCheck",
     "build:types": "tsc --emitDeclarationOnly --project tsconfig.json",
     "build:types:nocheck": "tsc --emitDeclarationOnly --project tsconfig.json --noCheck",
-    "build:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --watch\" \"bun build src/index.ts --outdir out --watch\""
+    "build:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --watch\" \"bun build src/index.ts --outdir out --watch\"",
+    "build:packages:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --watch\" \"bun build src/index.ts --packages external --outdir out --watch\""
   },
   "devDependencies": {
     "@types/bun": "latest",

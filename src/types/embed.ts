@@ -13,6 +13,13 @@ type EmbedImage = {
     width?: number;
 };
 
+type EmbedAuthor = {
+    name: string;
+    url?: string;
+    icon_url?: string;
+    proxy_icon_url?: string;
+};
+
 type EmbedVideo = {
     url?: string;
     height?: number;
@@ -98,7 +105,7 @@ export class Embed {
         return this;
     };
 
-    setAuthor = (author: EmbedImage & { name?: string }) => {
+    setAuthor = (author: EmbedAuthor) => {
         this.author = author;
         return this;
     };

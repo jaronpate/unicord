@@ -15,3 +15,4 @@ export { Embed } from './types/embed';
 export { Emoji } from './types/emoji';
 // Other
 export { createCommandHandler } from './types/handler';
+export { ApplicationCommandType, ApplicationCommandOptionType as CommandOptionType } from './types/applicationCommand';

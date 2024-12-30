@@ -23,6 +23,13 @@ export enum ApplicationCommandOptionType {
     Attachment = 11,
 }
 
+// Enum for Application Command Contexts
+export enum ApplicationCommandContext {
+    Guild = 0,
+    DM = 1,
+    PrivateChannel = 2,
+}
+
 // Enum for Channel Types (if applicable for options)
 export enum ChannelType {
     GuildText = 0,
@@ -87,7 +94,7 @@ export type DiscordApplicationCommand = {
     default_permission?: boolean;
     nsfw?: boolean;
     integration_types?: number[];
-    contexts?: number[];
+    contexts?: string;
     version: string;
     handler?: ApplicationCommandHandlerType;
 };
@@ -108,7 +115,7 @@ export class ApplicationCommand {
     default_permission?: boolean;
     nsfw?: boolean;
     integration_types?: number[];
-    contexts?: number[];
+    contexts?: ApplicationCommandContext[];
     version: string;
     handler?: ApplicationCommandHandlerType;
 
@@ -127,12 +134,34 @@ export class ApplicationCommand {
         this.default_permission = command.default_permission;
         this.nsfw = command.nsfw;
         this.integration_types = command.integration_types;
-        this.contexts = command.contexts;
+        this.contexts = command.contexts?.split(',').map((context) => parseInt(context) as ApplicationCommandContext);
         this.version = command.version;
         this.handler = command.handler;
     }
 
     static [Trait.fromDiscord](command: DiscordApplicationCommand): ApplicationCommand {
         return new ApplicationCommand(command);
+    }
+
+    public toJSON = (): DiscordApplicationCommand => {
+        return {
+            id: this.id,
+            type: this.type,
+            application_id: this.application_id,
+            guild_id: this.guild_id,
+            name: this.name,
+            name_localizations: this.name_localizations,
+            description: this.description,
+            description_localizations: this.description_localizations,
+            options: this.options,
+            default_member_permissions: this.default_member_permissions,
+            dm_permission: this.dm_permission,
+            default_permission: this.default_permission,
+            nsfw: this.nsfw,
+            integration_types: this.integration_types,
+            contexts: this.contexts?.join(','),
+            version: this.version,
+            handler: this.handler
+        };
     }
 }

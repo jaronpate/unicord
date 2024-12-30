@@ -3,7 +3,7 @@ import type { Context } from "../types/context";
 import { HandlerType, Trait, type EventPayload } from "../types/common";
 import { CommandHandler, type Handler, type ArgsFromOptions, OptionConstructorMap } from "../types/handler";
 import type { API } from "./api";
-import { ApplicationCommandType, type ApplicationCommandOption, type ApplicationCommandOptionResult } from "../types/applicationCommand";
+import { ApplicationCommandOptionType, ApplicationCommandType, type ApplicationCommandOption } from "../types/applicationCommand";
 import type { Emitter } from "./bus";
 
 export class Processor {
@@ -59,10 +59,19 @@ export class Processor {
             for (const handler of handlers) {
                 if (Processor.isCommandHandler(handler)) {
                     // TODO: Enforce this?
-                    // if (type === HandlerType.Events) {
-                    //     throw new Error('Event handlers cannot be a CommandHandler');
-                    // }
-                    const resolvedArgs = await this.validateAndResolveArgs(argsOrPayload, handler.args);
+                    if (type === HandlerType.Events) {
+                        throw new Error('Event handlers cannot be a CommandHandler');
+                    }
+                    const formattedArgs = (() => {
+                        if (type === HandlerType.ChatCommands) {
+                            // TODO: Fix type narrowing here
+                            // @ts-ignore - Haven't figured out how to type narrow this yet
+                            return argsOrPayload.map((arg, i) => ({ name: handler.args[i].name, value: arg }));
+                        } else {
+                            return argsOrPayload;
+                        }
+                    })();
+                    const resolvedArgs = await this.validateAndResolveArgs(formattedArgs, handler.args);
                     await Promise.resolve(handler[Trait.execute](context!, resolvedArgs));
                 } else {
                     // TODO: Fix ts error
@@ -73,27 +82,47 @@ export class Processor {
         }
     }
     
-    private validateAndResolveArgs = <T extends readonly ApplicationCommandOption[]>(args: ApplicationCommandOptionResult[], definition: T): Promise<ArgsFromOptions<T>> => {
+    private validateAndResolveArgs = async <T extends readonly ApplicationCommandOption[]>(args: { value: any }[], definition: T): Promise<ArgsFromOptions<T>> => {
         // Zip the args and definition together
-        const zipped: [ApplicationCommandOption, ApplicationCommandOptionResult][] = args.map((arg, i) => [definition[i], arg]);
+        const zipped: [ApplicationCommandOption, any][] = args.map((arg, i) => [definition[i], arg?.value ?? null]);
         // Validate the args
         const validated: Record<string, any> = {};
         // TODO: Attempt some type coresion/resolution here (mostly for text commands)
         for (const [def, arg] of zipped) {
             if (def.choices) {
                 // If the definition has choices, validate the arg against them
-                const choice = def.choices.find((choice: any) => choice.value === arg.value);
+                const choice = def.choices.find((choice: any) => choice.value === arg);
                 if (!choice) {
-                    throw new Error(`Invalid choice for ${def.name}: expected one of ${def.choices.map((c: any) => c.value).join(', ')}, got ${arg.value}`);
+                    throw new Error(`Invalid choice for ${def.name}: expected one of ${def.choices.map((c: any) => c.value).join(', ')}, got ${arg}`);
                 }
                 validated[def.name] = choice.value;
+            } else if (def.type === ApplicationCommandOptionType.User) {
+                // If the definition is a user, resolve the user
+                // Check if the arg is a string
+                if (typeof arg === 'string') {
+                    // Parse out the user ID as a mention or raw ID
+                    const userId = arg.match(/<@!?(\d+)>/)?.[1] ?? arg.match(/\d+/)?.[0];
+                    if (!userId) {
+                        throw new Error(`Invalid user for ${def.name}: expected a user mention or snowflake id, got ${arg}`);
+                    }
+                    validated[def.name] = await this.client.users.get(userId);
+                } else if (typeof arg === 'object') {
+                    // Check if the object has an ID
+                    if (arg.id) {
+                        validated[def.name] = await this.client.users.get(arg.id);
+                    } else {
+                        throw new Error(`Invalid user for ${def.name}: expected a user object with an ID, got ${arg}`);
+                    }
+                } else {
+                    throw new Error(`Invalid user for ${def.name}: expected a user mention, snowflake id, or object, got ${arg}`);
+                }
             } else {
                 // Otherwise just check the type
                 if (arg.value instanceof OptionConstructorMap[def.type]) {
                     // TODO: Coerce the type if possible
                     throw new Error(`Invalid type for ${def.name}: expected ${def.type}, got ${typeof arg}`);
                 } else {
-                    validated[def.name] = arg.value;
+                    validated[def.name] = arg;
                 }
             }
         }
@@ -139,7 +168,6 @@ export class Processor {
                 // Register the command with the API
                 const command: Record<string, any> = handler.toJSON();
                 command.name = n;
-                command.description = handler.description;
                 command.type = type;
                 this.api.post(`/applications/${this.client.application_id}/commands`, command);
             }

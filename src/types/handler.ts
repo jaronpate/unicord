@@ -1,6 +1,7 @@
-import { ApplicationCommandOptionType, type ApplicationCommandOption } from "./applicationCommand";
+import { ApplicationCommandContext, ApplicationCommandOptionType, type ApplicationCommandOption } from "./applicationCommand";
 import { Trait, type EventPayload } from "./common";
 import type { Context } from "./context";
+import type { User } from "./user";
 
 export const OptionConstructorMap = {
     [ApplicationCommandOptionType.String]: String,
@@ -21,7 +22,7 @@ export type OptionTypeMap = {
     [ApplicationCommandOptionType.Integer]: number,
     [ApplicationCommandOptionType.Boolean]: boolean,
     [ApplicationCommandOptionType.Number]: number,
-    [ApplicationCommandOptionType.User]: string, // Could be a user ID or object depending on your use case
+    [ApplicationCommandOptionType.User]: User, // Could be a user ID or object depending on your use case
     [ApplicationCommandOptionType.Channel]: string, // Could be a channel ID or object
     [ApplicationCommandOptionType.Role]: string, // Could be a role ID or object
     [ApplicationCommandOptionType.Mentionable]: string, // Could be a mentionable ID or object
@@ -47,17 +48,19 @@ export type ArgsFromOptions<T extends readonly ApplicationCommandOption[]> = {
         : unknown | undefined;
 };
 
-export type CommandHandlerExecuteFunction<T extends readonly ApplicationCommandOption[]> = (context: Context, args: ArgsFromOptions<T>) => Promise<void> | void;
+export type CommandHandlerExecuteFunction<T extends readonly ApplicationCommandOption[]> = (context: Context, args: ArgsFromOptions<T>) => Promise<any> | any;
 
 export type CommandHandlerInput<T extends readonly ApplicationCommandOption[]> = {
     args: T;
     description: string;
+    contexts?: ApplicationCommandContext[];
     execute: CommandHandlerExecuteFunction<T>;
 };
 
 export class CommandHandler<T extends readonly ApplicationCommandOption[]> {
     args: T;
     description: string;
+    contexts?: ApplicationCommandContext[];
     [Trait.execute]!: CommandHandlerExecuteFunction<T>;
 
     get execute() {
@@ -78,12 +81,15 @@ export class CommandHandler<T extends readonly ApplicationCommandOption[]> {
         }
         this.args = input.args;
         this.description = input.description
+        this.contexts = input.contexts;
         this[Trait.execute] = input.execute;
     }
 
     toJSON() {
         return {
             options: this.args,
+            description: this.description,
+            contexts: this.contexts,
         };
     }
 };

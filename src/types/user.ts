@@ -1,3 +1,4 @@
+import { exists } from "../utils";
 import { GatewayObject } from "./base";
 import { Trait } from "./common";
 
@@ -16,6 +17,15 @@ export class User extends GatewayObject {
     verified?: boolean;
     email?: string;
     // TODO: Add the rest of the properties
+
+    get avatarURL() {
+        // Check if avatar is an animated gif
+        if (this.avatar?.startsWith('a_')) {
+            return `https://cdn.discordapp.com/avatars/${this.id}/${this.avatar}.gif`;
+        } else {
+            return `https://cdn.discordapp.com/avatars/${this.id}/${this.avatar}.png`;
+        }
+    }
 
     constructor(data: Partial<User> & { id: string; username: string; discriminator: string; display_name: string; avatar: string }) {
         super();
