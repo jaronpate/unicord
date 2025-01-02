@@ -1,7 +1,7 @@
 import { API } from './api';
 import { Gateway } from './connectors/gateway';
 import { Processor } from './processor';
-import { Expectation, fromDiscord, Intent, type ClientConfig } from '../types/common';
+import { Expectation, Intent, type ClientConfig } from '../types/common';
 import { exists, isNil } from '../utils/index';
 import { type DiscordMessage, Message } from '../types/message';
 import { Guilds } from './caches/guilds';
@@ -42,7 +42,7 @@ export class Client {
         this.guilds = new Guilds(this.api, this.processor);
         this.users = new Users(this.api, this.processor);
         this.messages = new Messages(this, this.api, this.processor);
-        // Save references to the chat and application command handlers
+        // Save references to command and event handlers
         this.chatCommands = this.processor.chat_commands;
         this.applicationCommands = this.processor.application_commands;
     }

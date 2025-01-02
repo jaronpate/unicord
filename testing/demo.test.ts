@@ -85,11 +85,13 @@ client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     const hydrate = await context.hydrator(hydrated, [Expectation.Guild]);
     const hasGuild = hydrate(hydrated);
 
-    // if (hasGuild) {
-    //     hydrated.guild.name
-    // } else {
-    //     hydrated
-    // }
+    if (hasGuild) {
+        // Send a message stating the user that they are in a guild
+        await context.reply(`You are ${message.author.username} and this is ${message.guild.name}`, true);
+    } else {
+        // Send a message stating the user that they are not in a guild
+        await context.reply(`You are ${message.author.username} and we are not in a server`, true);
+    }
 
     // await context.reply(`You are ${message.author.username} ${hasGuild ? message.guild.name : ''}`, true);
 });
