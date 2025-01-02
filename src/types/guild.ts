@@ -1,10 +1,11 @@
+import { GatewayObject } from "./base";
 import { Channel } from "./channel";
 import { Trait } from "./common";
 import { Emoji } from "./emoji";
 import { Member } from "./member";
 import { Role } from "./role";
 
-export class Guild {
+export class Guild extends GatewayObject {
     id: string;
     name: string;
     description: string | null;
@@ -15,6 +16,7 @@ export class Guild {
     // roles: Role[];
 
     constructor(data: Guild) {
+        super();
         this.id = data.id;
         this.name = data.name;
         this.description = data.description;
@@ -25,7 +27,7 @@ export class Guild {
         // this.roles = data.roles;
     }
 
-    public static [Trait.fromDiscord](data: DiscordGuild) {
+    public static [Trait.fromDiscord]<T = Guild>(data: DiscordGuild): T {
         return new Guild({
             id: data.id,
             name: data.name,
@@ -35,7 +37,7 @@ export class Guild {
             owner_id: data.owner_id,
             // emojis: data.emojis,
             // roles: data.roles,
-        });
+        }) as T;
     }
 }
 

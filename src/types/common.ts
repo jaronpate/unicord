@@ -55,8 +55,6 @@ export type Payload = {
     t: string | null;
 };
 
-export type InteractionPayload = Record<string, any>;
-
 export enum InteractionResponseType {
     Pong = 1,
     Message = 4,

@@ -1,7 +1,7 @@
 import type { Client } from "./client";
 import type { Context } from "../types/context";
 import { HandlerType, Trait, type EventPayload } from "../types/common";
-import { CommandHandler, type Handler, type ArgsFromOptions, OptionConstructorMap } from "../types/handler";
+import { CommandHandler, type Handler, type ArgsFromOptions, OptionConstructorMap, type InteractionData } from "../types/handler";
 import type { API } from "./api";
 import { ApplicationCommandOptionType, ApplicationCommandType, type ApplicationCommandOption } from "../types/applicationCommand";
 import type { Emitter } from "./bus";
@@ -51,7 +51,8 @@ export class Processor {
     };
 
     public async execute(type: HandlerType.Events, event: string, context: Context | null, payload: EventPayload): Promise<void>
-    public async execute(type: Omit<HandlerType, HandlerType.Events>, event: string, context: Context, args: any[]): Promise<void>
+    public async execute(type: HandlerType.Interactions, event: string, context: Context | null, payload: InteractionData): Promise<void>
+    public async execute(type: Omit<HandlerType, HandlerType.Events | HandlerType.Interactions>, event: string, context: Context, args: any[]): Promise<void>
     public async execute(type: HandlerType, event: string, context: Context | null, argsOrPayload: any[] | EventPayload) {
         const handlers = this.handlers[type].get(event);
 
@@ -62,16 +63,9 @@ export class Processor {
                     if (type === HandlerType.Events) {
                         throw new Error('Event handlers cannot be a CommandHandler');
                     }
-                    const formattedArgs = (() => {
-                        if (type === HandlerType.ChatCommands) {
-                            // TODO: Fix type narrowing here
-                            // @ts-ignore - Haven't figured out how to type narrow this yet
-                            return argsOrPayload.map((arg, i) => ({ name: handler.args[i].name, value: arg }));
-                        } else {
-                            return argsOrPayload;
-                        }
-                    })();
-                    const resolvedArgs = await this.validateAndResolveArgs(formattedArgs, handler.args);
+                    // Validate and resolve the args
+                    const resolvedArgs = await this.validateAndResolveArgs(argsOrPayload, handler.args);
+                    // Execute the handler
                     await Promise.resolve(handler[Trait.execute](context!, resolvedArgs));
                 } else {
                     // TODO: Fix ts error
@@ -82,9 +76,9 @@ export class Processor {
         }
     }
     
-    private validateAndResolveArgs = async <T extends readonly ApplicationCommandOption[]>(args: { value: any }[], definition: T): Promise<ArgsFromOptions<T>> => {
+    private validateAndResolveArgs = async <T extends readonly ApplicationCommandOption[]>(args: any[], definition: T): Promise<ArgsFromOptions<T>> => {
         // Zip the args and definition together
-        const zipped: [ApplicationCommandOption, any][] = args.map((arg, i) => [definition[i], arg?.value ?? null]);
+        const zipped: [ApplicationCommandOption, any][] = args.map((arg, i) => [definition[i], arg]);
         // Validate the args
         const validated: Record<string, any> = {};
         // TODO: Attempt some type coresion/resolution here (mostly for text commands)
@@ -182,7 +176,7 @@ export class Processor {
     [HandlerType.Interactions] = {
         register: (event: string | string[], handler: Handler) => this.register(HandlerType.Interactions, event, handler),
         unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.Interactions, event, handler),
-        execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.Interactions, event, context, args),
+        execute: async (event: string, context: Context, args: InteractionData) => this.execute(HandlerType.Interactions, event, context, args),
         has: (event: string) => this.handlers[HandlerType.Interactions].has(event) ?? this.handlers[HandlerType.Interactions].get(event)?.length! > 0
     };
 

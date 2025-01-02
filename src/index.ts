@@ -10,7 +10,7 @@ export { Guild } from './types/guild';
 export { Role } from './types/role';
 export { Member } from './types/member';
 export { User } from './types/user';
-export { Message, type MessagePayload } from './types/message';
+export { Message, type MessagePayload, ComponentStyle, ComponentType } from './types/message';
 export { Embed } from './types/embed';
 export { Emoji } from './types/emoji';
 // Other

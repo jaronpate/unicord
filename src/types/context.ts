@@ -2,8 +2,9 @@ import type { API } from "../services/api";
 import type { Client } from "../services/client";
 import { hydrate, hydrator, type Hydrateable, type Hydrated } from "../services/hydrator";
 import { isNil, exists } from "../utils";
-import { fromDiscord, InteractionResponseType, type Expectation, type InteractionPayload } from "./common";
+import { fromDiscord, InteractionResponseType, type Expectation } from "./common";
 import type { Guild } from "./guild";
+import type { InteractionPayload } from "./handler";
 import { type DiscordMessage, Message, type MessagePayload } from "./message";
 /**
  * Represents the context of a message in a Discord channel.
@@ -106,14 +107,14 @@ export class Context<D extends ContextData = ContextData> {
             message = new Message().setContent(message);
         }
 
-        if (exists(this.message)) {
+        if (exists(this.interaction)) {
+            return this.ack(InteractionResponseType.Message, message.toJSON());
+        } else if (exists(this.message)) {
             if (reference) {
                 message.setReference(this.message)
             }
             
             return this.client.sendMessage(this.channel_id, message);
-        } else if (exists(this.interaction)) {
-            return this.ack(InteractionResponseType.Message, message.toJSON());
         } else {
             throw new Error('Cannot reply without a message or interaction payload');
         }

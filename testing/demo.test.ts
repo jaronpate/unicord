@@ -1,4 +1,4 @@
-import { Client, type Context, createCommandHandler, Expectation, Intent, type MessagePayload } from '../src/index';
+import { Client, ComponentStyle, type Context, createCommandHandler, Expectation, Intent, InteractionPayload, Message, type MessagePayload } from '../src/index';
 import { ApplicationCommandOptionType, ApplicationCommandType } from '../src/types/applicationCommand';
 
 const client = new Client({
@@ -10,7 +10,7 @@ const client = new Client({
         Intent.GUILD_MESSAGE_REACTIONS,
         Intent.MESSAGE_CONTENT
     ],
-    prefix: '!'
+    prefix: '!!'
 });
 
 // Register arbitrary event handler to the client bus
@@ -73,13 +73,13 @@ Nice to meet you, I'm ${context.self.username}!`
     }
 }));
 
+// BUG: Repeated hydration does not type narrow correctly. See below.
 // Repeated hydration
 client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // Note: Testing repeated hydration
     const { message } = await context.hydrate(context, [Expectation.Message])
     const hydrated = await context.hydrate(message, [Expectation.Channel])
     const rehydrated = await context.hydrate(hydrated, [Expectation.Guild]);
-
     rehydrated.guild.name
 
     const hydrate = await context.hydrator(hydrated, [Expectation.Guild]);
@@ -87,7 +87,7 @@ client.chatCommands.register('me', async (context: Context, _args: any[]) => {
 
     if (hasGuild) {
         // Send a message stating the user that they are in a guild
-        await context.reply(`You are ${message.author.username} and this is ${message.guild.name}`, true);
+        await context.reply(`You are ${message.author.username} and this is ${hydrated.guild.name}`, true);
     } else {
         // Send a message stating the user that they are not in a guild
         await context.reply(`You are ${message.author.username} and we are not in a server`, true);
@@ -105,6 +105,100 @@ client.chatCommands.register('here', async (context: Context, _args: any[]) => {
     } else {
         await context.reply('This is not a server!', true);
     }
+});
+
+// Interactions
+client.chatCommands.register('demo', async (context: Context, _args: any[]) => {
+    const msg = new Message()
+        .setContent('Hello World!')
+        .addComponent(
+            'This is an action row',
+            // Max buttons in a row is 5
+            // Custom ID is required and must be unique
+            // Non-Link buttons can not have a URL
+            // Link buttons can not have a custom ID
+            Message.button({
+                label: 'Click me!',
+                style: ComponentStyle.Primary,
+                custom_id: 'button_1'
+            }),
+            Message.button({
+                label: 'No me!',
+                style: ComponentStyle.Secondary,
+                custom_id: 'button_2',
+                disabled: true
+            }),
+            Message.button({
+                label: 'Never, me!',
+                style: ComponentStyle.Success,
+                custom_id: 'button_3'
+            }),
+            // Link requires url and can not have custom_id
+            Message.button({
+                label: 'Piss off.',
+                style: ComponentStyle.Link,
+                url: 'https://example.com'
+            }),
+            Message.button({
+                label: 'Emoji',
+                style: ComponentStyle.Secondary,
+                custom_id: 'button_4',
+                emoji: {
+                    name: '👍',
+                    id: null,
+                    animated: false
+                }
+            })
+        )
+        .addComponent(
+            Message.button({
+                label: 'Bad :(',
+                style: ComponentStyle.Danger,
+                custom_id: 'button_5'
+            }),
+            Message.button({
+                label: 'More Bad :(',
+                style: ComponentStyle.Danger,
+                custom_id: 'button_6'
+            })
+        )
+        .addComponent(
+            Message.selectMenu({
+                custom_id: 'select_1',
+                options: [
+                    {
+                        label: 'Select me',
+                        value: 'select_me',
+                        description: 'This is a description',
+                        emoji: {
+                            name: '👍',
+                            id: null,
+                            animated: false
+                        }
+                    }
+                ],
+                placeholder: 'Select an option',
+                min_values: 1,
+                max_values: 1
+            })
+        );
+
+    context.reply(msg);
+});
+
+const buttonInteractionHandler = (context: Context, data: InteractionData) => {
+    context.reply(`You clicked the ${data.custom_id} button!`);
+};
+
+client.interactions.register('button_1', buttonInteractionHandler);
+client.interactions.register('button_2', buttonInteractionHandler);
+client.interactions.register('button_3', buttonInteractionHandler);
+client.interactions.register('button_4', buttonInteractionHandler);
+client.interactions.register('button_5', buttonInteractionHandler);
+client.interactions.register('button_6', buttonInteractionHandler);
+
+client.interactions.register('select_1', async (context: Context, data: InteractionData) => {
+    context.reply(`You selected ${data.values[0]}!`);
 });
 
 client.connect();

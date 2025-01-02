@@ -1,7 +1,66 @@
 import { ApplicationCommandContext, ApplicationCommandOptionType, type ApplicationCommandOption } from "./applicationCommand";
 import { Trait, type EventPayload } from "./common";
 import type { Context } from "./context";
-import type { User } from "./user";
+import type { DiscordGuild } from "./guild";
+import type { DiscordMessage } from "./message";
+import type { DiscordUser, User } from "./user";
+
+// TODO: Flesh out InteractionPayload type
+export type InteractionPayload = {
+    id: string;
+    token: string;
+    type: number;
+    data?: InteractionData;
+    guild?: DiscordGuild;
+    guild_id: string;
+    // TODO: Add channel class
+    // channel?: DiscordChannel;
+    channel_id: string;
+    // TODO: Add member class
+    member?: Record<string, any> & { user: DiscordUser };
+    user?: DiscordUser
+    message?: DiscordMessage;
+};
+
+// TODO: Flesh out InteractionData type
+export type InteractionData = InteractionCommpoentData | InteractionCommandData;
+
+export type InteractionCommpoentData = {
+    custom_id: string;
+    component_type: number;
+    values?: any[];
+    resolved?: {
+        users?: Record<string, DiscordUser>;
+        members?: Record<string, DiscordUser>;
+        roles?: Record<string, any>;
+        channels?: Record<string, any>;
+        messages?: Record<string, any>;
+        attachments?: Record<string, any>;
+    };
+};
+
+export type InteractionCommandData = {
+    id: string;
+    name: string;
+    type: number;
+    resolved?: {
+        users?: Record<string, DiscordUser>;
+        members?: Record<string, DiscordUser>;
+        roles?: Record<string, any>;
+        channels?: Record<string, any>;
+        messages?: Record<string, any>;
+        attachments?: Record<string, any>;
+    }
+    options?: {
+        name: string;
+        type: ApplicationCommandOptionType;
+        value?: any;
+        options?: InteractionCommandData[];
+        focused?: boolean;
+    }[];
+    guild_id?: string;
+    target_id?: string;
+}
 
 export const OptionConstructorMap = {
     [ApplicationCommandOptionType.String]: String,

@@ -1,6 +1,6 @@
 import { WebSocket, type Data } from 'ws';
 import type { Client } from "../client";
-import { fromDiscord, HandlerType, type InteractionPayload, type Payload } from "../../types/common";
+import { fromDiscord, HandlerType, type Payload } from "../../types/common";
 import { exists, isNil, isObject, log } from "../../utils";
 import type { API } from "../api";
 import type { Processor } from '../processor';
@@ -9,6 +9,7 @@ import { type DiscordMessage, Message } from '../../types/message';
 import { DiscordUser, User } from '../../types/user';
 import { Guild } from '../../types/guild';
 import type { Emitter } from '../bus';
+import type { InteractionCommandData, InteractionCommpoentData, InteractionPayload } from '../../types/handler';
 
 export class Gateway {
     private socket: WebSocket | null = null;
@@ -228,27 +229,37 @@ export class Gateway {
         }
 
         if (payload.d.type === 2) {
-            this.handleShashInteraction(payload as Payload & { d: InteractionPayload });
+            this.handleShashInteraction(payload as Payload & { d: InteractionPayload & { data: InteractionCommandData } });
+        } else if (payload.d.type === 3) {
+            this.handleChatInteraction(payload as Payload & { d: InteractionPayload & { data: InteractionCommpoentData } });
         } else {
             // this.handleChatInteraction(payload);
         }
     };
 
-    private handleShashInteraction = (payload: Payload & { d: InteractionPayload }) => {
-        console.log('handleShashInteraction')
+    private handleShashInteraction = (payload: Payload & { d: InteractionPayload & { data: InteractionCommandData } }) => {
+        if (isNil(payload.d.data)) {
+            throw new Error('Invalid INTERACTION_CREATE data received');
+        }
+
         const command = payload.d.data.name;
-        const args = payload.d.data.options;
+        const args = payload.d.data.options ?? [];
 
         const context = new Context(this.client, this.api, { interaction: payload.d });
 
-        if (payload.d.data.guild) {
-            const guild = Guild[fromDiscord](payload.d.data.guild);
+        if (payload.d.guild) {
+            const guild = Guild.fromDiscord(payload.d.guild);
             this.client.guilds.set(guild.id, guild);
         }
 
-        if (payload.d.data.member) {
-            const member = User[fromDiscord](payload.d.data.member.user);
+        if (payload.d.member) {
+            const member = User.fromDiscord(payload.d.member?.user);
             this.client.users.set(member.id, member);
+        }
+
+        if (payload.d.user) {
+            const user = User.fromDiscord(payload.d.user);
+            this.client.users.set(user.id, user);
         }
 
         // TODO: Fix when channel class is implemented
@@ -258,10 +269,24 @@ export class Gateway {
         // }
 
         if (this.processor.application_commands.has(command)) {
-            this.processor.application_commands.execute(command, context, args);
+            this.processor.application_commands.execute(command, context, args?.map(arg => arg.value));
         } else {
             // TODO: Custom unknown command handler
             context.reply(`Unknown command: ${command}`);
+        }
+    };
+
+    private handleChatInteraction = (payload: Payload & { d: InteractionPayload & { data: InteractionCommpoentData } }) => {
+        const context = new Context(this.client, this.api, { interaction: payload.d });
+
+        if (exists(payload.d.data)) {
+            if (this.processor[HandlerType.Interactions].has(payload.d.data.custom_id)) {
+                this.processor[HandlerType.Interactions].execute(payload.d.data.custom_id, context, payload.d.data);
+            } else {
+                context.reply(`Unknown interaction: \`${payload.d.data.custom_id}\``);
+            }
+        } else {
+            context.reply('Invalid interaction data received');
         }
     };
 

@@ -1,7 +1,7 @@
 import { API } from './api';
 import { Gateway } from './connectors/gateway';
 import { Processor } from './processor';
-import { Expectation, Intent, type ClientConfig } from '../types/common';
+import { Expectation, HandlerType, Intent, type ClientConfig } from '../types/common';
 import { exists, isNil } from '../utils/index';
 import { type DiscordMessage, Message } from '../types/message';
 import { Guilds } from './caches/guilds';
@@ -23,8 +23,9 @@ export class Client {
     guilds: Guilds;
     users: Users;
     messages: Messages;
-    chatCommands: Processor['chat_commands'];
-    applicationCommands: Processor['application_commands'];
+    chatCommands: Processor[HandlerType.ChatCommands];
+    applicationCommands: Processor[HandlerType.ApplicationCommands];
+    interactions: Processor[HandlerType.Interactions];
 
     constructor(config: ClientConfig) {
         // Validate the configuration
@@ -43,8 +44,9 @@ export class Client {
         this.users = new Users(this.api, this.processor);
         this.messages = new Messages(this, this.api, this.processor);
         // Save references to command and event handlers
-        this.chatCommands = this.processor.chat_commands;
-        this.applicationCommands = this.processor.application_commands;
+        this.chatCommands = this.processor[HandlerType.ChatCommands];
+        this.applicationCommands = this.processor[HandlerType.ApplicationCommands];
+        this.interactions = this.processor[HandlerType.Interactions];
     }
 
     private static validateConfig(config: ClientConfig) {
