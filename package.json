@@ -4,19 +4,28 @@
   "module": "src/index.ts",
   "type": "module",
   "main": "out/index.js",
+  "types": "out/index.d.ts",
+  "files": [
+    "out"
+  ],
   "scripts": {
     "test": "bun run testing/demo.test.ts",
     "test:inspect": "bun --inspect testing/demo.test.ts",
-    "build": "bun run build:types && bun build src/index.ts --outdir out",
-    "build:packages": "bun run build:types && bun build src/index.ts --packages external --outdir out",
-    "build:nocheck": "bun run build:types:nocheck && bun build src/index.ts --outdir out --noCheck",
+    
+    "build": "bun run build:types && bun run build:core",
+    "build:packages": "bun run build:types && bun run build:core -- --packages external",
+    "build:nocheck": "bun run build:types:nocheck && bun run build:core",
+    
+    "build:core": "bun build src/index.ts --outdir out --drop=console,debugger",
     "build:types": "tsc --emitDeclarationOnly --project tsconfig.json",
-    "build:types:nocheck": "tsc --emitDeclarationOnly --project tsconfig.json --noCheck",
-    "build:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --watch\" \"bun build src/index.ts --outdir out --watch\"",
-    "build:packages:watch": "concurrently \"tsc --emitDeclarationOnly --project tsconfig.json --watch\" \"bun build src/index.ts --packages external --outdir out --watch\""
+    "build:types:nocheck": "bun run build:types -- --noCheck",
+    
+    "build:watch": "concurrently \"bun run build:types -- --watch\" \"bun run build:core -- --watch\"",
+    "build:packages:watch": "concurrently \"bun run build:types -- --watch\" \"bun run build:core -- --packages external --watch\""
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "commander": "^13.0.0",
     "concurrently": "^9.1.0"
   },
   "peerDependencies": {
