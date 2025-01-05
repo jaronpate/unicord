@@ -1,3 +1,4 @@
+import { exists } from "../utils";
 import { ApplicationCommandContext, ApplicationCommandOptionType, type ApplicationCommandOption } from "./applicationCommand";
 import { Trait, type EventPayload } from "./common";
 import type { Context } from "./context";
@@ -160,10 +161,11 @@ export function createCommandHandler<T extends readonly ApplicationCommandOption
     return new CommandHandler(handler);
 }
 
-export type CommandHandlerFunction = (context: Context, args: any[]) => Promise<void> | void;
-export type EventHandlerFunction = (context: Context | null, payload: EventPayload) => Promise<void> | void;
+export type CommandHandlerFunction = (context: Context, args: any[]) => Promise<any> | any;
+export type EventHandlerFunction = (context: Context | null, payload: EventPayload) => Promise<any> | any;
+export type InteractionHandlerFunction<P = InteractionData> = (context: Context, payload: P) => Promise<any> | any;
 
 export type HandlerWithoutContext = EventHandlerFunction;
-export type HanderWithContext = CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;
+export type HanderWithContext = InteractionHandlerFunction | CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;
 
-export type Handler = EventHandlerFunction | CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;
+export type Handler = InteractionHandlerFunction<InteractionCommpoentData> | InteractionHandlerFunction<InteractionCommandData> | EventHandlerFunction | CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;

@@ -14,5 +14,5 @@ export { Message, type MessagePayload, ComponentStyle, ComponentType } from './t
 export { Embed } from './types/embed';
 export { Emoji } from './types/emoji';
 // Other
-export { createCommandHandler } from './types/handler';
+export { createCommandHandler, type InteractionData, type InteractionCommpoentData, type InteractionCommandData, type InteractionHandlerFunction } from './types/handler';
 export { ApplicationCommandType, ApplicationCommandOptionType as CommandOptionType } from './types/applicationCommand';

@@ -1,5 +1,4 @@
-import { Client, ComponentStyle, type Context, createCommandHandler, Expectation, Intent, InteractionPayload, Message, type MessagePayload } from '../src/index';
-import { ApplicationCommandOptionType, ApplicationCommandType } from '../src/types/applicationCommand';
+import { ApplicationCommandType, Client, CommandOptionType, ComponentStyle, type Context, createCommandHandler, Expectation, Intent, InteractionCommpoentData, type InteractionData, Message, type MessagePayload } from '../src/index';
 
 const client = new Client({
     token: process.env.BOT_TOKEN!,
@@ -33,21 +32,21 @@ client.applicationCommands.register('hello', ApplicationCommandType.Chat, create
     description: "Introduce yourself",
     args: [
         {
-            type: ApplicationCommandOptionType.String,
+            type: CommandOptionType.String,
             name: "name",
             id: "name",
             description: "Your name",
             required: true
         },
         {
-            type: ApplicationCommandOptionType.Integer,
+            type: CommandOptionType.Integer,
             name: "age",
             id: "age",
             description: "Your age",
             required: true
         },
         {
-            type: ApplicationCommandOptionType.String,
+            type: CommandOptionType.String,
             name: "favorite_animal",
             id: "favorite_animal",
             description: "Your favorite animal",
@@ -186,7 +185,7 @@ client.chatCommands.register('demo', async (context: Context, _args: any[]) => {
     context.reply(msg);
 });
 
-const buttonInteractionHandler = (context: Context, data: InteractionData) => {
+const buttonInteractionHandler = (context: Context, data: InteractionCommpoentData) => {
     context.reply(`You clicked the ${data.custom_id} button!`);
 };
 
@@ -197,8 +196,12 @@ client.interactions.register('button_4', buttonInteractionHandler);
 client.interactions.register('button_5', buttonInteractionHandler);
 client.interactions.register('button_6', buttonInteractionHandler);
 
-client.interactions.register('select_1', async (context: Context, data: InteractionData) => {
-    context.reply(`You selected ${data.values[0]}!`);
+client.interactions.register('select_1', async (context: Context, data: InteractionCommpoentData) => {
+    if (data?.values !== undefined) {
+        context.reply(`You selected ${data.values[0]}!`);
+    } else {
+        context.reply('You selected nothing!');
+    }
 });
 
 client.connect();
