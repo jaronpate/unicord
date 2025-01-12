@@ -108,16 +108,16 @@ export type ArgsFromOptions<T extends readonly ApplicationCommandOption[]> = {
         : unknown | undefined;
 };
 
-export type CommandHandlerExecuteFunction<T extends readonly ApplicationCommandOption[]> = (context: Context, args: ArgsFromOptions<T>) => Promise<any> | any;
+export type CommandHandlerExecuteFunction<T extends ApplicationCommandOption[]> = (context: Context, args: ArgsFromOptions<T>) => Promise<any> | any;
 
-export type CommandHandlerInput<T extends readonly ApplicationCommandOption[]> = {
+export type CommandHandlerInput<T extends ApplicationCommandOption[]> = {
     args: T;
     description: string;
     contexts?: ApplicationCommandContext[];
     execute: CommandHandlerExecuteFunction<T>;
 };
 
-export class CommandHandler<T extends readonly ApplicationCommandOption[]> {
+export class CommandHandler<T extends ApplicationCommandOption[]> {
     args: T;
     description: string;
     contexts?: ApplicationCommandContext[];
@@ -155,7 +155,7 @@ export class CommandHandler<T extends readonly ApplicationCommandOption[]> {
 };
 
 // Helper function to infer type of `args`
-export function createCommandHandler<T extends readonly ApplicationCommandOption[]>(
+export function createCommandHandler<T extends ApplicationCommandOption[]>(
     handler: CommandHandlerInput<T>
 ): CommandHandler<T> {
     return new CommandHandler(handler);
@@ -166,6 +166,6 @@ export type EventHandlerFunction = (context: Context | null, payload: EventPaylo
 export type InteractionHandlerFunction<P = InteractionData> = (context: Context, payload: P) => Promise<any> | any;
 
 export type HandlerWithoutContext = EventHandlerFunction;
-export type HanderWithContext = InteractionHandlerFunction | CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;
+export type HanderWithContext = InteractionHandlerFunction | CommandHandlerFunction | CommandHandler<ApplicationCommandOption[]>;
 
-export type Handler = InteractionHandlerFunction<InteractionCommpoentData> | InteractionHandlerFunction<InteractionCommandData> | EventHandlerFunction | CommandHandlerFunction | CommandHandler<readonly ApplicationCommandOption[]>;
+export type Handler = InteractionHandlerFunction<InteractionCommpoentData> | InteractionHandlerFunction<InteractionCommandData> | EventHandlerFunction | CommandHandlerFunction | CommandHandler<ApplicationCommandOption[]>;

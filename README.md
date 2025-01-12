@@ -70,7 +70,7 @@ const avatarCommand = createCommandHandler({
             description: 'The user to get the avatar for',
             required: true
         }
-    ] as const,
+    ],
     execute: async (context: Context, args) => {
         // Args will be typed here as { user: User }
         context.reply(args.user.avatarURL);
@@ -84,8 +84,6 @@ client.applicationCommands.register('avatar', ApplicationCommandType.Chat, avata
 
 // <...>
 ```
-
-> NOTE: The `as const` is required to ensure the types are resolved correctly. This is to work around some TypeScript weirdness.
 
 ## Hydration
 

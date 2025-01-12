@@ -180,7 +180,7 @@ export class Processor {
         has: (event: string) => this.handlers[HandlerType.Interactions].has(event) ?? this.handlers[HandlerType.Interactions].get(event)?.length! > 0
     };
 
-    static isCommandHandler = (handler: Handler): handler is CommandHandler<readonly ApplicationCommandOption[]> => {
+    static isCommandHandler = (handler: Handler): handler is CommandHandler<ApplicationCommandOption[]> => {
         if (typeof handler === 'object') {
             return 'args' in handler && Trait.execute in handler && handler instanceof CommandHandler;
         } else {

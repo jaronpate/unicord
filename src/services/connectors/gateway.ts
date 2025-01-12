@@ -204,14 +204,16 @@ export class Gateway {
             this.client.messages.set(message.id, message);
             // Generate context
             const context = new Context(this.client, this.api, { message });
+            // Dispatch event for the command
+            this.bus.emit(`command:${command}`, context, args);
             // // Check if command exists
-            if (this.processor[HandlerType.ChatCommands].has(command)) {
-                // Execute the handler
-                this.processor[HandlerType.ChatCommands].execute(command, context, args);
-            } else {
-                // TODO: Custom unknown command handler
-                context.reply(`Unknown command: ${command}`);
-            }
+            // if (this.processor[HandlerType.ChatCommands].has(command)) {
+            //     // Execute the handler
+            //     this.processor[HandlerType.ChatCommands].execute(command, context, args);
+            // } else {
+            //     // TODO: Custom unknown command handler
+            //     context.reply(`Unknown command: ${command}`);
+            // }
         }
     };
 

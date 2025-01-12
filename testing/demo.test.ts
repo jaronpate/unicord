@@ -62,7 +62,7 @@ client.applicationCommands.register('hello', ApplicationCommandType.Chat, create
                 { name: "Bear", value: "Bear" }
             ]
         }
-    ] as const,
+    ],
     execute: async (context, args) => {
         context.reply(
             `\
