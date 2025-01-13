@@ -1,5 +1,5 @@
 {
-  "name": "discord.ts",
+  "name": "unicord",
   "description": "A simple discord library primarily for TypeScript. REST like and easy to use.",
   "version": "0.0.1",
   "module": "src/index.ts",
