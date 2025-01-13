@@ -109,8 +109,8 @@ export class Gateway {
                 intents: this.client.intents.reduce((acc, intent) => acc | intent, 0),
                 properties: {
                     os: process.platform,
-                    browser: 'discord.ts',
-                    device: 'discord.ts'
+                    browser: 'unicord',
+                    device: 'unicord'
                 }
             }
         });

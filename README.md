@@ -1,5 +1,6 @@
 <div align="center">
-    <h2>discord.ts</h2>
+    <img src="./assets/unicord.png" alt="unicord" width="200"/>
+    <h2>unicord</h2>
     <p><em>Build good bots fast</em></p>
 </div>
 
@@ -14,16 +15,16 @@ It's typecript first and has some nifty features like hydration and argument typ
 Install with your package manager of choice.
 
 ```
-npm install discord.ts
-yarn add discord.ts
-bun add discord.ts
+npm install unicord
+yarn add unicord
+bun add unicord
 ```
 
 ## Quick Start
 
 A small example implementation.
 ```typescript
-import { Client, type Context } from '`discord.ts';
+import { Client, type Context } from 'unicord';
 
 // Initialize and configure
 const client = new Client({
@@ -57,7 +58,7 @@ client.connect();
 This library is designed to be type safe and resolve types for you. Because of this you can write code that is both safe and easy to understand. With the `createCommandHandler` utility you can provide types for command arguments. The client will then check and resolve them for you.
 
 ```typescript
-import { createCommandHandler, CommandOptionType, type Context } from 'discord.ts';
+import { createCommandHandler, CommandOptionType, type Context } from 'unicord';
 
 // <...>
 
