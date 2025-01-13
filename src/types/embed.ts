@@ -1,4 +1,4 @@
-import { Message } from '.';
+import { Message } from './message';
 
 type EmbedFooter = {
     text: string;
@@ -11,6 +11,13 @@ type EmbedImage = {
     proxy_url?: string;
     height?: number;
     width?: number;
+};
+
+type EmbedAuthor = {
+    name: string;
+    url?: string;
+    icon_url?: string;
+    proxy_icon_url?: string;
 };
 
 type EmbedVideo = {
@@ -42,7 +49,7 @@ export class Embed {
     author?: EmbedImage & {
         name?: string;
     };
-    fields?: EmbedField[];
+    fields: EmbedField[];
 
     constructor() {
         this.fields = [];
@@ -98,7 +105,7 @@ export class Embed {
         return this;
     };
 
-    setAuthor = (author: EmbedImage & { name?: string }) => {
+    setAuthor = (author: EmbedAuthor) => {
         this.author = author;
         return this;
     };

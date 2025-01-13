@@ -1,79 +1,64 @@
+export type ClientConfig = {
+    token: string;
+    application_id: string;
+    prefix?: string;
+    intents?: Intent[];
+}
+
+export enum Expectation {
+    Guild = 'guild',
+    Channel = 'channel',
+    User = 'user',
+    Message = 'message',
+}
+
+export enum HandlerType {
+    Events = 'events',
+    ChatCommands = 'chat_commands',
+    ApplicationCommands = 'application_commands',
+    Interactions = 'interactions'
+}
+
+export type Expects<T extends Array<Expectation>, K extends Expectation> = Extract<K, T[number]> extends never ? false : true;
+
+export const clone: unique symbol = Symbol('clone')
+export const fromDiscord: unique symbol = Symbol('fromDiscord')
+export const execute: unique symbol = Symbol('execute')
+
+export const Trait: {
+    clone: typeof clone
+    fromDiscord: typeof fromDiscord
+    execute: typeof execute
+} = {
+    clone,
+    fromDiscord,
+    execute
+}
+
+export type EventPayload = any;
+
+export type Primitive = string | number | boolean | null;
+
+/**
+ * Represents a payload structure used in the Discord API.
+ * 
+ * @typedef {Object} Payload
+ * @property {number} op - The opcode of the payload.
+ * @property {Record<string, any>} d - The data associated with the payload.
+ * @property {number | null} s - The sequence number, or null if not applicable.
+ * @property {string | null} t - The event name, or null if not applicable.
+ */
 export type Payload = {
-    op: number;             // opcode
-    d: Record<string, any>; // data
-    s: number | null;       // sequence number
-    t: string | null;       // event name
+    op: number;
+    d: Record<string, any> | Primitive | null;
+    s: number | null;
+    t: string | null;
 };
 
-export type Session = {
-    s: number; // sequence number
-    session_id: string;
-    session_type: string;
-    resume_gateway_url: string;
-};
-
-export type Guild = Record<string, any>;
-
-export type User = Record<string, any>;
-
-export enum Status {
-    Online = "online",
-    DND = "dnd",
-    Idle = "idle",
-    Invisible = "invisible",
-    Offline = "offline"
-}
-
-export type Presence = {
-    since: number | null;
-    activities: Activity[];
-    status: Status;
-    afk: boolean;
-}
-
-export type Activity = {
-    name: string;
-    type: number;
-    created_at: number;
-    url?: string;
-    timestamps?: {
-        start?: number;
-        end?: number;
-    };
-    application_id?: string;
-    details?: string;
-    state?: string;
-    emoji?: {
-        name: string;
-        id?: string;
-        animated?: boolean;
-    };
-    party?: {
-        id?: string;
-        size?: [number, number];
-    };
-    assets?: {
-        large_image?: string;
-        large_text?: string;
-        small_image?: string;
-        small_text?: string;
-    };
-    secrets?: {
-        join?: string;
-        spectate?: string;
-        match?: string;
-    };
-    instance?: boolean;
-    flags?: number;
-}
-
-export enum ActivityType {
-    Game,
-    Streaming,
-    Listening,
-    Watching,
-    Custom ,
-    Competing
+export enum InteractionResponseType {
+    Pong = 1,
+    Message = 4,
+    DeferredMessage = 5
 }
 
 export enum Intent {
@@ -97,107 +82,107 @@ export enum Intent {
     ALL = 32767
 }
 
-export const IntentGroup : {[key in Intent]: [string[], number]} = {
+export const IntentGroup: { [key in Intent]?: [string[], number] } = {
     [Intent.GUILDS]: [[
-      "GUILD_CREATE",
-      "GUILD_UPDATE",
-      "GUILD_DELETE",
-      "GUILD_ROLE_CREATE",
-      "GUILD_ROLE_UPDATE",
-      "GUILD_ROLE_DELETE",
-      "CHANNEL_CREATE",
-      "CHANNEL_UPDATE",
-      "CHANNEL_DELETE",
-      "CHANNEL_PINS_UPDATE",
-      "THREAD_CREATE",
-      "THREAD_UPDATE",
-      "THREAD_DELETE",
-      "THREAD_LIST_SYNC",
-      "THREAD_MEMBER_UPDATE",
-      "THREAD_MEMBERS_UPDATE *",
-      "STAGE_INSTANCE_CREATE",
-      "STAGE_INSTANCE_UPDATE",
-      "STAGE_INSTANCE_DELETE"
+        "GUILD_CREATE",
+        "GUILD_UPDATE",
+        "GUILD_DELETE",
+        "GUILD_ROLE_CREATE",
+        "GUILD_ROLE_UPDATE",
+        "GUILD_ROLE_DELETE",
+        "CHANNEL_CREATE",
+        "CHANNEL_UPDATE",
+        "CHANNEL_DELETE",
+        "CHANNEL_PINS_UPDATE",
+        "THREAD_CREATE",
+        "THREAD_UPDATE",
+        "THREAD_DELETE",
+        "THREAD_LIST_SYNC",
+        "THREAD_MEMBER_UPDATE",
+        "THREAD_MEMBERS_UPDATE *",
+        "STAGE_INSTANCE_CREATE",
+        "STAGE_INSTANCE_UPDATE",
+        "STAGE_INSTANCE_DELETE"
     ], 0],
-  
+
     [Intent.GUILD_MEMBERS]: [[
-      "GUILD_MEMBER_ADD",
-      "GUILD_MEMBER_UPDATE",
-      "GUILD_MEMBER_REMOVE",
-      "THREAD_MEMBERS_UPDATE *",
-    ], 1], 
-  
+        "GUILD_MEMBER_ADD",
+        "GUILD_MEMBER_UPDATE",
+        "GUILD_MEMBER_REMOVE",
+        "THREAD_MEMBERS_UPDATE *",
+    ], 1],
+
     [Intent.GUILD_BANS]: [[
-      "GUILD_BAN_ADD",
-      "GUILD_BAN_REMOVE",
+        "GUILD_BAN_ADD",
+        "GUILD_BAN_REMOVE",
     ], 2],
-  
+
     [Intent.GUILD_EMOJIS_AND_STICKERS]: [[
-      "GUILD_EMOJIS_UPDATE",
-      "GUILD_STICKERS_UPDATE",
+        "GUILD_EMOJIS_UPDATE",
+        "GUILD_STICKERS_UPDATE",
     ], 3],
-  
+
     [Intent.GUILD_INTEGRATIONS]: [[
-      "GUILD_INTEGRATIONS_UPDATE",
-      "INTEGRATION_CREATE",
-      "INTEGRATION_UPDATE",
-      "INTEGRATION_DELETE",
+        "GUILD_INTEGRATIONS_UPDATE",
+        "INTEGRATION_CREATE",
+        "INTEGRATION_UPDATE",
+        "INTEGRATION_DELETE",
     ], 4],
-  
+
     [Intent.GUILD_WEBHOOKS]: [[
-      "WEBHOOKS_UPDATE"
+        "WEBHOOKS_UPDATE"
     ], 5],
-  
+
     [Intent.GUILD_INVITES]: [[
-      "INVITE_CREATE",
-      "INVITE_DELETE",
+        "INVITE_CREATE",
+        "INVITE_DELETE",
     ], 6],
-  
+
     [Intent.GUILD_VOICE_STATES]: [[
-      "VOICE_STATE_UPDATE"
+        "VOICE_STATE_UPDATE"
     ], 7],
-  
+
     [Intent.GUILD_PRESENCES]: [[
-      "PRESENCE_UPDATE"
+        "PRESENCE_UPDATE"
     ], 8],
-  
+
     [Intent.GUILD_MESSAGES]: [[
-      "MESSAGE_CREATE",
-      "MESSAGE_UPDATE",
-      "MESSAGE_DELETE",
-      "MESSAGE_DELETE_BULK",
+        "MESSAGE_CREATE",
+        "MESSAGE_UPDATE",
+        "MESSAGE_DELETE",
+        "MESSAGE_DELETE_BULK",
     ], 9],
-  
+
     [Intent.GUILD_MESSAGE_REACTIONS]: [[
-      "MESSAGE_REACTION_ADD",
-      "MESSAGE_REACTION_REMOVE",
-      "MESSAGE_REACTION_REMOVE_ALL",
-      "MESSAGE_REACTION_REMOVE_EMOJI",
+        "MESSAGE_REACTION_ADD",
+        "MESSAGE_REACTION_REMOVE",
+        "MESSAGE_REACTION_REMOVE_ALL",
+        "MESSAGE_REACTION_REMOVE_EMOJI",
     ], 10],
-  
+
     [Intent.GUILD_MESSAGE_TYPING]: [[
-      "TYPING_START"
+        "TYPING_START"
     ], 11],
-  
+
     [Intent.DIRECT_MESSAGES]: [[
-      "MESSAGE_CREATE",
-      "MESSAGE_UPDATE",
-      "MESSAGE_DELETE",
-      "CHANNEL_PINS_UPDATE",
+        "MESSAGE_CREATE",
+        "MESSAGE_UPDATE",
+        "MESSAGE_DELETE",
+        "CHANNEL_PINS_UPDATE",
     ], 12],
-  
+
     [Intent.DIRECT_MESSAGE_REACTIONS]: [[
-      "MESSAGE_REACTION_ADD",
-      "MESSAGE_REACTION_REMOVE",
-      "MESSAGE_REACTION_REMOVE_ALL",
-      "MESSAGE_REACTION_REMOVE_EMOJI",
+        "MESSAGE_REACTION_ADD",
+        "MESSAGE_REACTION_REMOVE",
+        "MESSAGE_REACTION_REMOVE_ALL",
+        "MESSAGE_REACTION_REMOVE_EMOJI",
     ], 13],
-  
+
     [Intent.DIRECT_MESSAGE_TYPING]: [[
-      "TYPING_START"
+        "TYPING_START"
     ], 14],
-  
+
     [Intent.MESSAGE_CONTENT]: [[
-      "MESSAGE_CONTENT"
+        "MESSAGE_CONTENT"
     ], 15]
-  }
+}

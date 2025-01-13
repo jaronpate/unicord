@@ -1,27 +1,38 @@
 {
-  "name": "@jaronp/discord.ts",
-  "version": "0.1.1",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "author": "Jaron Pate",
-  "license": "Unlicense",
-  "repository": "https://github.com/jaronpate/discord.ts",
+  "name": "unicord",
+  "description": "A simple discord library primarily for TypeScript. REST like and easy to use.",
+  "version": "0.0.1",
+  "module": "src/index.ts",
+  "type": "module",
+  "main": "out/index.js",
+  "types": "out/index.d.ts",
   "files": [
-    "/dist"
+    "out"
   ],
   "scripts": {
-    "start": "npx ts-node test/main.test.ts",
-    "start:watch": "npx ts-node-dev --respawn test/main.test.ts",
-    "build": "npx tsc"
+    "test": "bun run testing/demo.test.ts",
+    "test:inspect": "bun --inspect testing/demo.test.ts",
+    
+    "build": "bun run build:types && bun run build:core",
+    "build:packages": "bun run build:types && bun run build:core -- --packages external",
+    "build:nocheck": "bun run build:types:nocheck && bun run build:core",
+    
+    "build:core": "bun build src/index.ts --outdir out --drop=console --drop=debugger",
+    "build:types": "tsc --emitDeclarationOnly --project tsconfig.json",
+    "build:types:nocheck": "bun run build:types -- --noCheck",
+    
+    "build:watch": "concurrently \"bun run build:types -- --watch\" \"bun run build:core -- --watch\"",
+    "build:packages:watch": "concurrently \"bun run build:types -- --watch\" \"bun run build:core -- --packages external --watch\""
   },
   "devDependencies": {
-    "@types/ws": "^8.5.3",
-    "dotenv": "^16.0.2",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^4.8.3"
+    "@types/bun": "latest",
+    "commander": "^13.0.0",
+    "concurrently": "^9.1.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
   },
   "dependencies": {
-    "axios": "^0.27.2",
-    "ws": "^8.8.1"
+    "ws": "^8.18.0"
   }
 }
