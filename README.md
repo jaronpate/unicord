@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./assets/unicord.png" alt="unicord" width="200"/>
+    <img src="https://raw.githubusercontent.com/jaronpate/unicord/master/assets/unicord.png" width="150" height="150">
     <h2>unicord</h2>
     <p><em>Build good bots fast</em></p>
 </div>
