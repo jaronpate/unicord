@@ -137,6 +137,42 @@ client.chatCommands.register('demo', async (context: Context, _args: any[]) => {
                 label: 'Piss off.',
                 style: ComponentStyle.Link,
                 url: 'https://example.com'
+            })
+        );
+
+    context.reply(msg);
+});
+
+client.chatCommands.register('demo', async (context: Context, _args: any[]) => {
+    const msg = new Message()
+        .setContent('Hello World!')
+        .addComponent(
+            'This is an action row',
+            // Max buttons in a row is 5
+            // Custom ID is required and must be unique
+            // Non-Link buttons can not have a URL
+            // Link buttons can not have a custom ID
+            Message.button({
+                label: 'Click me!',
+                style: ComponentStyle.Primary,
+                custom_id: 'button_1'
+            }),
+            Message.button({
+                label: 'No me!',
+                style: ComponentStyle.Secondary,
+                custom_id: 'button_2',
+                disabled: true
+            }),
+            Message.button({
+                label: 'Never, me!',
+                style: ComponentStyle.Success,
+                custom_id: 'button_3'
+            }),
+            // Link requires url and can not have custom_id
+            Message.button({
+                label: 'Piss off.',
+                style: ComponentStyle.Link,
+                url: 'https://example.com'
             }),
             Message.button({
                 label: 'Emoji',

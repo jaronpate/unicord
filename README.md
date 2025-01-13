@@ -1,11 +1,13 @@
 <div align="center">
     <h2>discord.ts</h2>
-    <p>Build good bots fast</p>
+    <p><em>Build good bots fast</em></p>
 </div>
 
-> This package is in an early beta stage and not yet ready for consumption
+> This package is in early development and is not yet ready for production use. Please be aware that the API may change at any time. Use at your own risk.
 
-A solid and simple Discord API wrapper.
+This library is designed with three pillars in mind: **Simple**, **Maintainable**, and **Scalable**. It isn't guaranteed to be the fastest or the most feature rich, but you will probably find it to be the easiest to use and understand.
+
+It's typecript first and has some nifty features like hydration and argument type resolution. The goal here is to not have to worry about if you are using the Gateway, Webhooks, or Application commands. Ideally there is a single API that can be used to inferface with Discord.
 
 ## Installation
 
@@ -125,37 +127,56 @@ client.chatCommands.register('me', async (context: Context, _args: any[]) => {
 
 Additionally you can hydrate repeatedly if you need to fetch multiple objects at different times.
 
-<!-- 
 ## Interactions
+
 First create the interactions.
+
 ```typescript
-bot.commands.register('test', (_client, context, _args) => {
-    // Add components to use interactions
-    const msg = new Message().setContent('Test interaction!').addComponent(
-        // This generations an action row which can optionaly contain content
-        'This is an action row',
-        // Create components with helper functions
-        Message.button({
-            label: 'Click me!',
-            style: ComponentStyle.Primary,
-            // Assign id's to reference them later
-            custom_id: 'click_me',
-            emoji: {
-                name: '🔥',
-                id: null,
-                animated: false
-            }
-        })
-    );
+client.chatCommands.register('demo', async (context: Context, _args: any[]) => {
+    const msg = new Message()
+        .setContent('Hello World!')
+        .addComponent(
+            'This is an action row',
+            // Max buttons in a row is 5
+            // Custom ID is required and must be unique
+            // Non-Link buttons can not have a URL
+            // Link buttons can not have a custom ID
+            Message.button({
+                label: 'Click me!',
+                style: ComponentStyle.Primary,
+                custom_id: 'button_1'
+            }),
+            Message.button({
+                label: 'No me!',
+                style: ComponentStyle.Secondary,
+                custom_id: 'button_2',
+                disabled: true
+            }),
+            Message.button({
+                label: 'Never, me!',
+                style: ComponentStyle.Success,
+                custom_id: 'button_3'
+            }),
+            // Link requires url and can not have custom_id
+            Message.button({
+                label: 'Piss off.',
+                style: ComponentStyle.Link,
+                url: 'https://example.com'
+            })
+        );
+
     context.reply(msg);
 });
 ```
+
 Then provide a handler for them.
+
 ```typescript
-bot.interactions.register('click_me', async (client, context, interaction) => {
-    const response = context.reply(
-        `You clicked me! Thank you ${interaction.member.user.username} <3`
-    );
-});
+const buttonInteractionHandler = (context: Context, data: InteractionCommpoentData) => {
+    context.reply(`You clicked the ${data.custom_id} button!`);
+};
+
+client.interactions.register('button_1', buttonInteractionHandler);
+client.interactions.register('button_2', buttonInteractionHandler);
+client.interactions.register('button_3', buttonInteractionHandler);
 ```
--->
