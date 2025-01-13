@@ -17,7 +17,7 @@
     "build:packages": "bun run build:types && bun run build:core -- --packages external",
     "build:nocheck": "bun run build:types:nocheck && bun run build:core",
     
-    "build:core": "bun build src/index.ts --outdir out --drop=console,debugger",
+    "build:core": "bun build src/index.ts --outdir out --drop=console --drop=debugger",
     "build:types": "tsc --emitDeclarationOnly --project tsconfig.json",
     "build:types:nocheck": "bun run build:types -- --noCheck",
     
