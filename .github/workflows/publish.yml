@@ -4,14 +4,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 14
-          registry-url: https://registry.npmjs.org/
-      - run: yarn
-      - run: yarn build
-      # - run: yarn test
-      - run: yarn publish --access public
+      # Pull repo
+      - uses: actions/checkout@v2
+      # Install bun
+      - uses: oven-sh/setup-bun@v2
+      # Run tests
+      # TODO: Add tests
+      # Build
+      - run: bun build
+      # Publish
+      - run: bun publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org/_authToken=${{ secrets.NPM_TOKEN }}

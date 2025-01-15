@@ -64,6 +64,9 @@ export class Processor {
                         throw new Error('Event handlers cannot be a CommandHandler');
                     }
                     // Validate and resolve the args
+                    // TODO: There's no reason this can't use the hydrator system
+                    // Hydrator should have a more genric subcomponent that can be used anywhere and is more dumb.
+                    // Basically a function that accepts id's and returns values.
                     const resolvedArgs = await this.validateAndResolveArgs(argsOrPayload, handler.args);
                     // Execute the handler
                     await Promise.resolve(handler[Trait.execute](context!, resolvedArgs));
