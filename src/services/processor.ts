@@ -24,6 +24,7 @@ export class Processor {
             const handlers = this.handlers[type].get(e) || [];
             handlers.push(handler);
             this.handlers[type].set(e, handlers);
+            this.bus.on(`${type}:${e}`, async (context: Context | null, payload: any) => { this.execute(type, e, context, payload) });
         }
     };
 
@@ -50,9 +51,10 @@ export class Processor {
         }
     };
 
-    public async execute(type: HandlerType.Events, event: string, context: Context | null, payload: EventPayload): Promise<void>
-    public async execute(type: HandlerType.Interactions, event: string, context: Context | null, payload: InteractionData): Promise<void>
-    public async execute(type: Omit<HandlerType, HandlerType.Events | HandlerType.Interactions>, event: string, context: Context, args: any[]): Promise<void>
+    // TODO: Fix overloads
+    // public async execute(type: HandlerType.Events, event: string, context: Context | null, payload: EventPayload): Promise<void>
+    // public async execute(type: HandlerType.Interactions, event: string, context: Context | null, payload: InteractionData): Promise<void>
+    // public async execute(type: Omit<HandlerType, HandlerType.Events | HandlerType.Interactions>, event: string, context: Context, args: any[]): Promise<void>
     public async execute(type: HandlerType, event: string, context: Context | null, argsOrPayload: any[] | EventPayload) {
         const handlers = this.handlers[type].get(event);
 
