@@ -1,10 +1,10 @@
 import { exists, isNil } from '../utils';
 import { GatewayObject } from './base';
-import { fromDiscord, Trait, type Expectation, type Expects } from './common';
+import type { Channel } from './channel';
+import { fromDiscord, Trait, type Expectation } from './common';
 import type { Embed } from './embed';
 import type { Guild } from './guild';
-import { Channel } from './channel';
-import { type DiscordUser, User } from './user';
+import { User, type DiscordUser } from './user';
 
 export type Component = Partial<Button | SelectMenu> & {
     type: ComponentType;

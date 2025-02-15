@@ -5,11 +5,12 @@ import type { Processor } from "../processor";
 
 
 export class ObjectCache<T, K extends T> {
-    cache = new Map<string, K>();
+    cache: LRUCache<string, K>;
     requests = new Map<string, Promise<K>>();
     readonly type: string;
 
-    constructor(protected api: API, processor: Processor, type: string, private readonly factory: { [fromDiscord]: (data: any) => K } & (new (data: T) => T), events: string[]) {
+    constructor(protected api: API, processor: Processor, type: string, private readonly factory: { [fromDiscord]: (data: any) => K } & (new (data: T) => T), events: string[], capacity: number = 10_000) {
+        this.cache = new LRUCache<string, K>(10_000)
         this.type = type;
         processor.events.register(events, async (_context: Context, e: Record<string, any>) => {
             this.cache.set(e.id, factory[fromDiscord](e));
@@ -64,8 +65,96 @@ export class ObjectCache<T, K extends T> {
             return this.fetch(object_id);
         }
     }
+}
 
-    list(): Map<string, Promise<T> | T> {
-        return this.cache;
+class ListNode<K, V> {
+    key: K;
+    value: V;
+    prev: ListNode<K, V> | null = null;
+    next: ListNode<K, V> | null = null;
+
+    constructor(key: K, value: V) {
+        this.key = key;
+        this.value = value;
+    }
+}
+
+class LRUCache<K, V> {
+    private capacity: number;
+    private map: Map<K, ListNode<K, V>>;
+    private head: ListNode<K, V>;
+    private tail: ListNode<K, V>;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.map = new Map();
+
+        // Dummy head and tail to simplify boundary conditions
+        this.head = new ListNode<K, V>(null as any, null as any);
+        this.tail = new ListNode<K, V>(null as any, null as any);
+        this.head.next = this.tail;
+        this.tail.prev = this.head;
+    }
+
+    get(key: K): V | undefined {
+        if (!this.map.has(key)) return undefined;
+
+        const node = this.map.get(key)!;
+        this.moveToFront(node);
+        return node.value;
+    }
+
+    has(key: K): boolean {
+        return this.map.has(key);
+    }
+
+    set(key: K, value: V): void {
+        if (this.map.has(key)) {
+            // Update existing node value and move it to front
+            const node = this.map.get(key)!;
+            node.value = value;
+            this.moveToFront(node);
+        } else {
+            // Create a new node
+            const newNode = new ListNode(key, value);
+            this.map.set(key, newNode);
+            this.addToFront(newNode);
+
+            // If over capacity, remove the least recently used (LRU) node
+            if (this.map.size > this.capacity) {
+                this.removeLRU();
+            }
+        }
+    }
+
+    private moveToFront(node: ListNode<K, V>): void {
+        this.removeNode(node);
+        this.addToFront(node);
+    }
+
+    private addToFront(node: ListNode<K, V>): void {
+        node.next = this.head.next;
+        node.prev = this.head;
+        this.head.next!.prev = node;
+        this.head.next = node;
+    }
+
+    private removeNode(node: ListNode<K, V>): void {
+        node.prev!.next = node.next;
+        node.next!.prev = node.prev;
+    }
+
+    private removeLRU(): void {
+        const lruNode = this.tail.prev!;
+        this.removeNode(lruNode);
+        this.map.delete(lruNode.key);
+    }
+
+    *[Symbol.iterator](): IterableIterator<[K, V]> {
+        let current = this.head.next;
+        while (current && current !== this.tail) {
+            yield [current.key, current.value];
+            current = current.next;
+        }
     }
 }

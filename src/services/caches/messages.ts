@@ -1,14 +1,13 @@
 import { fromDiscord } from "../../types/common";
 import { Message, type MessagePayload } from "../../types/message";
 import type { API } from "../api";
-import type { Client } from "../client";
 import type { Processor } from "../processor";
 import { ObjectCache } from "./cache";
 
 
 export class Messages extends ObjectCache<Message, MessagePayload> {
-    constructor (protected client: Client, api: API, processor: Processor) {
-        super(api, processor, 'message', Message, ['MESSAGE_CREATE', 'MESSAGE_UPDATE']);
+    constructor (api: API, processor: Processor) {
+        super(api, processor, 'messages', Message, ['MESSAGE_CREATE', 'MESSAGE_UPDATE']);
     }
 
     async fetch(channel_id: string, message_id: string): Promise<MessagePayload> {

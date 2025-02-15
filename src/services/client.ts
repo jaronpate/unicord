@@ -1,15 +1,15 @@
-import { API } from './api';
-import { Gateway } from './connectors/gateway';
-import { Processor } from './processor';
 import { Expectation, HandlerType, Intent, type ClientConfig } from '../types/common';
+import { Message, type DiscordMessage } from '../types/message';
 import { exists, isNil } from '../utils/index';
-import { type DiscordMessage, Message } from '../types/message';
+import { API } from './api';
+import { EventBus, type Emitter } from './bus';
+import { Channels } from './caches/channels';
 import { Guilds } from './caches/guilds';
 import { Messages } from './caches/messages';
-import { Channels } from './caches/channels';
 import { Users } from './caches/users';
+import { Gateway } from './connectors/gateway';
 import { hydrate, hydrator, type Hydrateable, type Hydrated } from './hydrator';
-import { EventBus, type Emitter } from './bus';
+import { Processor } from './processor';
 
 export class Client {
     readonly token: string;
@@ -44,7 +44,7 @@ export class Client {
         this.gateway = new Gateway(this, this.processor, this.api, this.bus);
         this.guilds = new Guilds(this.api, this.processor);
         this.users = new Users(this.api, this.processor);
-        this.messages = new Messages(this, this.api, this.processor);
+        this.messages = new Messages(this.api, this.processor);
         this.channels = new Channels(this.api, this.processor);
         // Save references to command and event handlers
         this.chatCommands = this.processor[HandlerType.ChatCommands];
