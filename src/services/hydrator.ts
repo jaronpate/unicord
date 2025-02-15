@@ -9,8 +9,8 @@ import type { Client } from "./client";
 export type GatewayObject = Message | Channel;
 export type Hydrateable = Context | GatewayObject
 export type Hydrated<T extends Hydrateable, K extends Array<Expectation>> =
-    T extends Message ? HydratedMessage<K> & Partial<HydratedMessage<Expectation[]>> :
-    T extends Context ? HydratedContext<K> & Partial<HydratedContext<Expectation[]>> : never;
+    T extends Message ? HydratedMessage<K> & Omit<T, keyof HydratedMessage<K>> :
+    T extends Context ? HydratedContext<K> & Omit<T, keyof HydratedContext<K>> : never;
 
 /**
  * Hydrates a given data object based on the provided expectations.
@@ -70,10 +70,10 @@ export async function hydrate<T extends Hydrateable, K extends Array<Expectation
     }
 
     // Create a new object that preserves all existing properties
-    const result = { ...data };
+    const result = { ...data } as any;
     
-    // Return with both previous and new hydrated properties preserved
-    return result as Hydrated<T, K>;
+    // Ensure the result is properly typed with both old and new hydrated properties
+    return result as T & Hydrated<T, K>;
 }
 
 /**
