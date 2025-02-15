@@ -34,6 +34,11 @@ export type Component = Partial<Button | SelectMenu> & {
 //     components?: Component[];
 // }
 
+export type DefaultReaction = {
+    emoji_id?: string | null;   // the id of a guild's custom emoji
+    emoji_name?: string | null; // the unicode character of the emoji
+};
+
 export type Emoji = {
     name: string | null;
     id: string | null;
