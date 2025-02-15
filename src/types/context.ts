@@ -94,7 +94,7 @@ export class Context<D extends ContextData = ContextData> {
      * 
      * @returns A promise that resolves to a type guard function. The type guard function returns `true` if the data object was successfully hydrated, otherwise `false`.
      */
-    public hydrator = async <T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>, K extends Array<Expectation>>(data: T, expectations: K) => {
+    public hydrator = async <T extends Hydrateable, K extends Array<Expectation>>(data: T, expectations: K) => {
         return hydrator<T, K>(data, expectations, this.client, this.api);
     }
 
