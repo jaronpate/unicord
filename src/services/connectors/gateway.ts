@@ -121,7 +121,7 @@ export class Gateway {
             throw new Error('Event name is required');
         }
 
-        log('Event:', payload.t);
+        // log('Event:', payload.t);
 
         // Extract the event name and data
         const event_name = payload.t;
