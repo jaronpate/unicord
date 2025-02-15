@@ -1,15 +1,16 @@
 import { Expectation } from "../types/common";
 import { Context, type HydratedContext } from "../types/context";
 import { Message, type HydratedMessage } from "../types/message";
+import { Channel } from "../types/channel";
 import { exists } from "../utils";
 import type { API } from "./api";
 import type { Client } from "./client";
 
-export type GatewayObject = Message;
+export type GatewayObject = Message | Channel;
 export type Hydrateable = Context | GatewayObject
 export type Hydrated<T extends Hydrateable, K extends Array<Expectation>> =
-    T extends Message ? HydratedMessage<K> :
-    T extends Context ? HydratedContext<K> : never;
+    T extends Message ? HydratedMessage<K> & Omit<T, keyof HydratedMessage<K>> :
+    T extends Context ? HydratedContext<K> & Omit<T, keyof HydratedContext<K>> : never;
 
 /**
  * Hydrates a given data object based on the provided expectations.
@@ -26,12 +27,12 @@ export type Hydrated<T extends Hydrateable, K extends Array<Expectation>> =
  * 
  * @throws Will throw an error if an expectation cannot be resolved.
  */
-export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K extends Array<Expectation>>(
+export async function hydrate<T extends Hydrateable, K extends Array<Expectation>>(
     data: T,
     expectations: K,
     client: Client,
     api: API
-): Promise<T extends Hydrated<infer U, infer H> ? Hydrated<T & U, [...H, ...K]> : Hydrated<T, K>> {
+): Promise<Hydrated<T, K>> {
     // TODO: add clone trait. Make it a requirement for hydrateable objects.
     // Then clone the object and return the hydrated object.
     let hydrated: Hydrated<T, K>;
@@ -44,6 +45,9 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
             } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
                 let context = data as unknown as HydratedContext<[Expectation.Guild, ...Expectation[]]>;
                 context.guild = await client.guilds.get(data.guild_id);
+            } else if (expectation === Expectation.Channel && exists(data.channel_id)) {
+                let context = data as unknown as HydratedContext<[Expectation.Channel, ...Expectation[]]>;
+                context.channel = await client.channels.get(data.channel_id);
             } else {
                 throw new Error(`Invalid expectation requested for Context: ${expectation}`);
             }
@@ -65,7 +69,11 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
         }
     }
 
-    return data as unknown as (T extends Hydrated<infer U, infer H> ? Hydrated<T & U, [...H, ...K]> : Hydrated<T, K>);
+    // Create a new object that preserves all existing properties
+    const result = { ...data } as any;
+    
+    // Ensure the result is properly typed with both old and new hydrated properties
+    return result as T & Hydrated<T, K>;
 }
 
 /**
@@ -81,12 +89,12 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
  * 
  * @returns A promise that resolves to a type guard function. The type guard function returns `true` if the data object was successfully hydrated, otherwise `false`.
  */
-export async function hydrator<T extends Hydrateable | Hydrated<any, any>, K extends Array<Expectation>>(
+export async function hydrator<T extends Hydrateable, K extends Array<Expectation>>(
     data: T,
     expectations: K,
     client: Client,
     api: API
-): Promise<(data: unknown) => data is T extends Hydrated<infer U, infer H> ? Hydrated<T & U, [...H, ...K]> : Hydrated<T, K>> {
+): Promise<(data: unknown) => data is Hydrated<T, K>> {
     let hydrated = true;
 
     try {
@@ -98,7 +106,7 @@ export async function hydrator<T extends Hydrateable | Hydrated<any, any>, K ext
     }
 
     // BUG: Resolves to never after hydrations on an already hydrated object
-    return function (data: unknown): data is T extends Hydrated<infer U, infer H> ? Hydrated<T & U, [...H, ...K]> : Hydrated<T, K> {
+    return function (data: unknown): data is Hydrated<T, K> {
         return hydrated;
     }
 }

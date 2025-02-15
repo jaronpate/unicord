@@ -1,4 +1,4 @@
-import { ApplicationCommandType, Client, CommandOptionType, ComponentStyle, type Context, createCommandHandler, Expectation, Intent, InteractionCommpoentData, type InteractionData, Message, type MessagePayload } from '../src/index';
+import { ApplicationCommandType, ChannelType, Client, CommandOptionType, ComponentStyle, type Context, createCommandHandler, Expectation, Intent, InteractionCommpoentData, type InteractionData, Message, type MessagePayload } from '../src/index';
 
 const client = new Client({
     token: process.env.BOT_TOKEN!,
@@ -78,20 +78,18 @@ Nice to meet you, I'm ${context.self.username}!`
 // Repeated hydration
 client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // Note: Testing repeated hydration
-    const { message } = await context.hydrate(context, [Expectation.Message])
-    const hydrated = await context.hydrate(message, [Expectation.Channel])
-    // const rehydrated = await context.hydrate(hydrated, [Expectation.Guild]);
-    // rehydrated.guild.name
+    const { message } = await context.hydrate(context, [Expectation.Message]);
+    const { channel } = await context.hydrate(message, [Expectation.Channel]);
 
-    const hydrate = await context.hydrator(hydrated, [Expectation.Guild]);
-    const hasGuild = hydrate(hydrated);
+    const hydrate = await context.hydrator(context, [Expectation.Guild]);
+    const hasGuild = hydrate(context);
 
     if (hasGuild) {
         // Send a message stating the user that they are in a guild
-        await context.reply(`You are ${message.author.username} and this is ${hydrated.guild.name}`, true);
+        await context.reply(`You are ${message.author.username} and this is ${context.guild.name}`, true);
     } else {
         // Send a message stating the user that they are not in a guild
-        await context.reply(`You are ${message.author.username} and we are in ${hydrated.channel.type === 1 ? 'our DM\'s <3' : 'a Group DM 👀'}`, true);
+        await context.reply(`You are ${message.author.username} and we are in ${channel.type === ChannelType.DM ? 'our DM\'s 😘' : 'a Group 👀'}`, true);
     }
 });
 
