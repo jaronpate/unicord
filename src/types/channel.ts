@@ -1,6 +1,6 @@
 import { GatewayObject } from './base';
+import { Trait } from './common';
 import { User } from './user';
-import { Trait } from '../utils';
 
 export enum ChannelType {
     GUILD_TEXT = 0,
