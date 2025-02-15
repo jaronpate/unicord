@@ -71,6 +71,11 @@ export type ForumTag = {
     emoji_name?: string | null;
 }
 
+export type DefaultReaction = {
+    emoji_id?: string | null;   // the id of a guild's custom emoji
+    emoji_name?: string | null; // the unicode character of the emoji
+}
+
 export class Channel extends GatewayObject {
     id: string;
     type: ChannelType;
