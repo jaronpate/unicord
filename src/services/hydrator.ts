@@ -56,6 +56,9 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
             } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
                 let message = data as unknown as HydratedMessage<[Expectation.Guild, ...Expectation[]]>;
                 message.guild = await client.guilds.get(data.guild_id);
+            } else if (expectation === Expectation.Channel && exists(data.channel_id)) {
+                let message = data as unknown as HydratedMessage<[Expectation.Channel, ...Expectation[]]>;
+                message.channel = await client.channels.get(data.channel_id);
             } else {
                 throw new Error(`Invalid expectation requested for Message: ${expectation}`);
             }

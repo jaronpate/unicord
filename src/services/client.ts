@@ -7,6 +7,7 @@ import { type DiscordMessage, Message } from '../types/message';
 import { Guilds } from './caches/guilds';
 import { Messages } from './caches/messages';
 import { Users } from './caches/users';
+import { Channels } from './caches/channels';
 import { hydrate, hydrator, type Hydrateable, type Hydrated } from './hydrator';
 import { EventBus, type Emitter } from './bus';
 
@@ -23,6 +24,7 @@ export class Client {
     guilds: Guilds;
     users: Users;
     messages: Messages;
+    channels: Channels;
     chatCommands: Processor[HandlerType.ChatCommands];
     applicationCommands: Processor[HandlerType.ApplicationCommands];
     interactions: Processor[HandlerType.Interactions];
@@ -42,7 +44,8 @@ export class Client {
         this.gateway = new Gateway(this, this.processor, this.api, this.bus);
         this.guilds = new Guilds(this.api, this.processor);
         this.users = new Users(this.api, this.processor);
-        this.messages = new Messages(this, this.api, this.processor);
+        this.messages = new Messages(this.api, this.processor);
+        this.channels = new Channels(this.api, this.processor);
         // Save references to command and event handlers
         this.chatCommands = this.processor[HandlerType.ChatCommands];
         this.applicationCommands = this.processor[HandlerType.ApplicationCommands];

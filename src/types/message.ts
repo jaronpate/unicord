@@ -1,9 +1,10 @@
 import { exists, isNil } from '../utils';
 import { GatewayObject } from './base';
-import { fromDiscord, Trait, type Expectation, type Expects } from './common';
+import type { Channel } from './channel';
+import { fromDiscord, Trait, type Expectation } from './common';
 import type { Embed } from './embed';
 import type { Guild } from './guild';
-import { type DiscordUser, User } from './user';
+import { User, type DiscordUser } from './user';
 
 export type Component = Partial<Button | SelectMenu> & {
     type: ComponentType;
@@ -83,7 +84,7 @@ export enum ComponentType {
 }
 
 export type HydratedMessage<T extends Array<Expectation>> = MessagePayload & {
-    // channel: Extract<Expectation.Channel, T[number]> extends never ? undefined : Channel;
+    channel: Extract<Expectation.Channel, T[number]> extends never ? undefined : Channel;
     reference: Extract<Expectation.Message, T[number]> extends never ? undefined : MessagePayload;
     guild: Extract<Expectation.Guild, T[number]> extends never ? undefined : Guild;
 }
