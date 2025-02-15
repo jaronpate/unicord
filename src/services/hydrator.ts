@@ -27,12 +27,12 @@ export type Hydrated<T extends Hydrateable, K extends Array<Expectation>> =
  * 
  * @throws Will throw an error if an expectation cannot be resolved.
  */
-export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K extends Array<Expectation>>(
+export async function hydrate<T extends Hydrateable, K extends Array<Expectation>>(
     data: T,
     expectations: K,
     client: Client,
     api: API
-): Promise<T extends Hydrated<infer U, infer H> ? Hydrated<T & U, [...H, ...K]> : Hydrated<T, K>> {
+): Promise<Hydrated<T, K>> {
     // TODO: add clone trait. Make it a requirement for hydrateable objects.
     // Then clone the object and return the hydrated object.
     let hydrated: Hydrated<T, K>;
