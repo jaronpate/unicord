@@ -5,7 +5,13 @@ export { Intent, Trait } from './types/common';
 export type { ClientConfig } from './types/common';
 export type { Context } from './types/context';
 export { Expectation } from './types/common';
-export { ChannelType } from './types/channel';
+export { 
+    ChannelType,
+    ChannelFlags,
+    VideoQualityMode,
+    SortOrderType,
+    ForumLayoutType 
+} from './types/channel';
 // Consumable util classes
 export { Guild } from './types/guild';
 export { Role } from './types/role';
