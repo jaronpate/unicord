@@ -3,6 +3,7 @@ import { GatewayObject } from './base';
 import { fromDiscord, Trait, type Expectation, type Expects } from './common';
 import type { Embed } from './embed';
 import type { Guild } from './guild';
+import { Channel } from './channel';
 import { type DiscordUser, User } from './user';
 
 export type Component = Partial<Button | SelectMenu> & {
@@ -33,6 +34,11 @@ export type Component = Partial<Button | SelectMenu> & {
 //     max_values?: number;
 //     components?: Component[];
 // }
+
+export type DefaultReaction = {
+    emoji_id?: string | null;   // the id of a guild's custom emoji
+    emoji_name?: string | null; // the unicode character of the emoji
+};
 
 export type Emoji = {
     name: string | null;
@@ -83,7 +89,7 @@ export enum ComponentType {
 }
 
 export type HydratedMessage<T extends Array<Expectation>> = MessagePayload & {
-    // channel: Extract<Expectation.Channel, T[number]> extends never ? undefined : Channel;
+    channel: Extract<Expectation.Channel, T[number]> extends never ? undefined : Channel;
     reference: Extract<Expectation.Message, T[number]> extends never ? undefined : MessagePayload;
     guild: Extract<Expectation.Guild, T[number]> extends never ? undefined : Guild;
 }
