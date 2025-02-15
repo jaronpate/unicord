@@ -4,6 +4,7 @@ import { hydrate, hydrator, type Hydrateable, type Hydrated } from "../services/
 import { isNil, exists } from "../utils";
 import { fromDiscord, InteractionResponseType, type Expectation } from "./common";
 import type { Guild } from "./guild";
+import { Channel } from "./channel";
 import type { InteractionPayload } from "./handler";
 import { type DiscordMessage, Message, type MessagePayload } from "./message";
 /**
@@ -28,6 +29,7 @@ import { type DiscordMessage, Message, type MessagePayload } from "./message";
 export type HydratedContext<T extends Array<Expectation>> = Context & {
     guild: Extract<Expectation.Guild, T[number]> extends never ? undefined : Guild;
     message: Extract<Expectation.Message, T[number]> extends never ? undefined : Message;
+    channel: Extract<Expectation.Channel, T[number]> extends never ? undefined : Channel;
 };
 
 export type ContextData =
