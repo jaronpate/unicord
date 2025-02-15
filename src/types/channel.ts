@@ -133,7 +133,11 @@ export class Channel extends GatewayObject {
         this.application_id = data.application_id;
         this.managed = data.managed;
         this.parent_id = data.parent_id;
-        this.last_pin_timestamp = data.last_pin_timestamp ? new Date(data.last_pin_timestamp) : null;
+        this.last_pin_timestamp = data.last_pin_timestamp instanceof Date 
+            ? data.last_pin_timestamp 
+            : data.last_pin_timestamp 
+                ? new Date(data.last_pin_timestamp) 
+                : null;
         this.rtc_region = data.rtc_region;
         this.video_quality_mode = data.video_quality_mode;
         this.message_count = data.message_count;
@@ -172,7 +176,7 @@ export class Channel extends GatewayObject {
             application_id: data.application_id,
             managed: data.managed,
             parent_id: data.parent_id,
-            last_pin_timestamp: data.last_pin_timestamp,
+            last_pin_timestamp: data.last_pin_timestamp ? new Date(data.last_pin_timestamp) : null,
             rtc_region: data.rtc_region,
             video_quality_mode: data.video_quality_mode,
             message_count: data.message_count,
