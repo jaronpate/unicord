@@ -85,12 +85,12 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
  * 
  * @returns A promise that resolves to a type guard function. The type guard function returns `true` if the data object was successfully hydrated, otherwise `false`.
  */
-export async function hydrator<T extends Hydrateable | Hydrated<any, any>, K extends Array<Expectation>>(
+export async function hydrator<T extends Hydrateable, K extends Array<Expectation>>(
     data: T,
     expectations: K,
     client: Client,
     api: API
-): Promise<(data: unknown) => data is T extends Hydrated<infer U, infer H> ? Hydrated<T & U, [...H, ...K]> : Hydrated<T, K>> {
+): Promise<(data: unknown) => data is Hydrated<T, K>> {
     let hydrated = true;
 
     try {
@@ -102,7 +102,7 @@ export async function hydrator<T extends Hydrateable | Hydrated<any, any>, K ext
     }
 
     // BUG: Resolves to never after hydrations on an already hydrated object
-    return function (data: unknown): data is T extends Hydrated<infer U, infer H> ? Hydrated<T & U, [...H, ...K]> : Hydrated<T, K> {
+    return function (data: unknown): data is Hydrated<T, K> {
         return hydrated;
     }
 }
