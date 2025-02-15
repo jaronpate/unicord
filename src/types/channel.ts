@@ -152,7 +152,7 @@ export class Channel extends GatewayObject {
         this.default_forum_layout = data.default_forum_layout;
     }
 
-    public static [Trait.fromDiscord]<T extends Channel>(data: DiscordChannel): T {
+    public static [Trait.fromDiscord]<T = Channel>(data: DiscordChannel): T {
         return new Channel({
             id: data.id,
             type: data.type,
