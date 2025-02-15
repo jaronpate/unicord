@@ -1,11 +1,12 @@
 import { Expectation } from "../types/common";
 import { Context, type HydratedContext } from "../types/context";
 import { Message, type HydratedMessage } from "../types/message";
+import { Channel } from "../types/channel";
 import { exists } from "../utils";
 import type { API } from "./api";
 import type { Client } from "./client";
 
-export type GatewayObject = Message;
+export type GatewayObject = Message | Channel;
 export type Hydrateable = Context | GatewayObject
 export type Hydrated<T extends Hydrateable, K extends Array<Expectation>> =
     T extends Message ? HydratedMessage<K> :
@@ -44,6 +45,9 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
             } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
                 let context = data as unknown as HydratedContext<[Expectation.Guild, ...Expectation[]]>;
                 context.guild = await client.guilds.get(data.guild_id);
+            } else if (expectation === Expectation.Channel && exists(data.channel_id)) {
+                let context = data as unknown as HydratedContext<[Expectation.Channel, ...Expectation[]]>;
+                context.channel = await client.channels.get(data.channel_id);
             } else {
                 throw new Error(`Invalid expectation requested for Context: ${expectation}`);
             }
@@ -56,6 +60,9 @@ export async function hydrate<T extends Hydrateable | Hydrated<any, any>, K exte
             } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
                 let message = data as unknown as HydratedMessage<[Expectation.Guild, ...Expectation[]]>;
                 message.guild = await client.guilds.get(data.guild_id);
+            } else if (expectation === Expectation.Channel && exists(data.channel_id)) {
+                let message = data as unknown as HydratedMessage<[Expectation.Channel, ...Expectation[]]>;
+                message.channel = await client.channels.get(data.channel_id);
             } else {
                 throw new Error(`Invalid expectation requested for Message: ${expectation}`);
             }
