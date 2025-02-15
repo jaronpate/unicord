@@ -152,7 +152,7 @@ export class Channel extends GatewayObject {
         this.default_forum_layout = data.default_forum_layout;
     }
 
-    public static [Trait.fromDiscord](data: DiscordChannel): Channel {
+    public static [Trait.fromDiscord]<T extends Channel>(data: DiscordChannel): T {
         return new Channel({
             id: data.id,
             type: data.type,
@@ -189,7 +189,7 @@ export class Channel extends GatewayObject {
             default_thread_rate_limit_per_user: data.default_thread_rate_limit_per_user,
             default_sort_order: data.default_sort_order,
             default_forum_layout: data.default_forum_layout
-        });
+        }) as T;
     }
 }
 
