@@ -16,9 +16,14 @@ export default function Home() {
         <div className={[styles.page, styles.pageWithHeader].join(" ")}>
             <header className={styles.header}>
                 <div className={styles.logoMark}>
-                    <img src="/unicord.png"></img>
+                    <img src="/unicord.png" alt="Unicord logo"></img>
                     <div><span className={styles.logoMarkSpan}>uni</span>cord</div>
                 </div>
+                <nav className={styles.nav}>
+                    <a href="/docs" className={styles.navLink}>Docs</a>
+                    <a href="https://github.com/unicorddev/unicord" className={styles.navLink}>Source</a>
+                    <a href="https://discord.gg/your-invite-here" className={styles.navLink}>Discord</a>
+                </nav>
             </header>
             <main className={styles.main}>
                 <div className={styles.hero}>
