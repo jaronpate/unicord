@@ -11,10 +11,5 @@
     overflow: hidden;
     border: 1px solid #2d2d2d;
     /* Prevent scroll capture */
-    pointer-events: none;
-}
-
-/* Re-enable pointer events only for the Monaco Editor */
-.editorContainer :global(.monaco-editor) {
-    pointer-events: auto;
+    /* pointer-events: none; */
 }

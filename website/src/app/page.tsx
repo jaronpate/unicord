@@ -27,7 +27,7 @@ export default function Home() {
                         </p>
                     </div>
                     <div className={styles.codeExample}>
-                        <CodeExample code={simpleExample} />
+                        <CodeExample code={simpleExample} noScroll={true} />
                     </div>
                 </div>
 
@@ -54,7 +54,7 @@ export default function Home() {
                 <div className={styles.hydrationSection}>
                     <div className={styles.hydrationContainer}>
                         <div className={styles.hydrationCode}>
-                            <CodeExample code={hydrationExample} height={260} />
+                            <CodeExample code={hydrationExample} height={260} noScroll={true} />
                         </div>
                         <div className={styles.hydrationText}>
                             <h2>Smart Hydration</h2>

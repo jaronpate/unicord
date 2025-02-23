@@ -6,12 +6,13 @@ import styles from './CodeExample.module.css';
 type CodeExampleProps = {
     code: string;
     height?: string | number;
+    noScroll?: boolean;
 }
 
-export default function CodeExample({ code, height = "100%" }: CodeExampleProps) {
+export default function CodeExample({ code, height = "100%", noScroll = false }: CodeExampleProps) {
     return (
         <div className={styles.editorWrapper}>
-            <div className={styles.editorContainer}>
+            <div className={styles.editorContainer} style={{ pointerEvents: noScroll ? 'none' : 'auto' }}>
                 <Editor
                     height={height}
                     defaultLanguage="typescript"
