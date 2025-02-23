@@ -1,4 +1,10 @@
 import styles from "./page.module.css";
+import dynamic from 'next/dynamic';
+
+const CodeExample = dynamic(
+  () => import('../components/CodeExample'),
+  { ssr: false }
+);
 
 export default function Home() {
     return (
@@ -20,34 +26,7 @@ export default function Home() {
                         </p>
                     </div>
                     <div>
-                        <code className={styles.code}>
-                            <pre className={styles.codeBlock}>
-{`\
-import { Client, type Context } from 'unicord';
-
-// Initialize and configure
-const client = new Client({
-    token: '<token>',
-    application_id: '<application_id>',
-    intents: [
-        Intent.GUILDS,
-        Intent.GUILD_MESSAGES,
-        Intent.GUILD_MESSAGE_REACTIONS,
-        Intent.MESSAGE_CONTENT
-    ],
-    prefix: '??'
-});
-
-// Register a command
-client.chatCommands.register('ping', (context: Context, args) => {
-    context.reply('Pong!', true);
-});
-
-// Connect
-client.connect();
-`}
-                            </pre>
-                        </code>
+                        <CodeExample />
                     </div>
                 </div>
 
