@@ -1,19 +1,23 @@
 .section {
-  padding: var(--section-padding-desktop);
+  padding: 6rem 12em;
   min-height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  border-top: 1px solid var(--gray-alpha-200);
 }
 
 .dark {
   background: var(--gray-alpha-100);
+  border-top: 1px solid var(--gray-alpha-200);
+}
+
+.light {
+  border-top: 1px solid var(--gray-alpha-200);
 }
 
 @media (max-width: 1200px) {
   .section {
-    padding: var(--section-padding-mobile);
+    padding: 4rem 2rem;
   }
 }
