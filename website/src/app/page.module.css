@@ -1,0 +1,148 @@
+.page {
+  --gray-rgb: 255, 255, 255;
+  --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
+  --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
+
+  --button-primary-hover: #ccc;
+  --button-secondary-hover: #1a1a1a;
+
+  font-family: var(--font-space-grotesk);
+}
+
+/* pag with header needs margin atop */
+.pageWithHeader {
+  margin-top: 4rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem;
+  /* glassy background */
+  background: transparent;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--gray-alpha-200);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.header img {
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+}
+
+.logoMark {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.logoMarkSpan {
+  color: #ff0080;
+}
+
+.main {
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* padding: 4rem 0em; */
+}
+
+@keyframes dotPattern {
+  0% {
+    background-position: top right;
+  }
+  100% {
+    background-position: bottom left;
+  }
+}
+
+.hero {
+  padding: 0 15em 0;
+  height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--gray-alpha-200);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: radial-gradient(circle, #ff0080 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: dotPattern 30s linear infinite;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, transparent, var(--gray-alpha-100));
+  pointer-events: none;
+}
+
+.code {
+  font-family: var(--font-mono);
+  font-size: 1em;
+}
+
+.codeBlock {
+  background: var(--gray-alpha-100);
+  padding: 1em;
+  border-radius: 0.5em;
+}
+
+.codeBlock pre {
+  margin: 0;
+}
+
+.codeBlock code {
+  font-size: 1em;
+}
+
+.codeBlock code::before {
+  content: "";
+}
+
+.codeBlock code::after {
+  content: "";
+}
+
+.codeBlock code:hover {
+  background: var(--gray-alpha-200);
+}
+
+.codeBlock code:active {
+  background: var(--gray-alpha-200);
+}
+
+.codeBlock code:focus {
+  background: var(--gray-alpha-200);
+}
+
+.codeBlock code:focus-visible {
+  background: var(--gray-alpha-200);
+}
+
+.codeBlock code:focus-within {
+  background: var(--gray-alpha-200);
+}
