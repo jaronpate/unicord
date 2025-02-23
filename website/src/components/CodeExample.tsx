@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import * as monaco from 'monaco-editor';
+import { useRef } from 'react';
+import Editor from "@monaco-editor/react";
 import styles from './CodeExample.module.css';
 
 const exampleCode = `\
@@ -29,27 +29,24 @@ client.chatCommands.register('ping', (context: Context, args) => {
 client.connect();`;
 
 export default function CodeExample() {
-    const editorRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (editorRef.current) {
-            const editor = monaco.editor.create(editorRef.current, {
-                value: exampleCode,
-                language: 'typescript',
-                theme: 'vs-dark',
-                minimap: { enabled: false },
-                readOnly: true,
-                automaticLayout: true,
-                fontSize: 14,
-                lineNumbers: 'on',
-                scrollBeyondLastLine: false,
-                roundedSelection: false,
-                padding: { top: 16, bottom: 16 },
-            });
-
-            return () => editor.dispose();
-        }
-    }, []);
-
-    return <div className={styles.editorContainer} ref={editorRef} />;
+    return (
+        <div className={styles.editorContainer}>
+            <Editor
+                height="400px"
+                defaultLanguage="typescript"
+                defaultValue={exampleCode}
+                theme="vs-dark"
+                options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: 'on',
+                    scrollBeyondLastLine: false,
+                    roundedSelection: false,
+                    padding: { top: 16, bottom: 16 },
+                    automaticLayout: true,
+                }}
+            />
+        </div>
+    );
 }
