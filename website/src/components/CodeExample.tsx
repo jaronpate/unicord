@@ -1,10 +1,38 @@
 'use client';
 
-import { useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import styles from './CodeExample.module.css';
 
-const exampleCode = `\
+type CodeExampleProps = {
+    code: string;
+    height?: string | number;
+}
+
+export default function CodeExample({ code, height = "100%" }: CodeExampleProps) {
+    return (
+        <div className={styles.editorContainer}>
+            <Editor
+                height={height}
+                defaultLanguage="typescript"
+                defaultValue={code}
+                theme="vs-dark"
+                options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: 'on',
+                    scrollBeyondLastLine: false,
+                    roundedSelection: false,
+                    padding: { top: 16, bottom: 16 },
+                    automaticLayout: true,
+                }}
+            />
+        </div>
+    );
+}
+
+// Export the example code snippets for reuse
+export const simpleExample = `\
 import { Client, type Context } from 'unicord';
 
 // Initialize and configure
@@ -28,25 +56,14 @@ client.chatCommands.register('ping', (context: Context, args) => {
 // Connect
 client.connect();`;
 
-export default function CodeExample() {
-    return (
-        <div className={styles.editorContainer}>
-            <Editor
-                height="100%"
-                defaultLanguage="typescript"
-                defaultValue={exampleCode}
-                theme="vs-dark"
-                options={{
-                    readOnly: true,
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: 'on',
-                    scrollBeyondLastLine: false,
-                    roundedSelection: false,
-                    padding: { top: 16, bottom: 16 },
-                    automaticLayout: true,
-                }}
-            />
-        </div>
-    );
-}
+export const hydrationExample = `\
+client.chatCommands.register('ping', async (context: Context, args: any[]) => {
+    // Hydrate the message id from the context
+    const { message } = await context.hydrate(context, [Expectation.Message]);
+    // Send a message to the channel
+    const response = await context.reply(\`Pong!: got \${args.join(', ')}\`, true);
+    // Calculate the time it took to send the message
+    const time = message.timestamp.getTime() - message.timestamp.getTime();
+    // Edit the message to include the time
+    await context.editMessage(response, \`Pong! Latency: \${time}ms\`);
+});`;

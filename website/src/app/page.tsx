@@ -2,8 +2,11 @@ import styles from "./page.module.css";
 import dynamic from 'next/dynamic';
 
 const CodeExample = dynamic(
-  () => import('../components/CodeExample')
+  () => import('../components/CodeExample'),
+  { ssr: false }
 );
+
+import { simpleExample, hydrationExample } from '../components/CodeExample';
 
 export default function Home() {
     return (
@@ -25,7 +28,7 @@ export default function Home() {
                         </p>
                     </div>
                     <div className={styles.codeExample}>
-                        <CodeExample />
+                        <CodeExample code={simpleExample} />
                     </div>
                 </div>
 
@@ -45,6 +48,28 @@ export default function Home() {
                             <div className={styles.pillarIcon}>📈</div>
                             <h2>Scalable</h2>
                             <p>Efficient caching and event handling for bots of any size</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.hydrationSection}>
+                    <div className={styles.hydrationContainer}>
+                        <div className={styles.hydrationCode}>
+                            <CodeExample code={hydrationExample} height={400} />
+                        </div>
+                        <div className={styles.hydrationText}>
+                            <h2>Smart Hydration</h2>
+                            <p>
+                                Unicord's hydration system automatically manages Discord object lifecycles. 
+                                The context.hydrate method intelligently fetches and caches Discord objects 
+                                like messages, users, and guilds, ensuring your bot stays efficient while 
+                                keeping your code clean and predictable.
+                            </p>
+                            <p>
+                                In this example, we're hydrating a message object to calculate ping times, 
+                                demonstrating how Unicord handles complex Discord API interactions with 
+                                simple, intuitive code.
+                            </p>
                         </div>
                     </div>
                 </div>
