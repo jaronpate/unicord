@@ -1,15 +1,21 @@
-import styles from './Section.module.css';
+'use client';
+
+import { ReactNode } from 'react';
+import styles from '../app/page.module.css';
 
 type SectionProps = {
-  children: React.ReactNode;
-  background?: 'light' | 'dark';
-  className?: string;
-};
+    children: ReactNode;
+    background?: 'light' | 'dark';
+    className?: string;
+}
 
 export function Section({ children, background = 'light', className = '' }: SectionProps) {
-  return (
-    <section className={`${styles.section} ${styles[background]} ${className}`}>
-      {children}
-    </section>
-  );
+    return (
+        <div className={[
+            className,
+            background === 'dark' ? styles.darkSection : ''
+        ].filter(Boolean).join(' ')}>
+            {children}
+        </div>
+    );
 }
