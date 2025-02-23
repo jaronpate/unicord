@@ -32,7 +32,7 @@ export default function CodeExample() {
     return (
         <div className={styles.editorContainer}>
             <Editor
-                height="400px"
+                height="100%"
                 defaultLanguage="typescript"
                 defaultValue={exampleCode}
                 theme="vs-dark"
