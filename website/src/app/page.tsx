@@ -5,7 +5,7 @@ const CodeExample = dynamic(
   () => import('../components/CodeExample')
 );
 
-import { simpleExample, hydrationExample } from '../components/CodeExample';
+import { simpleExample, hydrationExample, typeCoercionExample } from '../components/CodeExample';
 
 export default function Home() {
     return (
@@ -85,7 +85,7 @@ export default function Home() {
                             </p>
                         </div>
                         <div className={styles.typeCode}>
-                            <CodeExample code={typeCoercionExample} height={300} noScroll={true} />
+                            <CodeExample code={typeCoercionExample} height={370} noScroll={true} />
                         </div>
                     </div>
                 </div>
