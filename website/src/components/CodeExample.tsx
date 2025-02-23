@@ -70,3 +70,21 @@ client.chatCommands.register('ping', async (context: Context, args: any[]) => {
     // Edit the message to include the time
     await context.editMessage(response, \`Pong! Latency: \${time}ms\`);
 });`;
+
+export const typeCoercionExample = `\
+const avatarCommand = createCommandHandler({
+    description: 'Get a users avatar',
+    args: [
+        {
+            id: 'user',
+            name: 'user',
+            type: CommandOptionType.User,
+            description: 'The user to get the avatar for',
+            required: true
+        }
+    ],
+    execute: async (context: Context, args) => {
+        // Args will be typed here as { user: User }
+        context.reply(args.user.avatarURL);
+    }
+});`;

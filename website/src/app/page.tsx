@@ -67,6 +67,28 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+
+                <div className={styles.typeSection}>
+                    <div className={styles.typeContainer}>
+                        <div className={styles.typeText}>
+                            <h2>Type Coercion</h2>
+                            <p>
+                                Unicord automatically handles type coercion for command arguments, 
+                                ensuring you always get the correct types in your handlers. Define your 
+                                command structure once, and get full type safety and autocompletion 
+                                throughout your codebase.
+                            </p>
+                            <p>
+                                In this example, the <code>user</code> argument is automatically typed 
+                                as a <code>User</code> object, providing access to all user properties 
+                                with full TypeScript support.
+                            </p>
+                        </div>
+                        <div className={styles.typeCode}>
+                            <CodeExample code={typeCoercionExample} height={300} noScroll={true} />
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     );
