@@ -10,23 +10,25 @@ type CodeExampleProps = {
 
 export default function CodeExample({ code, height = "100%" }: CodeExampleProps) {
     return (
-        <div className={styles.editorContainer}>
-            <Editor
-                height={height}
-                defaultLanguage="typescript"
-                defaultValue={code}
-                theme="vs-dark"
-                options={{
-                    readOnly: true,
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: 'on',
-                    scrollBeyondLastLine: false,
-                    roundedSelection: false,
-                    padding: { top: 16, bottom: 16 },
-                    automaticLayout: true,
-                }}
-            />
+        <div className={styles.editorWrapper}>
+            <div className={styles.editorContainer}>
+                <Editor
+                    height={height}
+                    defaultLanguage="typescript"
+                    defaultValue={code}
+                    theme="vs-dark"
+                    options={{
+                        readOnly: true,
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        lineNumbers: 'on',
+                        scrollBeyondLastLine: false,
+                        roundedSelection: false,
+                        padding: { top: 16, bottom: 16 },
+                        automaticLayout: true,
+                    }}
+                />
+            </div>
         </div>
     );
 }
