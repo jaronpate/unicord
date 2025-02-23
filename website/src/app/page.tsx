@@ -54,13 +54,13 @@ export default function Home() {
                 <div className={styles.hydrationSection}>
                     <div className={styles.hydrationContainer}>
                         <div className={styles.hydrationCode}>
-                            <CodeExample code={hydrationExample} height={260} noScroll={true} />
+                            <CodeExample code={hydrationExample} height={245} noScroll={true} />
                         </div>
                         <div className={styles.hydrationText}>
                             <h2>Smart Hydration</h2>
                             <p>
                                 Unicord's hydration system automatically manages Discord object lifecycles. 
-                                The context.hydrate method intelligently fetches and caches Discord objects 
+                                The <code>context.hydrate</code> method intelligently fetches and caches Discord objects 
                                 like messages, users, and guilds, ensuring your bot stays efficient while 
                                 keeping your code clean and predictable.
                             </p>

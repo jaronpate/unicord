@@ -227,7 +227,7 @@
 .hydrationCode {
     flex: 2;
     width: 100%;
-    max-width: 800px;
+    max-width: 780px;
 }
 
 .hydrationText {
@@ -281,4 +281,14 @@
         width: 100%;
         padding: 1rem;
     }
+}
+
+.hydrationText p code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background-color: var(--gray-alpha-100);
+    border-radius: 0.2em;
+    padding: 0.1em 0.2em;
+    color: var(--foreground);
+    border: 1px solid var(--gray-alpha-200);
 }
