@@ -30,6 +30,23 @@ export default function Home() {
                 </div>
 
                 <div className={styles.pillars}>
+                    <div className={styles.pillarContainer}>
+                        <div className={styles.pillar}>
+                            <div className={styles.pillarIcon}>⚡</div>
+                            <h2>Simple</h2>
+                            <p>Build Discord bots with minimal boilerplate and intuitive APIs</p>
+                        </div>
+                        <div className={styles.pillar}>
+                            <div className={styles.pillarIcon}>🔧</div>
+                            <h2>Maintainable</h2>
+                            <p>Type-safe, modular architecture that scales with your project</p>
+                        </div>
+                        <div className={styles.pillar}>
+                            <div className={styles.pillarIcon}>📈</div>
+                            <h2>Scalable</h2>
+                            <p>Efficient caching and event handling for bots of any size</p>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

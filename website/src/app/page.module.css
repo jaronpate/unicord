@@ -153,3 +153,70 @@
 .codeBlock code:focus-within {
   background: var(--gray-alpha-200);
 }
+
+.pillars {
+    padding: 6rem 15em;
+    background: var(--gray-alpha-100);
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.pillarContainer {
+    display: flex;
+    gap: 4rem;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.pillar {
+    flex: 1;
+    text-align: center;
+    padding: 2rem;
+    background: var(--gray-alpha-100);
+    border-radius: 12px;
+    border: 1px solid var(--gray-alpha-200);
+    transition: transform 0.2s ease-in-out;
+}
+
+.pillar:hover {
+    transform: translateY(-5px);
+}
+
+.pillarIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.pillar h2 {
+    color: #ff0080;
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.pillar p {
+    color: #fff;
+    opacity: 0.8;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 1200px) {
+    .pillars {
+        padding: 4rem 2rem;
+    }
+    
+    .pillarContainer {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .pillar {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
