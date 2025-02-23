@@ -24,32 +24,12 @@ export default function Home() {
                             Finally a simpler way to build Discord bots.{" "}
                         </p>
                     </div>
-                    <div>
+                    <div className={styles.codeExample}>
                         <CodeExample />
                     </div>
                 </div>
 
-                <div>
-                    <h2 className={styles.title}>Features</h2>
-                    <ul className={styles.features}>
-                        <li>TypeScript support</li>
-                        <li>Intuitive API</li>
-                        <li>Powerful command system</li>
-                        <li>Built-in event handling</li>
-                        <li>Easy to use</li>
-                    </ul>
-                    <h2 className={styles.title}>Get Started</h2>
-                    <p className={styles.description}>
-                        To get started, check out the{" "}
-                        <a href="https://unicord.dev" target="_blank">
-                            <span className={styles.link}>documentation</span>
-                        </a>{" "}
-                        or join our{" "}
-                        <a href="https://discord.gg/9v6Z4J5q" target="_blank">
-                            <span className={styles.link}>Discord server</span>
-                        </a>{" "}
-                        for help and support.
-                    </p>
+                <div className={styles.pillars}>
                 </div>
             </main>
         </div>

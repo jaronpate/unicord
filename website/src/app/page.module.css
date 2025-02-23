@@ -100,10 +100,11 @@
   pointer-events: none;
 }
 
-.hero > div:nth-child(2) {
+.codeExample {
   flex: 1;
-  min-width: 45%;
-  height: 100%;
+  max-width: 60%;
+  height: 75%;
+  max-height: 500px;
 }
 
 .code {
