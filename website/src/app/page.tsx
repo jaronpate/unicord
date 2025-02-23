@@ -2,8 +2,7 @@ import styles from "./page.module.css";
 import dynamic from 'next/dynamic';
 
 const CodeExample = dynamic(
-  () => import('../components/CodeExample'),
-  { ssr: false }
+  () => import('../components/CodeExample')
 );
 
 export default function Home() {
