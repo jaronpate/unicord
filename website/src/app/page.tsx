@@ -139,7 +139,7 @@ export default function Home() {
                                         pnpm: 'pnpm add unicord',
                                         bun: 'bun add unicord'
                                     };
-                                    navigator.clipboard.writeText(commands[activeTab]);
+                                    navigator.clipboard.writeText(commands[activeTab as keyof typeof commands]);
                                 }}
                             >
                                 Copy
