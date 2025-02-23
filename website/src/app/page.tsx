@@ -20,9 +20,9 @@ export default function Home() {
                     <div><span className={styles.logoMarkSpan}>uni</span>cord</div>
                 </div>
                 <nav className={styles.nav}>
-                    <a href="/docs" className={styles.navLink}>Docs</a>
-                    <a href="https://github.com/unicorddev/unicord" className={styles.navLink}>Source</a>
-                    <a href="https://discord.gg/your-invite-here" className={styles.navLink}>Discord</a>
+                    {/* <a href="/docs" className={styles.navLink}>Docs</a> */}
+                    <a href="https://github.com/jaronpate/unicord" target='_blank' className={styles.navLink}>Source</a>
+                    <a href="https://discord.gg/6kFfqa5bde" target='_blank' className={styles.navLink}>Discord</a>
                 </nav>
             </header>
             <main className={styles.main}>
