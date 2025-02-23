@@ -147,6 +147,60 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+
+                <div className={styles.installSection}>
+                    <div className={styles.installContainer}>
+                        <h2>Install <span className={styles.logoMarkSpan}>uni</span>cord</h2>
+                        <div className={styles.packageManagerTabs}>
+                            <button 
+                                className={`${styles.tabButton} ${activeTab === 'npm' ? styles.activeTab : ''}`}
+                                onClick={() => setActiveTab('npm')}
+                            >
+                                npm
+                            </button>
+                            <button 
+                                className={`${styles.tabButton} ${activeTab === 'yarn' ? styles.activeTab : ''}`}
+                                onClick={() => setActiveTab('yarn')}
+                            >
+                                yarn
+                            </button>
+                            <button 
+                                className={`${styles.tabButton} ${activeTab === 'pnpm' ? styles.activeTab : ''}`}
+                                onClick={() => setActiveTab('pnpm')}
+                            >
+                                pnpm
+                            </button>
+                            <button 
+                                className={`${styles.tabButton} ${activeTab === 'bun' ? styles.activeTab : ''}`}
+                                onClick={() => setActiveTab('bun')}
+                            >
+                                bun
+                            </button>
+                        </div>
+                        <div className={styles.installCommandWrapper}>
+                            <code className={styles.installCommand}>
+                                {activeTab === 'npm' && 'npm install unicord'}
+                                {activeTab === 'yarn' && 'yarn add unicord'}
+                                {activeTab === 'pnpm' && 'pnpm add unicord'}
+                                {activeTab === 'bun' && 'bun add unicord'}
+                            </code>
+                            <button 
+                                className={styles.copyButton}
+                                onClick={() => {
+                                    const commands = {
+                                        npm: 'npm install unicord',
+                                        yarn: 'yarn add unicord',
+                                        pnpm: 'pnpm add unicord',
+                                        bun: 'bun add unicord'
+                                    };
+                                    navigator.clipboard.writeText(commands[activeTab]);
+                                }}
+                            >
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     );
