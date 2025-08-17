@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         description: 'Unicord is a simple, type-safe, and modular framework for building Discord bots in TypeScript.',
         images: [
             {
-                url: '/unicord.png',
+                url: 'https://unicord.hat.fish/unicord.png',
                 width: 1024,
                 height: 1024,
                 alt: 'Unicord logo'

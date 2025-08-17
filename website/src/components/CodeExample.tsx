@@ -1,7 +1,8 @@
 'use client';
 
-import Editor from "@monaco-editor/react";
+import Editor, { Monaco } from "@monaco-editor/react";
 import styles from './CodeExample.module.css';
+import { useEffect, useState } from "react";
 
 type CodeExampleProps = {
     code: string;
@@ -9,10 +10,69 @@ type CodeExampleProps = {
     noScroll?: boolean;
 }
 
+
 export default function CodeExample({ code, height = "100%", noScroll = false }: CodeExampleProps) {
+    // const [unicordLib, setUnicordLib] = useState("");
+
+    // useEffect(() => {
+    //     setUnicordLib(`
+    //         declare module 'unicord' {
+    //             export enum Intent {
+    //                 GUILDS = 1 << 0,
+    //             }
+    //         }
+    //     `);
+        
+    // }, []);
+
+    // const handleEditorDidMount = (monaco: Monaco) => {
+    //     monaco.languages.typescript.typescriptDefaults.addExtraLib(unicordLib);
+
+    //     monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    //         noSemanticValidation: false,
+    //         noSyntaxValidation: false,
+    //         noSuggestionDiagnostics: false,
+    //     });
+    //     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+    //         target: monaco.languages.typescript.ScriptTarget.ESNext,
+    //         module: monaco.languages.typescript.ModuleKind.ESNext,
+    //         allowJs: true,
+    //         checkJs: true,
+    //         allowNonTsExtensions: true,
+    //         strict: true,
+    //         noEmit: true,
+    //         lib: [
+    //             "ESNext",
+    //             "DOM",
+    //             "DOM.Iterable",
+    //             "ESNext.AsyncIterable",
+    //             "ESNext.BigInt"
+    //         ],
+    //         types: ["node", "unicord"],
+    //         baseUrl: "./",
+    //         paths: {
+    //             "index": ["./src/index.ts"],
+    //             "unicord": ["./node_modules/unicord/dist/index.d.ts"]
+    //         }
+    //     });
+
+    // };
+
+    // useEffect(() => {
+    //     fetch("https://www.unpkg.com/unicord@0.0.4/out/types/common.d.ts")
+    //         .then((response) => response.text())
+    //         .then((text) => {
+    //             setUnicordLib(text);
+    //             console.log("Fetched extra lib:", text);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching extra lib:", error);
+    //         });
+    // }, []);
+    
     return (
         <div className={styles.editorWrapper}>
-            <div className={styles.editorContainer} style={{ pointerEvents: noScroll ? 'none' : 'auto' }}>
+            <div className={styles.editorContainer}>
                 <Editor
                     height={height}
                     defaultLanguage="typescript"
@@ -27,7 +87,11 @@ export default function CodeExample({ code, height = "100%", noScroll = false }:
                         roundedSelection: false,
                         padding: { top: 16, bottom: 16 },
                         automaticLayout: true,
+                        scrollbar: {
+                            alwaysConsumeMouseWheel: !noScroll,
+                        }
                     }}
+                    // beforeMount={handleEditorDidMount}
                 />
             </div>
         </div>
@@ -36,7 +100,7 @@ export default function CodeExample({ code, height = "100%", noScroll = false }:
 
 // Export the example code snippets for reuse
 export const simpleExample = `\
-import { Client, type Context } from 'unicord';
+import { Client, type Context, Intent } from 'unicord';
 
 // Initialize and configure
 const client = new Client({

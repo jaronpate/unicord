@@ -9,6 +9,7 @@
   "files": [
     "out"
   ],
+  "repository": "github:jaronpate/unicord",
   "scripts": {
     "test": "bun run testing/demo.test.ts",
     "test:inspect": "bun --inspect testing/demo.test.ts",

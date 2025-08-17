@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from "./page.module.css";
 import dynamic from 'next/dynamic';
 
@@ -12,6 +12,22 @@ import { simpleExample, hydrationExample, typeCoercionExample } from '../compone
 
 export default function Home() {
     const [activeTab, setActiveTab] = useState('npm');
+    const [windowWidth, setWindowWidth] = useState(1200);
+  
+    useEffect(() => {
+        setWindowWidth(window.innerWidth);
+
+      const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+      };
+  
+      window.addEventListener('resize', handleResize);
+  
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }, []);
+    
     return (
         <div className={[styles.page, styles.pageWithHeader].join(" ")}>
             <header className={styles.header}>
@@ -21,7 +37,7 @@ export default function Home() {
                 </div>
                 <nav className={styles.nav}>
                     {/* <a href="/docs" className={styles.navLink}>Docs</a> */}
-                    <a href="https://github.com/jaronpate/unicord" target='_blank' className={styles.navLink}>Source</a>
+                    <a href="https://github.com/jaronpate/unicord" className={styles.navLink}>Source</a>
                     <a href="https://discord.gg/6kFfqa5bde" target='_blank' className={styles.navLink}>Discord</a>
                 </nav>
             </header>
@@ -32,11 +48,11 @@ export default function Home() {
                             Welcome to <span className={styles.logoMarkSpan}>uni</span>cord
                         </h1>
                         <p className={styles.description}>
-                            Finally a simpler way to build Discord bots.{" "}
+                            Build good bots fast.
                         </p>
                     </div>
                     <div className={styles.codeExample}>
-                        <CodeExample code={simpleExample} noScroll={true} />
+                        <CodeExample code={simpleExample} noScroll={false} />
                     </div>
                 </div>
 
@@ -63,7 +79,7 @@ export default function Home() {
                 <div className={styles.hydrationSection}>
                     <div className={styles.hydrationContainer}>
                         <div className={styles.hydrationCode}>
-                            <CodeExample code={hydrationExample} height={245} noScroll={true} />
+                            <CodeExample code={hydrationExample} height={260} noScroll={windowWidth < 1200 ? false : true} />
                         </div>
                         <div className={styles.hydrationText}>
                             <h2>Smart Hydration</h2>
@@ -94,7 +110,7 @@ export default function Home() {
                             </p>
                         </div>
                         <div className={styles.typeCode}>
-                            <CodeExample code={typeCoercionExample} height={370} noScroll={true} />
+                            <CodeExample code={typeCoercionExample} height={370} noScroll={windowWidth < 1200 ? false : true} />
                         </div>
                     </div>
                 </div>

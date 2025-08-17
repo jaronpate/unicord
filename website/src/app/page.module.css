@@ -267,58 +267,6 @@
     line-height: 1.6;
 }
 
-@media (max-width: 1200px) {
-    .pillars {
-        padding: 4rem 2rem;
-    }
-
-    .pillarContainer {
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .pillar {
-        max-width: 400px;
-        margin: 0 auto;
-    }
-
-    .hydrationSection {
-        padding: 4rem 2rem;
-    }
-
-    .hydrationContainer {
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .hydrationCode {
-        width: 100%;
-    }
-
-    .hydrationText {
-        width: 100%;
-        padding: 1rem;
-    }
-
-    .typeSection {
-        padding: 4rem 2rem;
-    }
-
-    .typeContainer {
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .typeCode {
-        width: 100%;
-    }
-
-    .typeText {
-        width: 100%;
-        padding: 1rem;
-    }
-}
-
 .typeSection {
     padding: 6rem 12em;
     min-height: 50vh;
@@ -456,7 +404,70 @@
     background: var(--gray-alpha-200);
 }
 
+
 @media (max-width: 1200px) {
+    .hero {
+        padding: 0 2rem;
+        height: calc(100vh - 4rem);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hero .codeExample, .hero::after {
+        display: none;
+    }
+
+    .pillars {
+        padding: 4rem 2rem;
+    }
+
+    .pillarContainer {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .pillar {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .hydrationSection {
+        padding: 4rem 2rem;
+    }
+
+    .hydrationContainer {
+        flex-direction: column-reverse;
+        gap: 2rem;
+    }
+
+    .hydrationCode {
+        width: 100%;
+    }
+
+    .hydrationText {
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .typeSection {
+        padding: 4rem 2rem;
+    }
+
+    .typeContainer {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .typeCode {
+        width: 100%;
+    }
+
+    .typeText {
+        width: 100%;
+        padding: 1rem;
+    }
+
     .installSection {
         padding: 4rem 2rem;
     }
