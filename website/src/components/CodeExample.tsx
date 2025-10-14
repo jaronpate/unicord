@@ -130,7 +130,7 @@ client.chatCommands.register('ping', async (context: Context, args: any[]) => {
     // Send a message to the channel
     const response = await context.reply(\`Pong!: got \${args.join(', ')}\`, true);
     // Calculate the time it took to send the message
-    const time = message.timestamp.getTime() - message.timestamp.getTime();
+    const time = Date.now() - message.timestamp.getTime();
     // Edit the message to include the time
     await context.editMessage(response, \`Pong! Latency: \${time}ms\`);
 });`;
