@@ -175,7 +175,7 @@
 }
 
 .pillars {
-    padding: 6rem 12em;
+    padding: 6rem 6em;
     background: var(--gray-alpha-100);
     min-height: 50vh;
     display: flex;
@@ -226,7 +226,7 @@
 }
 
 .hydrationSection {
-    padding: 6rem 12em;
+    padding: 6rem 6em;
     min-height: 50vh;
     display: flex;
     align-items: space;
@@ -252,12 +252,14 @@
 .hydrationText {
     flex: 1;
     /* padding: 2rem; */
+    min-width: 400px;
 }
 
 .hydrationText h2 {
     color: #ff0080;
     margin: 0 0 1.5rem 0;
     font-size: 2rem;
+    min-width: 400px;
 }
 
 .hydrationText p {
@@ -266,10 +268,11 @@
     margin: 1rem 0;
     font-size: 1.1rem;
     line-height: 1.6;
+    min-width: 400px;
 }
 
 .typeSection {
-    padding: 6rem 12em;
+    padding: 6rem 6em;
     min-height: 50vh;
     display: flex;
     align-items: space;
@@ -289,6 +292,7 @@
 
 .typeText {
     flex: 1;
+    min-width: 400px;
 }
 
 .typeCode {
@@ -322,7 +326,7 @@
 }
 
 .installSection {
-    padding: 6rem 12em;
+    padding: 6rem 6em;
     min-height: 30vh;
     display: flex;
     align-items: center;
