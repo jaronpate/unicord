@@ -9,7 +9,7 @@
     font-family: var(--font-space-grotesk);
 }
 
-/* pag with header needs margin atop */
+/* page with header needs margin atop */
 .pageWithHeader {
     margin-top: 4rem;
 }
