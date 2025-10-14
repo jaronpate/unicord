@@ -83,14 +83,15 @@
 }
 
 .hero {
-    padding: 0 15em 0;
+    padding: 0 5em 0;
     height: calc(100vh - 4rem);
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     position: relative;
     overflow: hidden;
+    gap: 2rem;
     border-bottom: 1px solid var(--gray-alpha-200);
 }
 
