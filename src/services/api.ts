@@ -1,5 +1,5 @@
-import { exists, log } from "../utils";
-import type { Client } from "./client";
+import { exists, log } from '../utils';
+import type { Client } from './client';
 
 export class API {
     private readonly base_url: string = 'https://discord.com/api/v10';
@@ -9,9 +9,9 @@ export class API {
     async request<T = any>(method: string, path: string, data?: any): Promise<T> {
         const url = `${this.base_url}${path.startsWith('/') ? '' : '/'}${path}`;
         const headers = {
-            Authorization: `Bot ${this.client.token}`,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            Authorization: `Bot ${this.client.config.token}`,
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
         };
 
         const response = await fetch(url, {
@@ -27,7 +27,6 @@ export class API {
         }
 
         const body = await response.json();
-
 
         // console.log(`API Request: ${method} ${url}`);
         // console.log(`API Body: ${JSON.stringify(data, null, 4)}`);
@@ -49,7 +48,7 @@ export class API {
             const retryAfter = response.headers.get('Retry-After');
             if (exists(retryAfter)) {
                 // Wait for the retry-after time
-                await new Promise(resolve => setTimeout(resolve, parseInt(retryAfter) * 1000));
+                await new Promise((resolve) => setTimeout(resolve, parseInt(retryAfter) * 1000));
             } else {
                 // TODO: Handle this case better
                 // Maybe wait some arbitrary time??

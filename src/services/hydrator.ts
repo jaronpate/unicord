@@ -41,13 +41,13 @@ export async function hydrate<T extends Hydrateable, K extends Array<Expectation
         for (const expectation of expectations) {
             if (expectation === Expectation.Message && exists(data.message_id)) {
                 let context = data as unknown as HydratedContext<[Expectation.Message, ...Expectation[]]>;
-                context.message = await client.messages.get(data.channel_id, data.message_id);
+                context.message = await client.caches.messages.get(data.channel_id, data.message_id);
             } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
                 let context = data as unknown as HydratedContext<[Expectation.Guild, ...Expectation[]]>;
-                context.guild = await client.guilds.get(data.guild_id);
+                context.guild = await client.caches.guilds.get(data.guild_id);
             } else if (expectation === Expectation.Channel && exists(data.channel_id)) {
                 let context = data as unknown as HydratedContext<[Expectation.Channel, ...Expectation[]]>;
-                context.channel = await client.channels.get(data.channel_id);
+                context.channel = await client.caches.channels.get(data.channel_id);
             } else {
                 throw new Error(`Invalid expectation requested for Context: ${expectation}`);
             }
@@ -56,13 +56,13 @@ export async function hydrate<T extends Hydrateable, K extends Array<Expectation
         for (const expectation of expectations) {
             if (expectation === Expectation.Message && exists(data.message_reference?.id)) {
                 let message = data as unknown as HydratedMessage<[Expectation.Message, ...Expectation[]]>;
-                message.reference = await client.messages.get(data.message_reference.channel_id, data.message_reference.id);
+                message.reference = await client.caches.messages.get(data.message_reference.channel_id, data.message_reference.id);
             } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
                 let message = data as unknown as HydratedMessage<[Expectation.Guild, ...Expectation[]]>;
-                message.guild = await client.guilds.get(data.guild_id);
+                message.guild = await client.caches.guilds.get(data.guild_id);
             } else if (expectation === Expectation.Channel && exists(data.channel_id)) {
                 let message = data as unknown as HydratedMessage<[Expectation.Channel, ...Expectation[]]>;
-                message.channel = await client.channels.get(data.channel_id);
+                message.channel = await client.caches.channels.get(data.channel_id);
             } else {
                 throw new Error(`Invalid expectation requested for Message: ${expectation}`);
             }

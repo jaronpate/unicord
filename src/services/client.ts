@@ -12,44 +12,42 @@ import { hydrate, hydrator, type Hydrateable, type Hydrated } from './hydrator';
 import { Processor } from './processor';
 
 export class Client {
-    readonly token: string;
-    readonly application_id: string;
-    readonly intents: Intent[] = [Intent.DEFAULT];
-    prefix: string;
+    readonly config: Readonly<Required<ClientConfig>>;
     // Internal services
     protected bus: Emitter;
     protected api: API;
     protected processor: Processor;
     protected gateway: Gateway;
-    guilds: Guilds;
-    users: Users;
-    messages: Messages;
-    channels: Channels;
-    chatCommands: Processor[HandlerType.ChatCommands];
-    applicationCommands: Processor[HandlerType.ApplicationCommands];
-    interactions: Processor[HandlerType.Interactions];
+    // Caches
+    caches: {
+        guilds: Guilds;
+        users: Users;
+        messages: Messages;
+        channels: Channels;
+    };
 
     constructor(config: ClientConfig) {
         // Validate the configuration
         Client.validateConfig(config);
         // Save the configuration
-        this.token = config.token;
-        this.application_id = config.application_id;
-        this.intents = config.intents ?? this.intents;
-        this.prefix = config.prefix ?? '!';
+        this.config = Object.freeze({
+            token: config.token,
+            application_id: config.application_id,
+            intents: config.intents ?? [Intent.DEFAULT],
+            prefix: config.prefix ?? '!',
+        });
         // Initialize internal services
         this.bus = EventBus;
         this.api = new API(this);
         this.processor = new Processor(this, this.api, this.bus);
         this.gateway = new Gateway(this, this.processor, this.api, this.bus);
-        this.guilds = new Guilds(this.api, this.processor);
-        this.users = new Users(this.api, this.processor);
-        this.messages = new Messages(this.api, this.processor);
-        this.channels = new Channels(this.api, this.processor);
-        // Save references to command and event handlers
-        this.chatCommands = this.processor[HandlerType.ChatCommands];
-        this.applicationCommands = this.processor[HandlerType.ApplicationCommands];
-        this.interactions = this.processor[HandlerType.Interactions];
+        // Initialize caches
+        this.caches = {
+            guilds: new Guilds(this.api, this.processor),
+            users: new Users(this.api, this.processor),
+            messages: new Messages(this.api, this.processor),
+            channels: new Channels(this.api, this.processor),
+        };
     }
 
     private static validateConfig(config: ClientConfig) {
@@ -80,6 +78,22 @@ export class Client {
 
     get self() {
         return this.gateway.user;
+    }
+
+    get chatCommands() {
+        return this.processor[HandlerType.ChatCommands];
+    }
+
+    get applicationCommands() {
+        return this.processor[HandlerType.ApplicationCommands];
+    }
+
+    get interactions() {
+        return this.processor[HandlerType.Interactions];
+    }
+
+    get events() {
+        return this.processor[HandlerType.Events];
     }
 
     /**

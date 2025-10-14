@@ -1,10 +1,10 @@
-import type { Client } from "./client";
-import type { Context } from "../types/context";
-import { HandlerType, Trait, type EventPayload } from "../types/common";
-import { CommandHandler, type Handler, type ArgsFromOptions, OptionConstructorMap, type InteractionData } from "../types/handler";
-import type { API } from "./api";
 import { ApplicationCommandOptionType, ApplicationCommandType, type ApplicationCommandOption } from "../types/applicationCommand";
+import { HandlerType, Trait, type EventPayload } from "../types/common";
+import type { Context } from "../types/context";
+import { CommandHandler, OptionConstructorMap, type ArgsFromOptions, type Handler, type InteractionData } from "../types/handler";
+import type { API } from "./api";
 import type { Emitter } from "./bus";
+import type { Client } from "./client";
 
 export class Processor {
     private handlers = {
@@ -14,13 +14,13 @@ export class Processor {
         [HandlerType.Interactions]: new Map<string, Handler[]>()
     };
 
-    constructor(private client: Client, private api: API, private bus: Emitter) {};
+    constructor(private client: Client, private api: API, private bus: Emitter) { };
 
     public register(type: HandlerType, event: string | string[], handler: Handler) {
         // Normalize events into an array
         const events = Array.isArray(event) ? event : [event];
         // Register the handler for each event
-        for (const e of events) {            
+        for (const e of events) {
             const handlers = this.handlers[type].get(e) || [];
             handlers.push(handler);
             this.handlers[type].set(e, handlers);
@@ -78,7 +78,7 @@ export class Processor {
             }
         }
     }
-    
+
     private validateAndResolveArgs = async <T extends readonly ApplicationCommandOption[]>(args: any[], definition: T): Promise<ArgsFromOptions<T>> => {
         // Zip the args and definition together
         const zipped: [ApplicationCommandOption, any][] = args.map((arg, i) => [definition[i], arg]);
@@ -102,11 +102,11 @@ export class Processor {
                     if (!userId) {
                         throw new Error(`Invalid user for ${def.name}: expected a user mention or snowflake id, got ${arg}`);
                     }
-                    validated[def.name] = await this.client.users.get(userId);
+                    validated[def.name] = await this.client.caches.users.get(userId);
                 } else if (typeof arg === 'object') {
                     // Check if the object has an ID
                     if (arg.id) {
-                        validated[def.name] = await this.client.users.get(arg.id);
+                        validated[def.name] = await this.client.caches.users.get(arg.id);
                     } else {
                         throw new Error(`Invalid user for ${def.name}: expected a user object with an ID, got ${arg}`);
                     }
@@ -138,7 +138,7 @@ export class Processor {
         register: (event: string | string[], handler: Handler) => this.register(HandlerType.ChatCommands, event, handler),
         unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.ChatCommands, event, handler),
         execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.ChatCommands, event, context, args),
-        has: (event: string) => this.handlers[HandlerType.ChatCommands].has(event) ?? this.handlers[HandlerType.ChatCommands].get(event)?.length! > 0
+        has: (event: string) => this.handlers[HandlerType.ChatCommands].has(event) && this.handlers[HandlerType.ChatCommands].get(event)?.length! > 0
     };
 
     [HandlerType.ApplicationCommands] = {
@@ -154,7 +154,7 @@ export class Processor {
 
             // Ensure the command name is valid
             // @see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
-            // TODO: can this sus bind be removed? Is the only way to kill the arrow function?
+            // TODO: can this sus bind be removed? Is the only way to convert from arrow to regular function?
             const commandNameRegex = /^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u;
             const commandNameTest = commandNameRegex.test.bind(commandNameRegex)
             if (!names.every(commandNameTest)) {
@@ -166,21 +166,21 @@ export class Processor {
                 const command: Record<string, any> = handler.toJSON();
                 command.name = n;
                 command.type = type;
-                this.api.post(`/applications/${this.client.application_id}/commands`, command);
+                this.api.post(`/applications/${this.client.config.application_id}/commands`, command);
             }
 
             this.register(HandlerType.ApplicationCommands, names, handler)
         },
         unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.ApplicationCommands, event, handler),
         execute: async (event: string, context: Context, args: any[]) => this.execute(HandlerType.ApplicationCommands, event, context, args),
-        has: (event: string) => this.handlers[HandlerType.ApplicationCommands].has(event) ?? this.handlers[HandlerType.ApplicationCommands].get(event)?.length! > 0,
+        has: (event: string) => this.handlers[HandlerType.ApplicationCommands].has(event) && this.handlers[HandlerType.ApplicationCommands].get(event)?.length! > 0,
     };
 
     [HandlerType.Interactions] = {
         register: (event: string | string[], handler: Handler) => this.register(HandlerType.Interactions, event, handler),
         unregister: (event: string | string[], handler?: Handler) => this.unregister(HandlerType.Interactions, event, handler),
         execute: async (event: string, context: Context, args: InteractionData) => this.execute(HandlerType.Interactions, event, context, args),
-        has: (event: string) => this.handlers[HandlerType.Interactions].has(event) ?? this.handlers[HandlerType.Interactions].get(event)?.length! > 0
+        has: (event: string) => this.handlers[HandlerType.Interactions].has(event) && this.handlers[HandlerType.Interactions].get(event)?.length! > 0
     };
 
     static isCommandHandler = (handler: Handler): handler is CommandHandler<ApplicationCommandOption[]> => {
