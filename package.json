@@ -35,5 +35,11 @@
   },
   "dependencies": {
     "ws": "^8.18.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 120,
+    "tabWidth": 4
   }
 }

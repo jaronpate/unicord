@@ -1,4 +1,4 @@
-import { Expectation, HandlerType, Intent, type ClientConfig } from '../types/common';
+import { type DiscordAPIEvent, Expectation, HandlerType, Intent, type ClientConfig } from '../types/common';
 import { Message, type DiscordMessage } from '../types/message';
 import { exists, isNil } from '../utils/index';
 import { API } from './api';
@@ -84,43 +84,63 @@ export class Client {
 
     /**
      * Hydrates a given data object based on the provided expectations.
-     * 
+     *
      * @template T - The type of the data object to be hydrated. Must extend `Hydrateable`.
      * @template K - An array of `Expectation` types that specify what properties should be hydrated.
-     * 
+     *
      * @param data - The data object to be hydrated. Can be of type `Context` or `Message`.
      * @param expectations - An array of expectations that specify what properties should be hydrated.
-     * 
+     *
      * @returns A promise that resolves to the hydrated data object.
-     * 
+     *
      * @throws Will throw an error if an expectation cannot be resolved.
      */
-    hydrate = async <T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>, K extends Array<Expectation>>(data: T, expectations: K) => {
+    hydrate = async <T extends Hydrateable | Hydrated<Hydrateable, Array<Expectation>>, K extends Array<Expectation>>(
+        data: T,
+        expectations: K,
+    ) => {
         return hydrate<T, K>(data, expectations, this, this.api);
-    }
-    
+    };
+
     /**
      * A wrapper function that attempts to hydrate a given data object and returns a type guard function.
-     * 
+     *
      * @template T - The type of the data object to be hydrated. Must extend `Hydrateable`.
      * @template K - An array of `Expectation` types that specify what properties should be hydrated.
-     * 
+     *
      * @param data - The data object to be hydrated. Can be of type `Context` or `Message`.
      * @param expectations - An array of expectations that specify what properties should be hydrated.
-     * 
+     *
      * @returns A promise that resolves to a type guard function. The type guard function returns `true` if the data object was successfully hydrated, otherwise `false`.
      */
-    hydrator = async<T extends Hydrateable, K extends Expectation[]>(data: T, expectations: K) => {
-        return hydrator<T, K>(data, expectations, this, this.api);   
-    }
+    hydrator = async <T extends Hydrateable, K extends Expectation[]>(data: T, expectations: K) => {
+        return hydrator<T, K>(data, expectations, this, this.api);
+    };
 
     sendMessage = async (channel_id: string, message: Message | string) => {
         if (typeof message === 'string') {
             message = new Message().setContent(message);
         }
 
-        return Message.fromDiscord(await this.api.post<DiscordMessage>(`/channels/${channel_id}/messages`, message.toJSON()));
-    }
+        return Message.fromDiscord(
+            await this.api.post<DiscordMessage>(`/channels/${channel_id}/messages`, message.toJSON()),
+        );
+    };
+
+    /**
+     * Makes a raw HTTP request to the Discord API.
+     * @param method HTTP method to use for the request (GET, POST, PUT, DELETE).
+     * @param endpoint The API endpoint to request; can start with a slash or be a full URL.
+     * @param body Optional body to send with the request, typically used for POST or PUT requests.
+     * @returns A promise that resolves to the response data of type T.
+     */
+    rawRequest = async <T = Record<string, any>>(
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+        endpoint: string,
+        body?: Record<string, any>,
+    ): Promise<T> => {
+        return this.api.request<T>(method, endpoint, body);
+    };
 
     // chatCommands = {
     //     register: (name: string | string[], handler: Handler) => this.processor.chat_commands.register(name, handler),
@@ -134,11 +154,11 @@ export class Client {
     //     has: (name: string) => this.processor.application_commands.has(name)
     // }
 
-    on = (event: string, handler: (...args: any[]) => void) => this.bus.on(event, handler);
+    on = (event: DiscordAPIEvent, handler: (...args: any[]) => void) => this.bus.on(event, handler);
 
-    once = (event: string, handler: (...args: any[]) => void) => this.bus.once(event, handler);
+    once = (event: DiscordAPIEvent, handler: (...args: any[]) => void) => this.bus.once(event, handler);
 
-    off = (event: string, handler: (...args: any[]) => void) => this.bus.off(event, handler);
+    off = (event: DiscordAPIEvent, handler: (...args: any[]) => void) => this.bus.off(event, handler);
 
     connect = () => this.gateway.connect();
 }
