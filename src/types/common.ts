@@ -3,7 +3,7 @@ export type ClientConfig = {
     application_id: string;
     prefix?: string;
     intents?: Intent[];
-}
+};
 
 export enum Expectation {
     Guild = 'guild',
@@ -16,24 +16,26 @@ export enum HandlerType {
     Events = 'events',
     ChatCommands = 'chat_commands',
     ApplicationCommands = 'application_commands',
-    Interactions = 'interactions'
+    Interactions = 'interactions',
 }
 
-export type Expects<T extends Array<Expectation>, K extends Expectation> = Extract<K, T[number]> extends never ? false : true;
+export type Expects<T extends Array<Expectation>, K extends Expectation> = Extract<K, T[number]> extends never
+    ? false
+    : true;
 
-export const clone: unique symbol = Symbol('clone')
-export const fromDiscord: unique symbol = Symbol('fromDiscord')
-export const execute: unique symbol = Symbol('execute')
+export const clone: unique symbol = Symbol('clone');
+export const fromDiscord: unique symbol = Symbol('fromDiscord');
+export const execute: unique symbol = Symbol('execute');
 
 export const Trait: {
-    clone: typeof clone
-    fromDiscord: typeof fromDiscord
-    execute: typeof execute
+    clone: typeof clone;
+    fromDiscord: typeof fromDiscord;
+    execute: typeof execute;
 } = {
     clone,
     fromDiscord,
-    execute
-}
+    execute,
+};
 
 export type EventPayload = any;
 
@@ -41,7 +43,7 @@ export type Primitive = string | number | boolean | null;
 
 /**
  * Represents a payload structure used in the Discord API.
- * 
+ *
  * @typedef {Object} Payload
  * @property {number} op - The opcode of the payload.
  * @property {Record<string, any>} d - The data associated with the payload.
@@ -58,7 +60,7 @@ export type Payload = {
 export enum InteractionResponseType {
     Pong = 1,
     Message = 4,
-    DeferredMessage = 5
+    DeferredMessage = 5,
 }
 
 export enum Intent {
@@ -79,110 +81,189 @@ export enum Intent {
     DIRECT_MESSAGE_TYPING = 1 << 14,
     MESSAGE_CONTENT = 1 << 15,
     DEFAULT = 513,
-    ALL = 32767
+    ALL = 32767,
 }
 
 export const IntentGroup: { [key in Intent]?: [string[], number] } = {
-    [Intent.GUILDS]: [[
-        "GUILD_CREATE",
-        "GUILD_UPDATE",
-        "GUILD_DELETE",
-        "GUILD_ROLE_CREATE",
-        "GUILD_ROLE_UPDATE",
-        "GUILD_ROLE_DELETE",
-        "CHANNEL_CREATE",
-        "CHANNEL_UPDATE",
-        "CHANNEL_DELETE",
-        "CHANNEL_PINS_UPDATE",
-        "THREAD_CREATE",
-        "THREAD_UPDATE",
-        "THREAD_DELETE",
-        "THREAD_LIST_SYNC",
-        "THREAD_MEMBER_UPDATE",
-        "THREAD_MEMBERS_UPDATE *",
-        "STAGE_INSTANCE_CREATE",
-        "STAGE_INSTANCE_UPDATE",
-        "STAGE_INSTANCE_DELETE"
-    ], 0],
+    [Intent.GUILDS]: [
+        [
+            'GUILD_CREATE',
+            'GUILD_UPDATE',
+            'GUILD_DELETE',
+            'GUILD_ROLE_CREATE',
+            'GUILD_ROLE_UPDATE',
+            'GUILD_ROLE_DELETE',
+            'CHANNEL_CREATE',
+            'CHANNEL_UPDATE',
+            'CHANNEL_DELETE',
+            'CHANNEL_PINS_UPDATE',
+            'THREAD_CREATE',
+            'THREAD_UPDATE',
+            'THREAD_DELETE',
+            'THREAD_LIST_SYNC',
+            'THREAD_MEMBER_UPDATE',
+            'THREAD_MEMBERS_UPDATE *',
+            'STAGE_INSTANCE_CREATE',
+            'STAGE_INSTANCE_UPDATE',
+            'STAGE_INSTANCE_DELETE',
+        ],
+        0,
+    ],
 
-    [Intent.GUILD_MEMBERS]: [[
-        "GUILD_MEMBER_ADD",
-        "GUILD_MEMBER_UPDATE",
-        "GUILD_MEMBER_REMOVE",
-        "THREAD_MEMBERS_UPDATE *",
-    ], 1],
+    [Intent.GUILD_MEMBERS]: [
+        ['GUILD_MEMBER_ADD', 'GUILD_MEMBER_UPDATE', 'GUILD_MEMBER_REMOVE', 'THREAD_MEMBERS_UPDATE *'],
+        1,
+    ],
 
-    [Intent.GUILD_BANS]: [[
-        "GUILD_BAN_ADD",
-        "GUILD_BAN_REMOVE",
-    ], 2],
+    [Intent.GUILD_BANS]: [['GUILD_BAN_ADD', 'GUILD_BAN_REMOVE'], 2],
 
-    [Intent.GUILD_EMOJIS_AND_STICKERS]: [[
-        "GUILD_EMOJIS_UPDATE",
-        "GUILD_STICKERS_UPDATE",
-    ], 3],
+    [Intent.GUILD_EMOJIS_AND_STICKERS]: [['GUILD_EMOJIS_UPDATE', 'GUILD_STICKERS_UPDATE'], 3],
 
-    [Intent.GUILD_INTEGRATIONS]: [[
-        "GUILD_INTEGRATIONS_UPDATE",
-        "INTEGRATION_CREATE",
-        "INTEGRATION_UPDATE",
-        "INTEGRATION_DELETE",
-    ], 4],
+    [Intent.GUILD_INTEGRATIONS]: [
+        ['GUILD_INTEGRATIONS_UPDATE', 'INTEGRATION_CREATE', 'INTEGRATION_UPDATE', 'INTEGRATION_DELETE'],
+        4,
+    ],
 
-    [Intent.GUILD_WEBHOOKS]: [[
-        "WEBHOOKS_UPDATE"
-    ], 5],
+    [Intent.GUILD_WEBHOOKS]: [['WEBHOOKS_UPDATE'], 5],
 
-    [Intent.GUILD_INVITES]: [[
-        "INVITE_CREATE",
-        "INVITE_DELETE",
-    ], 6],
+    [Intent.GUILD_INVITES]: [['INVITE_CREATE', 'INVITE_DELETE'], 6],
 
-    [Intent.GUILD_VOICE_STATES]: [[
-        "VOICE_STATE_UPDATE"
-    ], 7],
+    [Intent.GUILD_VOICE_STATES]: [['VOICE_STATE_UPDATE'], 7],
 
-    [Intent.GUILD_PRESENCES]: [[
-        "PRESENCE_UPDATE"
-    ], 8],
+    [Intent.GUILD_PRESENCES]: [['PRESENCE_UPDATE'], 8],
 
-    [Intent.GUILD_MESSAGES]: [[
-        "MESSAGE_CREATE",
-        "MESSAGE_UPDATE",
-        "MESSAGE_DELETE",
-        "MESSAGE_DELETE_BULK",
-    ], 9],
+    [Intent.GUILD_MESSAGES]: [['MESSAGE_CREATE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE', 'MESSAGE_DELETE_BULK'], 9],
 
-    [Intent.GUILD_MESSAGE_REACTIONS]: [[
-        "MESSAGE_REACTION_ADD",
-        "MESSAGE_REACTION_REMOVE",
-        "MESSAGE_REACTION_REMOVE_ALL",
-        "MESSAGE_REACTION_REMOVE_EMOJI",
-    ], 10],
+    [Intent.GUILD_MESSAGE_REACTIONS]: [
+        [
+            'MESSAGE_REACTION_ADD',
+            'MESSAGE_REACTION_REMOVE',
+            'MESSAGE_REACTION_REMOVE_ALL',
+            'MESSAGE_REACTION_REMOVE_EMOJI',
+        ],
+        10,
+    ],
 
-    [Intent.GUILD_MESSAGE_TYPING]: [[
-        "TYPING_START"
-    ], 11],
+    [Intent.GUILD_MESSAGE_TYPING]: [['TYPING_START'], 11],
 
-    [Intent.DIRECT_MESSAGES]: [[
-        "MESSAGE_CREATE",
-        "MESSAGE_UPDATE",
-        "MESSAGE_DELETE",
-        "CHANNEL_PINS_UPDATE",
-    ], 12],
+    [Intent.DIRECT_MESSAGES]: [['MESSAGE_CREATE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE', 'CHANNEL_PINS_UPDATE'], 12],
 
-    [Intent.DIRECT_MESSAGE_REACTIONS]: [[
-        "MESSAGE_REACTION_ADD",
-        "MESSAGE_REACTION_REMOVE",
-        "MESSAGE_REACTION_REMOVE_ALL",
-        "MESSAGE_REACTION_REMOVE_EMOJI",
-    ], 13],
+    [Intent.DIRECT_MESSAGE_REACTIONS]: [
+        [
+            'MESSAGE_REACTION_ADD',
+            'MESSAGE_REACTION_REMOVE',
+            'MESSAGE_REACTION_REMOVE_ALL',
+            'MESSAGE_REACTION_REMOVE_EMOJI',
+        ],
+        13,
+    ],
 
-    [Intent.DIRECT_MESSAGE_TYPING]: [[
-        "TYPING_START"
-    ], 14],
+    [Intent.DIRECT_MESSAGE_TYPING]: [['TYPING_START'], 14],
 
-    [Intent.MESSAGE_CONTENT]: [[
-        "MESSAGE_CONTENT"
-    ], 15]
+    [Intent.MESSAGE_CONTENT]: [['MESSAGE_CONTENT'], 15],
+};
+
+export type DiscordAPIEvent =
+    | 'READY'
+    | 'RESUMED'
+    | 'CHANNEL_CREATE'
+    | 'CHANNEL_UPDATE'
+    | 'CHANNEL_DELETE'
+    | 'CHANNEL_PINS_UPDATE'
+    | 'THREAD_CREATE'
+    | 'THREAD_UPDATE'
+    | 'THREAD_DELETE'
+    | 'THREAD_LIST_SYNC'
+    | 'THREAD_MEMBER_UPDATE'
+    | 'THREAD_MEMBERS_UPDATE *'
+    | 'STAGE_INSTANCE_CREATE'
+    | 'STAGE_INSTANCE_UPDATE'
+    | 'STAGE_INSTANCE_DELETE'
+    | 'GUILD_CREATE'
+    | 'GUILD_UPDATE'
+    | 'GUILD_DELETE'
+    | 'GUILD_ROLE_CREATE'
+    | 'GUILD_ROLE_UPDATE'
+    | 'GUILD_ROLE_DELETE'
+    | 'GUILD_MEMBER_ADD'
+    | 'GUILD_MEMBER_UPDATE'
+    | 'GUILD_MEMBER_REMOVE'
+    | 'GUILD_MEMBERS_CHUNK *'
+    | 'GUILD_BAN_ADD'
+    | 'GUILD_BAN_REMOVE'
+    | 'GUILD_EMOJIS_UPDATE'
+    | 'GUILD_STICKERS_UPDATE'
+    | 'GUILD_INTEGRATIONS_UPDATE'
+    | 'INTEGRATION_CREATE'
+    | 'INTEGRATION_UPDATE'
+    | 'INTEGRATION_DELETE'
+    | 'WEBHOOKS_UPDATE'
+    | 'INVITE_CREATE'
+    | 'INVITE_DELETE'
+    | 'VOICE_STATE_UPDATE'
+    | 'MESSAGE_CREATE'
+    | 'MESSAGE_UPDATE'
+    | 'MESSAGE_DELETE'
+    | 'MESSAGE_DELETE_BULK'
+    | 'MESSAGE_REACTION_ADD'
+    | 'MESSAGE_REACTION_REMOVE'
+    | 'MESSAGE_REACTION_REMOVE_ALL'
+    | 'MESSAGE_REACTION_REMOVE_EMOJI'
+    | 'TYPING_START'
+    | 'PRESENCE_UPDATE'
+    | 'APPLICATION_COMMAND_CREATE'
+    | 'APPLICATION_COMMAND_UPDATE'
+    | 'APPLICATION_COMMAND_DELETE';
+
+export enum DiscordAPIEvents {
+    READY = 'READY',
+    RESUMED = 'RESUMED',
+    CHANNEL_CREATE = 'CHANNEL_CREATE',
+    CHANNEL_UPDATE = 'CHANNEL_UPDATE',
+    CHANNEL_DELETE = 'CHANNEL_DELETE',
+    CHANNEL_PINS_UPDATE = 'CHANNEL_PINS_UPDATE',
+    THREAD_CREATE = 'THREAD_CREATE',
+    THREAD_UPDATE = 'THREAD_UPDATE',
+    THREAD_DELETE = 'THREAD_DELETE',
+    THREAD_LIST_SYNC = 'THREAD_LIST_SYNC',
+    THREAD_MEMBER_UPDATE = 'THREAD_MEMBER_UPDATE',
+    THREAD_MEMBERS_UPDATE = 'THREAD_MEMBERS_UPDATE *',
+    STAGE_INSTANCE_CREATE = 'STAGE_INSTANCE_CREATE',
+    STAGE_INSTANCE_UPDATE = 'STAGE_INSTANCE_UPDATE',
+    STAGE_INSTANCE_DELETE = 'STAGE_INSTANCE_DELETE',
+    GUILD_CREATE = 'GUILD_CREATE',
+    GUILD_UPDATE = 'GUILD_UPDATE',
+    GUILD_DELETE = 'GUILD_DELETE',
+    GUILD_ROLE_CREATE = 'GUILD_ROLE_CREATE',
+    GUILD_ROLE_UPDATE = 'GUILD_ROLE_UPDATE',
+    GUILD_ROLE_DELETE = 'GUILD_ROLE_DELETE',
+    GUILD_MEMBER_ADD = 'GUILD_MEMBER_ADD',
+    GUILD_MEMBER_UPDATE = 'GUILD_MEMBER_UPDATE',
+    GUILD_MEMBER_REMOVE = 'GUILD_MEMBER_REMOVE',
+    GUILD_MEMBERS_CHUNK = 'GUILD_MEMBERS_CHUNK *',
+    GUILD_BAN_ADD = 'GUILD_BAN_ADD',
+    GUILD_BAN_REMOVE = 'GUILD_BAN_REMOVE',
+    GUILD_EMOJIS_UPDATE = 'GUILD_EMOJIS_UPDATE',
+    GUILD_STICKERS_UPDATE = 'GUILD_STICKERS_UPDATE',
+    GUILD_INTEGRATIONS_UPDATE = 'GUILD_INTEGRATIONS_UPDATE',
+    INTEGRATION_CREATE = 'INTEGRATION_CREATE',
+    INTEGRATION_UPDATE = 'INTEGRATION_UPDATE',
+    INTEGRATION_DELETE = 'INTEGRATION_DELETE',
+    WEBHOOKS_UPDATE = 'WEBHOOKS_UPDATE',
+    INVITE_CREATE = 'INVITE_CREATE',
+    INVITE_DELETE = 'INVITE_DELETE',
+    VOICE_STATE_UPDATE = 'VOICE_STATE_UPDATE',
+    MESSAGE_CREATE = 'MESSAGE_CREATE',
+    MESSAGE_UPDATE = 'MESSAGE_UPDATE',
+    MESSAGE_DELETE = 'MESSAGE_DELETE',
+    MESSAGE_DELETE_BULK = 'MESSAGE_DELETE_BULK',
+    MESSAGE_REACTION_ADD = 'MESSAGE_REACTION_ADD',
+    MESSAGE_REACTION_REMOVE = 'MESSAGE_REACTION_REMOVE',
+    MESSAGE_REACTION_REMOVE_ALL = 'MESSAGE_REACTION_REMOVE_ALL',
+    MESSAGE_REACTION_REMOVE_EMOJI = 'MESSAGE_REACTION_REMOVE_EMOJI',
+    TYPING_START = 'TYPING_START',
+    PRESENCE_UPDATE = 'PRESENCE_UPDATE',
+    APPLICATION_COMMAND_CREATE = 'APPLICATION_COMMAND_CREATE',
+    APPLICATION_COMMAND_UPDATE = 'APPLICATION_COMMAND_UPDATE',
+    APPLICATION_COMMAND_DELETE = 'APPLICATION_COMMAND_DELETE',
 }

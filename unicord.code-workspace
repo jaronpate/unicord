@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "unicord",
+			"path": "."
+		},
+		{
+			"name": "quotes-bot",
+			"path": "../quotes-bot"
+		}
+	],
+	"settings": {}
+}

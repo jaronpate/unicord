@@ -181,3 +181,46 @@ client.interactions.register('button_1', buttonInteractionHandler);
 client.interactions.register('button_2', buttonInteractionHandler);
 client.interactions.register('button_3', buttonInteractionHandler);
 ```
+
+## Multi-Context Support
+
+This is an example of how a single function can be used for both chat and application commands.
+
+```typescript
+const quotesCommandHandler = createCommandHandler({
+    description: 'Get a list of a users quotes',
+    args: [
+        {
+            id: 'user',
+            name: 'user',
+            type: CommandOptionType.User,
+            description: 'The user to get quotes for',
+            required: true
+        }
+    ] as const,
+    execute: async (context: Context, args) => {
+        // Lookup user
+        const user = await findUserByDiscordId(args.user.id);
+
+        if (user === undefined) {
+            return context.reply('User not found', true);
+        }
+
+        const quotes = await getQuotesByUser(user.id);
+
+        if (quotes.length === 0) {
+            return context.reply('No quotes found', true);
+        } else {
+            const embed = new Embed()
+                .setAuthor({ icon_url: args.user.avatarURL, name: args.user.display_name })
+                .setDescription(quotes.map(q => `"${q.quote_content}"`).join('\n\n'))
+                .setColor(0xFFFFFF);
+
+            return context.reply(embed.toMessage(), true);
+        }
+    }
+});
+
+client.chatCommands.register('quotes', quotesCommandHandler);
+client.applicationCommands.register('quotes', ApplicationCommandType.Chat, quotesCommandHandler);
+```

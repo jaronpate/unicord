@@ -1,0 +1,494 @@
+.page {
+    --gray-rgb: 255, 255, 255;
+    --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
+    --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
+
+    --button-primary-hover: #ccc;
+    --button-secondary-hover: #1a1a1a;
+
+    font-family: var(--font-space-grotesk);
+}
+
+/* page with header needs margin atop */
+.pageWithHeader {
+    margin-top: 4rem;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem;
+    /* glassy background */
+    background: transparent;
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--gray-alpha-200);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.nav {
+    display: flex;
+    gap: 2rem;
+    margin-right: 2rem;
+}
+
+.navLink {
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 1rem;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.navLink:hover {
+    opacity: 1;
+}
+
+.header img {
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+}
+
+.logoMark {
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.logoMarkSpan {
+    color: #ff0080;
+}
+
+.main {
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* padding: 4rem 0em; */
+}
+
+@keyframes dotPattern {
+    0% {
+        background-position: top right;
+    }
+
+    100% {
+        background-position: bottom left;
+    }
+}
+
+.hero {
+    padding: 0 15em 0;
+    height: calc(100vh - 4rem);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--gray-alpha-200);
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: radial-gradient(circle, #ff0080 1px, transparent 1px);
+    background-size: 20px 20px;
+    animation: dotPattern 30s linear infinite;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, transparent, var(--gray-alpha-100));
+    pointer-events: none;
+}
+
+.codeExample {
+    flex: 1;
+    max-width: 60%;
+    height: 75%;
+    max-height: 500px;
+}
+
+.code {
+    font-family: var(--font-mono);
+    font-size: 1em;
+}
+
+.codeBlock {
+    background: var(--gray-alpha-100);
+    padding: 1em;
+    border-radius: 0.5em;
+}
+
+.codeBlock pre {
+    margin: 0;
+}
+
+.codeBlock code {
+    font-size: 1em;
+}
+
+.codeBlock code::before {
+    content: "";
+}
+
+.codeBlock code::after {
+    content: "";
+}
+
+.codeBlock code:hover {
+    background: var(--gray-alpha-200);
+}
+
+.codeBlock code:active {
+    background: var(--gray-alpha-200);
+}
+
+.codeBlock code:focus {
+    background: var(--gray-alpha-200);
+}
+
+.codeBlock code:focus-visible {
+    background: var(--gray-alpha-200);
+}
+
+.codeBlock code:focus-within {
+    background: var(--gray-alpha-200);
+}
+
+.pillars {
+    padding: 6rem 12em;
+    background: var(--gray-alpha-100);
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.pillarContainer {
+    display: flex;
+    gap: 4rem;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.pillar {
+    flex: 1;
+    text-align: center;
+    padding: 2rem;
+    background: var(--gray-alpha-100);
+    border-radius: 12px;
+    border: 1px solid var(--gray-alpha-200);
+    transition: transform 0.2s ease-in-out;
+}
+
+.pillar:hover {
+    transform: translateY(-5px);
+}
+
+.pillarIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.pillar h2 {
+    color: #ff0080;
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.pillar p {
+    color: #fff;
+    opacity: 0.8;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.hydrationSection {
+    padding: 6rem 12em;
+    min-height: 50vh;
+    display: flex;
+    align-items: space;
+    justify-content: center;
+    position: relative;
+    border-top: 1px solid var(--gray-alpha-200);
+}
+
+.hydrationContainer {
+    display: flex;
+    gap: 4rem;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.hydrationCode {
+    flex: 2;
+    width: 100%;
+    max-width: 780px;
+}
+
+.hydrationText {
+    flex: 1;
+    /* padding: 2rem; */
+}
+
+.hydrationText h2 {
+    color: #ff0080;
+    margin: 0 0 1.5rem 0;
+    font-size: 2rem;
+}
+
+.hydrationText p {
+    color: #fff;
+    opacity: 0.8;
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.typeSection {
+    padding: 6rem 12em;
+    min-height: 50vh;
+    display: flex;
+    align-items: space;
+    justify-content: center;
+    position: relative;
+    background: var(--gray-alpha-100);
+    border-top: 1px solid var(--gray-alpha-200);
+}
+
+.typeContainer {
+    display: flex;
+    gap: 4rem;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.typeText {
+    flex: 1;
+}
+
+.typeCode {
+    flex: 2;
+    width: 100%;
+    max-width: 780px;
+}
+
+.typeText h2 {
+    color: #ff0080;
+    margin: 0 0 1.5rem 0;
+    font-size: 2rem;
+}
+
+.typeText p {
+    color: #fff;
+    opacity: 0.8;
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.typeText p code, .hydrationText p code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background-color: var(--gray-alpha-100);
+    border-radius: 0.2em;
+    padding: 0.1em 0.2em;
+    color: var(--foreground);
+    border: 1px solid var(--gray-alpha-200);
+}
+
+.installSection {
+    padding: 6rem 12em;
+    min-height: 30vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-top: 1px solid var(--gray-alpha-200);
+}
+
+.installContainer {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.installContainer h2 {
+    color: #fff;
+    margin: 0 0 2rem 0;
+    font-size: 2rem;
+}
+
+.packageManagerTabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tabButton {
+    background: transparent;
+    border: 1px solid var(--gray-alpha-200);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.tabButton:hover {
+    background: var(--gray-alpha-200);
+}
+
+.activeTab {
+    background: var(--gray-alpha-200);
+    border-color: #ff0080;
+}
+
+.installCommandWrapper {
+    display: flex;
+    align-items: center;
+    background: var(--gray-alpha-100);
+    border: 1px solid var(--gray-alpha-200);
+    border-radius: 8px;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.installCommand {
+    flex: 1;
+    display: block;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.copyButton {
+    background: transparent;
+    border: 1px solid var(--gray-alpha-200);
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.copyButton:hover {
+    background: var(--gray-alpha-200);
+}
+
+
+@media (max-width: 1200px) {
+    .hero {
+        padding: 0 2rem;
+        height: calc(100vh - 4rem);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hero .codeExample, .hero::after {
+        display: none;
+    }
+
+    .pillars {
+        padding: 4rem 2rem;
+    }
+
+    .pillarContainer {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .pillar {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .hydrationSection {
+        padding: 4rem 2rem;
+    }
+
+    .hydrationContainer {
+        flex-direction: column-reverse;
+        gap: 2rem;
+    }
+
+    .hydrationCode {
+        width: 100%;
+    }
+
+    .hydrationText {
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .typeSection {
+        padding: 4rem 2rem;
+    }
+
+    .typeContainer {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .typeCode {
+        width: 100%;
+    }
+
+    .typeText {
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .installSection {
+        padding: 4rem 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .packageManagerTabs {
+        flex-wrap: wrap;
+    }
+    
+    .tabButton {
+        flex: 1;
+        min-width: 80px;
+    }
+
+    .nav {
+        gap: 1rem;
+        margin-right: 1rem;
+    }
+    
+    .navLink {
+        font-size: 0.9rem;
+    }
+}

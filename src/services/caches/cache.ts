@@ -1,16 +1,22 @@
-import { fromDiscord } from "../../types/common";
-import type { Context } from "../../types/context";
-import type { API } from "../api";
-import type { Processor } from "../processor";
-
+import { fromDiscord } from '../../types/common';
+import type { Context } from '../../types/context';
+import type { API } from '../api';
+import type { Processor } from '../processor';
 
 export class ObjectCache<T, K extends T> {
     cache: LRUCache<string, K>;
     requests = new Map<string, Promise<K>>();
     readonly type: string;
 
-    constructor(protected api: API, processor: Processor, type: string, private readonly factory: { [fromDiscord]: (data: any) => K } & (new (data: T) => T), events: string[], capacity: number = 10_000) {
-        this.cache = new LRUCache<string, K>(10_000)
+    constructor(
+        protected api: API,
+        processor: Processor,
+        type: string,
+        private readonly factory: { [fromDiscord]: (data: any) => K } & (new (data: T) => T),
+        events: string[],
+        maxCapacity: number = 10_000,
+    ) {
+        this.cache = new LRUCache<string, K>(maxCapacity);
         this.type = type;
         processor.events.register(events, async (_context: Context, e: Record<string, any>) => {
             this.cache.set(e.id, factory[fromDiscord](e));
@@ -35,8 +41,8 @@ export class ObjectCache<T, K extends T> {
     async fetch(object_id: string, ..._args: any[]): Promise<K> {
         if (this.requests.has(object_id)) {
             return this.requests.get(object_id)!;
-        // } else if (this.cache.has(object_id)) {
-        //     return Promise.resolve(this.cache.get(object_id)!);
+            // } else if (this.cache.has(object_id)) {
+            //     return Promise.resolve(this.cache.get(object_id)!);
         } else {
             // Dispatch the request
             const req = this.api.get(`/${this.type}/${object_id}`).then((data) => {
@@ -49,10 +55,8 @@ export class ObjectCache<T, K extends T> {
             });
             // Save the request
             this.requests.set(object_id, req);
-            // Remove the request from the cache if it succeeds
-            req.then(() => this.requests.delete(object_id));
-            // Remove the request from the cache if it fails
-            req.catch(() => this.requests.delete(object_id));
+            // Remove the request from the cache when it finishes
+            req.finally(() => this.requests.delete(object_id));
             // Return the request
             return req;
         }

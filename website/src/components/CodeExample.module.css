@@ -1,0 +1,13 @@
+.editorWrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.editorContainer {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #2d2d2d;
+}
