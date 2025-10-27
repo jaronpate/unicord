@@ -41,6 +41,46 @@ export class UnicordCommandManager {
             [UnicordEventType.ChatCommands]: new Map(),
             [UnicordEventType.ApplicationCommands]: new Map(),
         };
+
+        // Register the default help command
+        this.registerChatCommand(
+            'help',
+            async (context) => {
+                // Just list chat commands for now
+                let reply = '## Available Commands:\n';
+
+                for (const [command, defs] of this.handlers[UnicordEventType.ChatCommands]) {
+                    reply += `> \n`;
+
+                    for (const def of defs) {
+                        reply += `> **${command}**: ${def.options.description ?? 'No description'}\n`;
+                        // List arguments
+                        if (def.options.args.length > 0) {
+                            for (const arg of def.options.args) {
+                                reply += `>    \`${arg.name}\` (${UnicordArgumentType[arg.type]}${
+                                    arg.required ? ', required' : ''
+                                }): ${arg.description ?? 'No description'}\n`;
+                            }
+                        }
+                        // Show usage
+                        reply += `> \n`;
+                        reply += `>    \`${command}`;
+                        for (const arg of def.options.args) {
+                            reply += arg.required ? ` <${arg.name}>` : ` <?${arg.name}>`;
+                        }
+                        reply += `\`\n`;
+                    }
+                }
+
+                console.log(reply);
+
+                await context.reply(reply);
+            },
+            {
+                description: 'Lists all available commands',
+                args: [],
+            },
+        );
     }
 
     private validateAndResolveArgs = async <const Options extends UnicordCommandOptions>(
