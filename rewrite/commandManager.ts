@@ -4,8 +4,7 @@ import type {
     UnicordArgumentDefinition,
     UnicordCommandHandler,
     UnicordCommandOptions,
-    UnicordEventContext,
-    UnicordHandler,
+    UnicordHandler
 } from '.';
 import { UnicordCommandContext } from './context';
 import type { UnicordEventProcessor } from './eventProcessor';
@@ -71,8 +70,6 @@ export class UnicordCommandManager {
                         reply += `\`\n`;
                     }
                 }
-
-                console.log(reply);
 
                 await context.reply(reply);
             },
