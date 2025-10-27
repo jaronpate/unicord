@@ -19,11 +19,11 @@ export class Client {
     protected processor: Processor;
     protected gateway: Gateway;
     // Caches
-    caches: {
-        guilds: Guilds;
-        users: Users;
-        messages: Messages;
-        channels: Channels;
+    readonly caches: {
+        readonly guilds: Guilds;
+        readonly users: Users;
+        readonly messages: Messages;
+        readonly channels: Channels;
     };
 
     constructor(config: ClientConfig) {

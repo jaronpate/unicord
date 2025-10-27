@@ -1,8 +1,8 @@
 import { WebSocket, type Data } from 'ws';
-import type { Client } from '../client';
-import { fromDiscord, HandlerType, type Payload } from '../../types/common';
-import { exists, isNil, isObject, log } from '../../utils';
-import type { API } from '../api';
+import type { Client } from "../client";
+import { fromDiscord, HandlerType, type Payload } from "../../types/common";
+import { exists, isNil, isObject, log } from "../../utils";
+import type { API } from "../api";
 import type { Processor } from '../processor';
 import { Context } from '../../types/context';
 import { type DiscordMessage, Message } from '../../types/message';
@@ -23,7 +23,7 @@ export class Gateway {
 
     private onOpen = () => {
         log('Connected to gateway');
-    };
+    }
 
     private onMessage = async (packet: Data) => {
         // Allocate a variable to store the parsed payload
@@ -71,7 +71,7 @@ export class Gateway {
                 log('Heartbeat ACK');
             }
         }
-    };
+    }
 
     private heartbeat() {
         if (exists(this.heartbeat_interval)) {
@@ -105,14 +105,14 @@ export class Gateway {
         this.send({
             op: 2,
             d: {
-                token: this.client.config.token,
-                intents: this.client.config.intents.reduce((acc, intent) => acc | intent, 0),
+                token: this.client.token,
+                intents: this.client.intents.reduce((acc, intent) => acc | intent, 0),
                 properties: {
                     os: process.platform,
                     browser: 'unicord',
-                    device: 'unicord',
-                },
-            },
+                    device: 'unicord'
+                }
+            }
         });
     };
 
@@ -179,15 +179,13 @@ export class Gateway {
         // Extract the author
         const author = User.fromDiscord(DiscordUser.fromAPIResponse(payload.d.author));
         // Store the author in the cache
-        this.client.caches.users.set(author.id, author);
+        this.client.users.set(author.id, author);
         // Extract the content
         const content = payload.d.content.trim();
         // Is this a command?
-        if (content.startsWith(this.client.config.prefix) || content.startsWith(`<@${this.user.id}>`)) {
+        if (content.startsWith(this.client.prefix) || content.startsWith(`<@${this.user.id}>`)) {
             // Determine the prefix
-            const prefix = content.startsWith(this.client.config.prefix)
-                ? this.client.config.prefix
-                : `<@${this.user.id}> `;
+            const prefix = content.startsWith(this.client.prefix) ? this.client.prefix : `<@${this.user.id}> `;
             // Parse command
             const args = content
                 .slice(prefix.length)
@@ -203,7 +201,7 @@ export class Gateway {
             // Create a new message object from the payload
             const message = Message.fromDiscord(payload.d as DiscordMessage);
             // Store the message in the cache
-            this.client.caches.messages.set(message.id, message);
+            this.client.messages.set(message.id, message);
             // Generate context
             const context = new Context(this.client, this.api, { message });
             // Dispatch event for the command
@@ -233,21 +231,15 @@ export class Gateway {
         }
 
         if (payload.d.type === 2) {
-            this.handleShashInteraction(
-                payload as Payload & { d: InteractionPayload & { data: InteractionCommandData } },
-            );
+            this.handleShashInteraction(payload as Payload & { d: InteractionPayload & { data: InteractionCommandData } });
         } else if (payload.d.type === 3) {
-            this.handleChatInteraction(
-                payload as Payload & { d: InteractionPayload & { data: InteractionCommpoentData } },
-            );
+            this.handleChatInteraction(payload as Payload & { d: InteractionPayload & { data: InteractionCommpoentData } });
         } else {
             // this.handleChatInteraction(payload);
         }
     };
 
-    private handleShashInteraction = (
-        payload: Payload & { d: InteractionPayload & { data: InteractionCommandData } },
-    ) => {
+    private handleShashInteraction = (payload: Payload & { d: InteractionPayload & { data: InteractionCommandData } }) => {
         if (isNil(payload.d.data)) {
             throw new Error('Invalid INTERACTION_CREATE data received');
         }
@@ -259,17 +251,17 @@ export class Gateway {
 
         if (payload.d.guild) {
             const guild = Guild.fromDiscord(payload.d.guild);
-            this.client.caches.guilds.set(guild.id, guild);
+            this.client.guilds.set(guild.id, guild);
         }
 
         if (payload.d.member) {
             const member = User.fromDiscord(payload.d.member?.user);
-            this.client.caches.users.set(member.id, member);
+            this.client.users.set(member.id, member);
         }
 
         if (payload.d.user) {
             const user = User.fromDiscord(payload.d.user);
-            this.client.caches.users.set(user.id, user);
+            this.client.users.set(user.id, user);
         }
 
         // TODO: Fix when channel class is implemented
@@ -279,20 +271,14 @@ export class Gateway {
         // }
 
         if (this.processor.application_commands.has(command)) {
-            this.processor.application_commands.execute(
-                command,
-                context,
-                args?.map((arg) => arg.value),
-            );
+            this.processor.application_commands.execute(command, context, args?.map(arg => arg.value));
         } else {
             // TODO: Custom unknown command handler
             context.reply(`Unknown command: ${command}`);
         }
     };
 
-    private handleChatInteraction = (
-        payload: Payload & { d: InteractionPayload & { data: InteractionCommpoentData } },
-    ) => {
+    private handleChatInteraction = (payload: Payload & { d: InteractionPayload & { data: InteractionCommpoentData } }) => {
         const context = new Context(this.client, this.api, { interaction: payload.d });
 
         if (exists(payload.d.data)) {
