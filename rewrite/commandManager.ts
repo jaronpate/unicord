@@ -2,6 +2,7 @@ import type {
     ArgumentTypeFromOptions,
     Unicord,
     UnicordArgumentDefinition,
+    UnicordCommandHandler,
     UnicordCommandOptions,
     UnicordEventContext,
     UnicordHandler,
@@ -64,7 +65,7 @@ export class UnicordCommandManager {
     register<const Options extends UnicordCommandOptions>(
         type: UnicordEventType.ChatCommands | UnicordEventType.ApplicationCommands,
         event: string,
-        handler: UnicordHandler<Options>,
+        handler: UnicordCommandHandler<Options>,
         options: Options = { args: [] } as unknown as Options,
     ) {
         if (this.handlers[type].has(event) === false) {
@@ -74,15 +75,14 @@ export class UnicordCommandManager {
         this.handlers[type].get(event)!.push({ options, handler });
 
         // Generate a closure to wrap the handler
-        const wrappedHandler = async (context: UnicordCommandContext | UnicordEventContext, args: any[]) => {
+        const wrappedHandler = (async (context: UnicordCommandContext, args: any[]) => {
             console.log('Raw Args:', args);
             console.log('options:', options.args);
             const resolvedArgs = await this.validateAndResolveArgs<Options>(args, options.args);
             console.log('Resolved Args:', resolvedArgs);
             // TODO: Fix context type here
-            // @ts-expect-error will fix later
             return handler(context, resolvedArgs);
-        };
+        }) as UnicordCommandHandler<Options>;
 
         this.eventProcessor.register(`${type}:${event}`, wrappedHandler);
         return this.self;

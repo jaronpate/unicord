@@ -6,6 +6,7 @@ import { UnicordEventProcessor } from './eventProcessor';
 import { UnicordGatewayManager } from './gatewayManager';
 import { hydrate } from './hydrator';
 import type {
+    UnicordCommandHandler,
     UnicordCommandOptions,
     UnicordConfig,
     UnicordConfigWithDefaults,
@@ -78,14 +79,21 @@ export class Unicord {
         this.eventProcessor.emit(`${type}:${event}`, context, args);
     }
 
-    // TODO: type signature from registerChatCommand needs to transfer to here
-    get registerChatCommand() {
-        return this.commandManager.registerChatCommand;
+    // TODO: can we automate defining these methods with some TS magic?
+    registerChatCommand<const Options extends UnicordCommandOptions>(
+        event: string,
+        handler: UnicordCommandHandler<Options>,
+        options: Options = { args: [] } as unknown as Options,
+    ) {
+        return this.commandManager.registerChatCommand(event, handler, options);
     }
 
-    // TODO: type signature from registerApplicationCommand needs to transfer to here
-    get registerApplicationCommand() {
-        return this.commandManager.registerApplicationCommand;
+    registerApplicationCommand<const Options extends UnicordCommandOptions>(
+        event: string,
+        handler: UnicordCommandHandler<Options>,
+        options: Options = { args: [] } as unknown as Options,
+    ) {
+        return this.commandManager.registerApplicationCommand(event, handler, options);
     }
 
     // TODO: should have a different signature for events that are not commands
