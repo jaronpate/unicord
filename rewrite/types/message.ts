@@ -2,7 +2,7 @@ import { exists, isNil } from '../utils';
 import { UnicordGatewayObject } from './base';
 import type { Channel } from './channel';
 import { fromDiscord, Trait, type Expectation } from './common';
-// import type { Embed } from './embed';
+import type { DiscordEmbed, Embed } from './embed';
 import type { Guild } from './guild';
 import { User, type DiscordUser } from './user';
 
@@ -94,7 +94,7 @@ export type MessagePayload = Message & {
     author: User;
     channel_id: string;
     content: string;
-    // embeds: Embed[];
+    embeds: Embed[];
     components: Component[];
     message_reference?: {
         id: string;
@@ -110,7 +110,7 @@ export class Message extends UnicordGatewayObject<Message, DiscordMessage> {
     channel_id?: string;
     guild_id?: string;
     public content: string;
-    // public embeds: Embed[] = [];
+    public embeds: Embed[] = [];
     public components: Component[] = [];
     public message_reference?: {
         id: string;
@@ -178,10 +178,10 @@ export class Message extends UnicordGatewayObject<Message, DiscordMessage> {
         return this;
     };
 
-    // public addEmbed = (embed: Embed) => {
-    //     this.embeds.push(embed);
-    //     return this;
-    // };
+    public addEmbed = (embed: Embed) => {
+        this.embeds.push(embed);
+        return this;
+    };
 
     public addComponent = (content: Component | string, ...components: Component[]) => {
         if (typeof content === 'string') {
@@ -223,7 +223,7 @@ export class Message extends UnicordGatewayObject<Message, DiscordMessage> {
     public toJSON = () => {
         return {
             content: this.content,
-            // embeds: this.embeds,
+            embeds: this.embeds,
             components: this.components,
             message_reference: this.message_reference
                 ? {
@@ -236,7 +236,6 @@ export class Message extends UnicordGatewayObject<Message, DiscordMessage> {
     };
 }
 
-// Raw API Object
 export type DiscordMessage = {
     id: string;
     channel_id: string;
@@ -253,7 +252,7 @@ export type DiscordMessage = {
     mention_roles: string[];
     mention_channels?: { id: string; guild_id: string; type: number; name: string }[];
     attachments: { id: string; filename: string; url: string; proxy_url: string; size: number }[];
-    // embeds: DiscordEmbed[];
+    embeds: DiscordEmbed[];
     reactions?: { count: number; me: boolean; emoji: Emoji }[];
     nonce?: string | number;
     pinned: boolean;

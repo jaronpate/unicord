@@ -4,10 +4,11 @@ import type {
     UnicordArgumentDefinition,
     UnicordCommandHandler,
     UnicordCommandOptions,
-    UnicordHandler
+    UnicordHandler,
 } from '.';
 import { UnicordCommandContext } from './context';
 import type { UnicordEventProcessor } from './eventProcessor';
+import { Embed } from './types';
 import { UnicordArgumentType, UnicordEventType } from './types/common';
 
 type UnicordCommandDefinition<Options extends UnicordCommandOptions> = {
@@ -46,32 +47,36 @@ export class UnicordCommandManager {
             'help',
             async (context) => {
                 // Just list chat commands for now
-                let reply = '## Available Commands:\n';
+                const reply = new Embed().setTitle('Available Commands');
 
                 for (const [command, defs] of this.handlers[UnicordEventType.ChatCommands]) {
-                    reply += `> \n`;
-
                     for (const def of defs) {
-                        reply += `> **${command}**: ${def.options.description ?? 'No description'}\n`;
-                        // List arguments
+                        let fieldValue = def.options.description ?? 'No description';
+                        fieldValue += '\n';
+
                         if (def.options.args.length > 0) {
+                            fieldValue += `\n\`${command}`;
                             for (const arg of def.options.args) {
-                                reply += `>    \`${arg.name}\` (${UnicordArgumentType[arg.type]}${
+                                fieldValue += arg.required ? ` <${arg.name}>` : ` <?${arg.name}>`;
+                            }
+                            fieldValue += '`\n';
+                            for (const arg of def.options.args) {
+                                fieldValue += `- \`${arg.name}\` (${UnicordArgumentType[arg.type]}${
                                     arg.required ? ', required' : ''
                                 }): ${arg.description ?? 'No description'}\n`;
                             }
                         }
-                        // Show usage
-                        reply += `> \n`;
-                        reply += `>    \`${command}`;
-                        for (const arg of def.options.args) {
-                            reply += arg.required ? ` <${arg.name}>` : ` <?${arg.name}>`;
-                        }
-                        reply += `\`\n`;
+
+                        fieldValue += '\n';
+
+                        reply.fields.push({
+                            name: command,
+                            value: fieldValue,
+                        });
                     }
                 }
 
-                await context.reply(reply);
+                await context.reply(reply.toMessage());
             },
             {
                 description: 'Lists all available commands',

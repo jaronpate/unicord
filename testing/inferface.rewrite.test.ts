@@ -22,7 +22,7 @@ const client = new Unicord({
             await context.reply(response);
         },
         {
-            description: 'Ping command',
+            description: 'Say hello',
             args: [
                 {
                     name: 'name',
@@ -48,7 +48,7 @@ const client = new Unicord({
             await context.reply(hydrated.channel.name ?? 'Unnamed Channel');
         },
         {
-            description: 'Channel command',
+            description: 'Get info about a channel',
             args: [],
         },
     )
