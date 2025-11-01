@@ -19,7 +19,7 @@ export const log = (...args: any[]) => {
     const LOG_LEVEL = process.env.UNICORD_LOG_LEVEL?.toLocaleLowerCase();
 
     if (LOG_LEVEL === 'debug') {
-        const timestamp = `\x1b[37m[${new Date().toLocaleString()}]\x1b[0m`;
+        const timestamp = `\x1b[37m[${new Date().toLocaleTimeString()}]\x1b[0m`;
         const prefix = `\x1b[35m[unicord]`;
         console.log(`${timestamp} ${prefix} \x1b[0m`, ...args);
     }
