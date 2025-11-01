@@ -104,6 +104,7 @@ export class UnicordCommandManager {
         return Promise.resolve(validated as ArgumentTypeFromOptions<Options['args']>);
     };
 
+    // TODO: Register application commands with the DiscordAPI
     register<const Options extends UnicordCommandOptions>(
         type: UnicordEventType.ChatCommands | UnicordEventType.ApplicationCommands,
         event: string,
@@ -118,11 +119,7 @@ export class UnicordCommandManager {
 
         // Generate a closure to wrap the handler
         const wrappedHandler = (async (context: UnicordCommandContext, args: any[]) => {
-            console.log('Raw Args:', args);
-            console.log('options:', options.args);
             const resolvedArgs = await this.validateAndResolveArgs<Options>(args, options.args);
-            console.log('Resolved Args:', resolvedArgs);
-            // TODO: Fix context type here
             return handler(context, resolvedArgs);
         }) as UnicordCommandHandler<Options>;
 
