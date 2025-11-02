@@ -1,4 +1,10 @@
-export function defaults(original: Record<string, any>, defaults: Record<string, any>) {
+/**
+ * Sets top level properties when undefined on the original object — cretates a new object, does not modify the original
+ * @param original original object
+ * @param defaults defailts to set on the object
+ * @returns a new object with top level defaults set
+ */
+export function setDefaults<T>(original: Record<string, any>, defaults: Record<string, any>): T {
     const final: Record<string, any> = {};
 
     for (const prop of Object.keys(defaults)) {
@@ -9,7 +15,7 @@ export function defaults(original: Record<string, any>, defaults: Record<string,
         final[prop] = original[prop];
     }
 
-    return final;
+    return final as T;
 }
 export const isNil = (value: any): value is null | undefined => value === null || value === undefined;
 export const exists = <T>(value: T | null | undefined): value is NonNullable<T> => !isNil(value);

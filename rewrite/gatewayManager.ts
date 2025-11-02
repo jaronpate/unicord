@@ -61,7 +61,7 @@ export class UnicordGatewayManager {
                 this.indentify();
             } else if (code === 11) {
                 // Heartbeat ACK
-                log('Heartbeat ACK');
+                // log('Heartbeat ACK');
             }
         }
     };

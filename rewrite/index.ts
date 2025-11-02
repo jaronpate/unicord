@@ -17,7 +17,7 @@ import type {
 import { Intent, UnicordEventType } from './types/common';
 import type { DiscordMessage } from './types/message';
 import { Message } from './types/message';
-import { defaults } from './utils';
+import { setDefaults } from './utils';
 
 const UNICORD_CONFIG_DEFAULTS = {
     intents: [Intent.DEFAULT],
@@ -36,7 +36,7 @@ export class Unicord {
     };
 
     constructor(userConfig: UnicordConfig = {}) {
-        this.config = defaults(userConfig, UNICORD_CONFIG_DEFAULTS) as UnicordConfigWithDefaults;
+        this.config = setDefaults<UnicordConfigWithDefaults>(userConfig, UNICORD_CONFIG_DEFAULTS);
         this.discordAPI = new UnicordDiscordAPI(this);
         this.eventProcessor = new UnicordEventProcessor(this);
         this.gatewayManager = new UnicordGatewayManager(this);
@@ -70,6 +70,30 @@ export class Unicord {
         return this.eventProcessor.register(`${type}:${event}`, handler);
     }
 
+    use(client: Unicord): this {
+        // const handlers = client.commandManager.all();
+
+        // for (const type in handlers) {
+        //     const typeKey = type as UnicordEventType.ChatCommands | UnicordEventType.ApplicationCommands;
+        //     for (const [event, definition] of handlers[typeKey]) {
+        //         this.commandManager.register(
+        //             typeKey,
+        //             event,
+        //             definition.handler.bind(this.commandManager),
+        //             definition.options,
+        //         );
+        //     }
+        // }
+
+        // this.commandManager.registerDefaultHelpCommand();
+
+        this.commandManager.merge(client.commandManager);
+
+        // TODO: inherit event listeners too
+
+        return this;
+    }
+
     emit(type: UnicordEventType, event: string, context: UnicordCommandContext | UnicordEventContext, args: any[]) {
         this.eventProcessor.emit(`${type}:${event}`, context, args);
     }
@@ -79,16 +103,18 @@ export class Unicord {
         event: string,
         handler: UnicordCommandHandler<Options>,
         options: Options = { args: [] } as unknown as Options,
-    ) {
-        return this.commandManager.registerChatCommand(event, handler, options);
+    ): this {
+        this.commandManager.registerChatCommand(event, handler, options);
+        return this;
     }
 
     registerApplicationCommand<const Options extends UnicordCommandOptions>(
         event: string,
         handler: UnicordCommandHandler<Options>,
         options: Options = { args: [] } as unknown as Options,
-    ) {
-        return this.commandManager.registerApplicationCommand(event, handler, options);
+    ): this {
+        this.commandManager.registerApplicationCommand(event, handler, options);
+        return this;
     }
 
     // TODO: should have a different signature for events that are not commands
@@ -107,7 +133,7 @@ export class Unicord {
         );
     };
 
-    login(token: string | undefined = this.config.token) {
+    login(token: string | undefined = this.config.token): this {
         if (token === null || token === undefined) {
             throw new Error(
                 'You must provide a token to login. Either in the Unicord config or when calling `login()`',
@@ -117,6 +143,7 @@ export class Unicord {
         this.config.token = token;
 
         this.gatewayManager.connect();
+        return this;
     }
 }
 

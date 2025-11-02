@@ -12,6 +12,10 @@ export class UnicordEventProcessor extends EventEmitter {
         return super.on(event, handler);
     }
 
+    unregister<const Options extends UnicordCommandOptions>(event: string, handler: UnicordHandler<Options>) {
+        return super.off(event, handler);
+    }
+
     emit(event: string, context: UnicordCommandContext | UnicordEventContext, args: any[]): boolean {
         return super.emit(event, context, args);
     }

@@ -41,7 +41,7 @@ export class UnicordDiscordAPI {
         const limitBucket = response.headers.get('X-RateLimit-Bucket');
 
         // Log rate limit info for debugging
-        log(`Rate Limit: ${remaining}/${limit} - Reset: ${reset} (${resetSeconds}s) - Bucket: ${limitBucket}`);
+        log(`Rate Limit: ${remaining}/${limit} - Reset: ${resetSeconds}s - Bucket: ${limitBucket}`);
 
         // If status is 429, we are being rate limited
         if (response.status === 429) {

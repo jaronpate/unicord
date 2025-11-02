@@ -73,11 +73,32 @@ const client = new Unicord({
         console.log(`Logged in as ${payload.user.username}`);
     });
 
-client.login(DISCORD_CLIENT_TOKEN);
+// client.login(DISCORD_CLIENT_TOKEN);
 
 // Allow use of "child" instances inside parent instance
-// const client2 = new Unicord().chatCommand('ping', async (context, _) => {
-//     await context.reply('Pong!');
-// });
+const etc = new Unicord().registerChatCommand(
+    'zing',
+    async (context, args) => {
+        await context.reply(`Zing! You got served!` + args.fav_amimal ? ` One ${args.fav_amimal} please!` : '');
+    },
+    {
+        args: [
+            {
+                name: 'fav_amimal',
+                description: 'Your favorite animal',
+                type: UnicordArgumentType.String,
+                required: false,
+                choices: [
+                    { name: 'Dog', value: 'dog' },
+                    { name: 'Cat', value: 'cat' },
+                    { name: 'Hamster', value: 'hamster' },
+                    { name: 'Dolphin', value: 'dolphin' },
+                ],
+            },
+        ],
+    },
+);
 
-// new Unicord().use(client2).login(DISCORD_CLIENT_TOKEN);
+client.use(etc);
+
+client.login();

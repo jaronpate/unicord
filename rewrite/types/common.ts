@@ -30,11 +30,30 @@ export enum UnicordArgumentType {
     Attachment = 11,
 }
 
+// Old type
+// export type ApplicationCommandOption = {
+//     type: ApplicationCommandOptionType;
+//     name: string;
+//     id: string;
+//     name_localizations?: Record<string, string> | null;
+//     description: string;
+//     description_localizations?: Record<string, string> | null;
+//     required?: boolean;
+//     choices?: Array<{ name: string; value: string | number }>;
+//     options?: ApplicationCommandOption[]; // Recursive structure for subcommands
+//     channel_types?: ChannelType[];
+//     min_value?: number;
+//     max_value?: number;
+//     min_length?: number;
+//     max_length?: number;
+//     autocomplete?: boolean;
+// };
 export interface UnicordArgumentDefinition {
     name: string;
     description: string;
     type: UnicordArgumentType;
     required: boolean;
+    choices?: Array<{ name: string; value: string | number }>;
 }
 
 export interface UnicordCommandOptions {
@@ -56,7 +75,7 @@ export interface UnicordBaseContext extends Record<string, any> {
 
 export interface UnicordEventContext extends UnicordBaseContext {}
 
-export type OptionTypeMap = {
+export type DefinitionTypeMap = {
     [UnicordArgumentType.String]: string;
     [UnicordArgumentType.Integer]: number;
     [UnicordArgumentType.Boolean]: boolean;
@@ -71,10 +90,14 @@ export type OptionTypeMap = {
 };
 
 export type ArgumentTypeFromOptions<T extends readonly UnicordArgumentDefinition[]> = {
-    [Option in T[number] as Option['name']]: Option['type'] extends keyof OptionTypeMap
-        ? Option['required'] extends true // If required, keep as is; otherwise, make optional
-            ? OptionTypeMap[Option['type']]
-            : OptionTypeMap[Option['type']] | undefined
+    [Definition in T[number] as Definition['name']]: Definition['type'] extends keyof DefinitionTypeMap
+        ? Definition['choices'] extends readonly { value: infer U }[]
+            ? Definition['required'] extends true // If required, keep as is; otherwise, make optional
+                ? U
+                : U | undefined
+            : Definition['required'] extends true // If required, keep as is; otherwise, make optional
+                ? DefinitionTypeMap[Definition['type']]
+                : DefinitionTypeMap[Definition['type']] | undefined
         : unknown;
 };
 
