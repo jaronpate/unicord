@@ -71,26 +71,8 @@ export class Unicord {
     }
 
     use(client: Unicord): this {
-        // const handlers = client.commandManager.all();
-
-        // for (const type in handlers) {
-        //     const typeKey = type as UnicordEventType.ChatCommands | UnicordEventType.ApplicationCommands;
-        //     for (const [event, definition] of handlers[typeKey]) {
-        //         this.commandManager.register(
-        //             typeKey,
-        //             event,
-        //             definition.handler.bind(this.commandManager),
-        //             definition.options,
-        //         );
-        //     }
-        // }
-
-        // this.commandManager.registerDefaultHelpCommand();
-
         this.commandManager.merge(client.commandManager);
-
         // TODO: inherit event listeners too
-
         return this;
     }
 
@@ -117,7 +99,6 @@ export class Unicord {
         return this;
     }
 
-    // TODO: should have a different signature for events that are not commands
     onEvent(event: string, handler: UnicordEventHandler): this {
         this.__onEvent(UnicordEventType.SystemEvent, event, handler);
         return this;

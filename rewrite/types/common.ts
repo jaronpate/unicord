@@ -1,20 +1,30 @@
-import { UnicordCommandContext } from "../context";
+import { UnicordCommandContext } from '../context';
 
 export type Primitive = string | number | boolean | null;
 
 export interface UnicordConfig {
+    application_id?: string;
     token?: string;
     prefix?: string;
     intents?: Intent[];
 }
 
 export interface UnicordConfigWithDefaults extends UnicordConfig {
+    application_id: string;
+    token: string;
     intents: Intent[];
 }
 
 export type Brand<T, K> = T & { __brand: K };
 
 export type EventName = Brand<string, 'event-name'>;
+
+export enum UnicordApplicationCommandType {
+    Chat = 1,
+    User = 2,
+    Message = 3,
+    PrimaryEntryPoint = 4,
+}
 
 export enum UnicordArgumentType {
     SubCommand = 1,
@@ -28,6 +38,23 @@ export enum UnicordArgumentType {
     Mentionable = 9,
     Number = 10,
     Attachment = 11,
+}
+
+export enum UnicordChannelType {
+    GuildText = 0,
+    DM = 1,
+    GuildVoice = 2,
+    GroupDm = 3,
+    GuildCategory = 4,
+    GuildNews = 5,
+    GuildStore = 6,
+    GuildNewsThread = 10,
+    GuildPublicThread = 11,
+    GuildPrivateThread = 12,
+    GuildStageVoice = 13,
+    GuildDirectory = 14,
+    GuildForum = 15,
+    GuildMedia = 16,
 }
 
 // Old type
@@ -96,8 +123,8 @@ export type ArgumentTypeFromOptions<T extends readonly UnicordArgumentDefinition
                 ? U
                 : U | undefined
             : Definition['required'] extends true // If required, keep as is; otherwise, make optional
-                ? DefinitionTypeMap[Definition['type']]
-                : DefinitionTypeMap[Definition['type']] | undefined
+            ? DefinitionTypeMap[Definition['type']]
+            : DefinitionTypeMap[Definition['type']] | undefined
         : unknown;
 };
 
@@ -106,6 +133,7 @@ export type UnicordCommandHandler<Options extends UnicordCommandOptions> = (
     args: ArgumentTypeFromOptions<Options['args']>,
 ) => any;
 
+// TODO: Fill out signature
 export type UnicordEventHandler = (context: UnicordEventContext, payload: any) => any;
 
 export type UnicordHandler<Options extends UnicordCommandOptions> =

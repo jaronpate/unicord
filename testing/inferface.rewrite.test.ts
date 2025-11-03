@@ -1,15 +1,16 @@
 // Here we are defining what we want the interface to look like so that there is a goal to work towards
 // Things here are not necessarily implemented in the actual code but show what we want it to look like to use the library
 
-// import { unicord, t } from 'unicord';
 import { Expectation, Unicord, UnicordArgumentType } from '../rewrite/index.ts';
 
+const DISCORD_APPLICATION_ID = process.env.APPLICATION_ID!;
 const DISCORD_CLIENT_TOKEN = process.env.BOT_TOKEN!;
 
 // Create a new client instance
 // Most usage will be via chaining methods off the client instance
 const client = new Unicord({
-    token: process.env.BOT_TOKEN!,
+    application_id: DISCORD_APPLICATION_ID,
+    token: DISCORD_CLIENT_TOKEN,
 })
     .registerChatCommand(
         'ping',
@@ -72,8 +73,6 @@ const client = new Unicord({
     .onEvent('READY', async (payload) => {
         console.log(`Logged in as ${payload.user.username}`);
     });
-
-// client.login(DISCORD_CLIENT_TOKEN);
 
 // Allow use of "child" instances inside parent instance
 const etc = new Unicord().registerChatCommand(
