@@ -252,8 +252,6 @@ export class UnicordGatewayManager {
         }
 
         // Extract the content
-        console.log('payload.d', payload.d);
-        console.log('content', payload.d.content);
         const content = payload.d.content.trim();
         const hasPrefixInConfig = exists(this.self.config.prefix) && this.self.config.prefix.length > 0;
         const userMentionPrefix = `<@${this.user.id}>`;
