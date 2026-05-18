@@ -4,13 +4,11 @@ import type {
     UnicordArgumentDefinition,
     UnicordCommandHandler,
     UnicordCommandOptions,
-    UnicordHandler,
 } from '.';
 import { UnicordCommandContext } from './context';
 import type { UnicordEventProcessor } from './eventProcessor';
 import { Embed } from './types';
 import { UnicordArgumentType, UnicordEventType } from './types/common';
-import { log } from './utils';
 
 type UnicordCommandDefinition<Options extends UnicordCommandOptions> = {
     options: Options;
@@ -56,19 +54,59 @@ export class UnicordCommandManager {
         args: any[],
         definitions: Options['args'],
     ): Promise<ArgumentTypeFromOptions<Options['args']>> {
-        // Zip the args and definition together
-        const zipped: [UnicordArgumentDefinition, any][] = args.map((arg, i) => [definitions[i], arg]);
-        // Validate the args
         const validated: Record<string, any> = {};
-        // TODO: Attempt some type coresion/resolution here (mostly for text commands)
-        for (const [def, arg] of zipped) {
-            if (false) {
+
+        if (args.length > definitions.length) {
+            throw new Error(`Too many arguments. Expected ${definitions.length}, received ${args.length}`);
+        }
+
+        for (const [index, def] of definitions.entries()) {
+            const arg = args[index];
+
+            if (arg === undefined || arg === null || arg === '') {
+                if (def.required) {
+                    throw new Error(`Missing required argument: ${def.name}`);
+                }
+                validated[def.name] = undefined;
+                continue;
+            }
+
+            validated[def.name] = this.coerceArgument(def, arg);
+        }
+
+        return Promise.resolve(validated as ArgumentTypeFromOptions<Options['args']>);
+    }
+
+    private coerceArgument(def: UnicordArgumentDefinition, value: any) {
+        let coerced = value;
+
+        if (def.type === UnicordArgumentType.Integer) {
+            coerced = typeof value === 'number' ? value : parseInt(value, 10);
+            if (!Number.isInteger(coerced)) {
+                throw new Error(`Argument ${def.name} must be an integer`);
+            }
+        } else if (def.type === UnicordArgumentType.Number) {
+            coerced = typeof value === 'number' ? value : Number(value);
+            if (Number.isNaN(coerced)) {
+                throw new Error(`Argument ${def.name} must be a number`);
+            }
+        } else if (def.type === UnicordArgumentType.Boolean) {
+            if (typeof value === 'boolean') {
+                coerced = value;
+            } else if (value === 'true') {
+                coerced = true;
+            } else if (value === 'false') {
+                coerced = false;
             } else {
-                validated[def.name] = arg;
+                throw new Error(`Argument ${def.name} must be a boolean`);
             }
         }
-        // TODO: Fix types so we don't need to cast here
-        return Promise.resolve(validated as ArgumentTypeFromOptions<Options['args']>);
+
+        if (def.choices && !def.choices.some((choice) => choice.value === coerced)) {
+            throw new Error(`Invalid choice for argument ${def.name}: ${value}`);
+        }
+
+        return coerced;
     }
 
     registerDefaultHelpCommand() {
@@ -142,13 +180,35 @@ export class UnicordCommandManager {
         return this.self;
     }
 
-    // TODO: Register application commands with the DiscordAPI
     register<const Options extends UnicordCommandOptions>(
         type: UnicordEventType.ChatCommands | UnicordEventType.ApplicationCommands,
         event: string,
         handler: UnicordCommandHandler<Options>,
         options: Options = { args: [] } as unknown as Options,
     ) {
+        if (type === UnicordEventType.ApplicationCommands) {
+            const commandNameRegex = /^[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/u;
+            if (!commandNameRegex.test(event)) {
+                throw new Error(
+                    `${event} is not a valid application command name (1-32 characters, only letters, numbers, hyphens, and underscores)`,
+                );
+            }
+
+            if (!options.description || options.description.length === 0) {
+                throw new Error('Application commands require a description');
+            }
+
+            if (options.args && options.args.length > 25) {
+                throw new Error('Application commands cannot have more than 25 arguments');
+            }
+
+            for (const arg of options.args) {
+                if (arg.choices && arg.choices.length > 25) {
+                    throw new Error(`Application command argument ${arg.name} cannot have more than 25 choices`);
+                }
+            }
+        }
+
         if (this.has(type, event)) {
             this.unregister(type, event);
         }

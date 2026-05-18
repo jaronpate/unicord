@@ -4,22 +4,13 @@ import { UnicordCommandContext } from './context';
 import type { Channel, Guild, Message } from './types';
 import { exists } from './utils';
 
-export type Hydrateable = UnicordCommandContext;
+export type UnicordHydrateable = UnicordCommandContext;
 
 export type UnicordHydratedObject<Object, Expectations extends Array<Expectation>> = Object & {
     channel: Expects<Expectations, Expectation.Channel, Channel>;
     guild: Expects<Expectations, Expectation.Guild, Guild>;
     message: Expects<Expectations, Expectation.Message, Message>;
 };
-
-export type Hydrated<Object extends Hydrateable, Expectations extends Array<Expectation>> = UnicordHydratedObject<
-    Object,
-    Expectations
->;
-
-// export type Hydrated<T extends Hydrateable, K extends Array<Expectation>> = T extends UnicordCommandContext
-//     ? HydratedCommandContext<K>
-//     : never;
 
 // NOTE: Dont forget to update the typedoc comment in src/index.ts and src/context.ts when making changes here
 /**
@@ -33,7 +24,7 @@ export type Hydrated<Object extends Hydrateable, Expectations extends Array<Expe
  *
  * @throws Will throw an error if an expectation cannot be resolved.
  */
-export async function hydrate<T extends Hydrateable, K extends Array<Expectation>>(
+export async function hydrate<T extends UnicordHydrateable, K extends Array<Expectation>>(
     self: Unicord,
     data: T,
     expectations: K,
@@ -45,15 +36,18 @@ export async function hydrate<T extends Hydrateable, K extends Array<Expectation
     if (data instanceof UnicordCommandContext) {
         for (const expectation of expectations) {
             // if (expectation === Expectation.Message && exists(data.message_id)) {
-            //     let context = data as unknown as UnicordHydratedObject<[Expectation.Message, ...Expectation[]]>;
+            //     let context = data as unknown as UnicordHydratedObject<T, [Expectation.Message]>;
             //     context.message = await self.caches.messages.get(data.channel_id, data.message_id);
             // } else if (expectation === Expectation.Guild && exists(data.guild_id)) {
             if (expectation === Expectation.Guild && exists(data.guild_id)) {
-                let context = data as unknown as UnicordHydratedObject<UnicordCommandContext, [Expectation.Guild]>;
+                let context = data as unknown as UnicordHydratedObject<T, [Expectation.Guild]>;
                 context.guild = await self.caches.guilds.get(data.guild_id);
             } else if (expectation === Expectation.Channel && exists(data.channel_id)) {
-                let context = data as unknown as UnicordHydratedObject<UnicordCommandContext, [Expectation.Channel]>;
+                let context = data as unknown as UnicordHydratedObject<T, [Expectation.Channel]>;
                 context.channel = await self.caches.channels.get(data.channel_id);
+            } else if (expectation === Expectation.Message && exists(data.message)) {
+                let context = data as unknown as UnicordHydratedObject<T, [Expectation.Message]>;
+                context.message = data.message;
             } else {
                 throw new Error(`Invalid expectation requested for Context: ${expectation}`);
             }
@@ -62,9 +56,6 @@ export async function hydrate<T extends Hydrateable, K extends Array<Expectation
         throw new Error(`Hydration for the provided type is not implemented.`);
     }
 
-    // Create a new object that preserves all existing properties
-    const result = { ...data } as any;
-
     // Ensure the result is properly typed with both old and new hydrated properties
-    return result as T & Hydrated<T, K>;
+    return data as T & UnicordHydratedObject<T, K>;
 }

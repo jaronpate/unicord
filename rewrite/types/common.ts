@@ -133,12 +133,9 @@ export type UnicordCommandHandler<Options extends UnicordCommandOptions> = (
     args: ArgumentTypeFromOptions<Options['args']>,
 ) => any;
 
-// TODO: Fill out signature
-export type UnicordEventHandler = (context: UnicordEventContext, payload: any) => any;
+export type UnicordEventHandler = (payload: EventPayload) => any;
 
-export type UnicordHandler<Options extends UnicordCommandOptions> =
-    | UnicordCommandHandler<Options>
-    | UnicordEventHandler;
+export type UnicordHandler<Options extends UnicordCommandOptions> = UnicordCommandHandler<Options> | UnicordEventHandler;
 
 export type ClientConfig = {
     token: string;

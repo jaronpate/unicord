@@ -1,7 +1,7 @@
 // Here we are defining what we want the interface to look like so that there is a goal to work towards
 // Things here are not necessarily implemented in the actual code but show what we want it to look like to use the library
 
-import { Expectation, Unicord, UnicordArgumentType } from '../rewrite/index.ts';
+import { Expectation, Unicord, UnicordArgumentType, Intent } from '../rewrite/index.ts';
 
 const DISCORD_APPLICATION_ID = process.env.APPLICATION_ID!;
 const DISCORD_CLIENT_TOKEN = process.env.BOT_TOKEN!;
@@ -9,8 +9,17 @@ const DISCORD_CLIENT_TOKEN = process.env.BOT_TOKEN!;
 // Create a new client instance
 // Most usage will be via chaining methods off the client instance
 const client = new Unicord({
+    intents: [
+        Intent.GUILDS,
+        Intent.GUILD_MESSAGES,
+        Intent.GUILD_MESSAGE_REACTIONS,
+        Intent.MESSAGE_CONTENT,
+        Intent.DIRECT_MESSAGES,
+        Intent.DIRECT_MESSAGE_REACTIONS,
+    ],
     application_id: DISCORD_APPLICATION_ID,
     token: DISCORD_CLIENT_TOKEN,
+    prefix: '!!',
 })
     .registerChatCommand(
         'ping',
@@ -98,6 +107,6 @@ const etc = new Unicord().registerChatCommand(
     },
 );
 
-client.use(etc);
+// client.use(etc);
 
 client.login();

@@ -70,14 +70,24 @@ export class Unicord {
         return this.eventProcessor.register(`${type}:${event}`, handler);
     }
 
-    use(client: Unicord): this {
-        this.commandManager.merge(client.commandManager);
-        // TODO: inherit event listeners too
-        return this;
+    // This is kinda dumb maybe just remove
+    // use(client: Unicord): this {
+    //     this.commandManager.merge(client.commandManager);
+    //     // TODO: inherit event listeners too
+    //     return this;
+    // }
+
+    emitSystem(event: string, payload: UnicordEventContext) {
+        return this.eventProcessor.emitSystem(event, payload);
     }
 
-    emit(type: UnicordEventType, event: string, context: UnicordCommandContext | UnicordEventContext, args: any[]) {
-        this.eventProcessor.emit(`${type}:${event}`, context, args);
+    emitCommand(
+        type: UnicordEventType.ChatCommands | UnicordEventType.ApplicationCommands,
+        event: string,
+        context: UnicordCommandContext,
+        args: any[],
+    ) {
+        return this.eventProcessor.emitCommand(type, event, context, args);
     }
 
     // TODO: can we automate defining these methods with some TS magic?
@@ -102,6 +112,10 @@ export class Unicord {
     onEvent(event: string, handler: UnicordEventHandler): this {
         this.__onEvent(UnicordEventType.SystemEvent, event, handler);
         return this;
+    }
+
+    onSystemEvent(event: string, handler: UnicordEventHandler): void {
+        this.__onEvent(UnicordEventType.SystemEvent, event, handler);
     }
 
     sendMessage = async (channel_id: string, message: Message | string) => {

@@ -16,8 +16,8 @@ export class UnicordObjectCache<Entity> {
         this.cache = new LRUCache<string, Entity>(maxCapacity);
         this.type = type;
         for (const event of events) {
-            this.self.onEvent(event, async (_context, e) => {
-                this.cache.set(e.id, factory[Trait.fromDiscord](e));
+            this.self.onSystemEvent(event, async (payload) => {
+                this.cache.set(payload.id, factory[Trait.fromDiscord](payload));
             });
         }
     }

@@ -1,7 +1,8 @@
 import { EventEmitter } from 'node:events';
 import type { Unicord } from '.';
 import type { UnicordCommandContext } from './context';
-import type { UnicordCommandOptions, UnicordEventContext, UnicordHandler } from './types/common';
+import type { UnicordCommandOptions, UnicordEventHandler, UnicordHandler } from './types/common';
+import { UnicordEventType } from './types/common';
 
 export class UnicordEventProcessor extends EventEmitter {
     constructor(private readonly self: Unicord) {
@@ -16,7 +17,16 @@ export class UnicordEventProcessor extends EventEmitter {
         return super.off(event, handler);
     }
 
-    emit(event: string, context: UnicordCommandContext | UnicordEventContext, args: any[]): boolean {
-        return super.emit(event, context, args);
+    emitCommand(
+        type: UnicordEventType.ChatCommands | UnicordEventType.ApplicationCommands,
+        event: string,
+        context: UnicordCommandContext,
+        args: any[],
+    ): boolean {
+        return super.emit(`${type}:${event}`, context, args);
+    }
+
+    emitSystem(event: string, payload: Parameters<UnicordEventHandler>[0]): boolean {
+        return super.emit(`${UnicordEventType.SystemEvent}:${event}`, payload);
     }
 }
