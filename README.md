@@ -112,9 +112,9 @@ You can also generate a hydration function that returns a type narrowing boolean
 ```typescript
 client.chatCommands.register('me', async (context: Context, _args: any[]) => {
     // Hydrate the message id from the context
-    const hydrate = await context.hydrator(hydrated, [Expectation.Guild]);
+    const hydrate = await context.hydrator(context, [Expectation.Guild]);
     // Check if the object is hydrated
-    const hasGuild = hydrate(hydrated);
+    const hasGuild = hydrate(context);
 
     if (hasGuild) {
         // Send a message stating the user that they are in a guild
